@@ -1,0 +1,12 @@
+# Node-related
+node_modules/*
+npm-debug.log
+yarn-error.log
+
+# Build-related
+dist/*
+src/**/*.js
+.rpt2_cache/*
+
+# IDE
+.vscode/*
