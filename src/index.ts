@@ -1,24 +1,8 @@
 import EventEmitter from "eventemitter3";
 import io from "socket.io-client";
 
-const BASE_URL = "https://api.charisma.ai";
-
-let context: AudioContext | null = null;
-
-declare global {
-  // tslint:disable-next-line
-  interface Window {
-    AudioContext: typeof AudioContext;
-    webkitAudioContext: typeof AudioContext;
-  }
-}
-
-if (typeof window !== "undefined") {
-  window.AudioContext = window.AudioContext || window.webkitAudioContext;
-  if (!context && window.AudioContext) {
-    context = new window.AudioContext();
-  }
-}
+import Microphone from "./microphone";
+import speak from "./speaker";
 
 type ID = string;
 
@@ -42,7 +26,9 @@ interface IReply {
 export class CharismaInstance extends EventEmitter {
   private buffered: Array<{ type: string }> = [];
   private ready: boolean = false;
+  private listening: boolean = false;
   private socket: SocketIOClient.Socket;
+  private microphone: Microphone;
 
   constructor(socket: SocketIOClient.Socket) {
     super();
@@ -59,6 +45,15 @@ export class CharismaInstance extends EventEmitter {
     });
 
     this.socket = socket;
+
+    const microphone = new Microphone();
+    microphone.on("recognise-interim", (...args) => {
+      this.emit("recognise-interim", ...args);
+    });
+    microphone.on("recognise", (...args) => {
+      this.emit("recognise", ...args);
+    });
+    this.microphone = microphone;
   }
 
   public start = ({
@@ -108,17 +103,23 @@ export class CharismaInstance extends EventEmitter {
   };
 
   public speak = async (audio: number[]) => {
-    if (context) {
-      const arrayBuffer = new Uint8Array(audio).buffer;
-      const source = context.createBufferSource();
-      source.connect(context.destination);
-      source.buffer = await context.decodeAudioData(arrayBuffer);
-      return new Promise(resolve => {
-        source.onended = () => resolve();
-        source.start();
-      });
+    if (this.listening) {
+      this.microphone.stopListening();
     }
-    return Promise.resolve();
+    await speak(audio);
+    if (this.listening) {
+      this.microphone.startListening();
+    }
+  };
+
+  public startListening = () => {
+    this.microphone.startListening();
+    this.listening = true;
+  };
+
+  public stopListening = () => {
+    this.microphone.stopListening();
+    this.listening = false;
   };
 
   private onStatusChange = (status: string) => {
@@ -147,11 +148,13 @@ export class CharismaInstance extends EventEmitter {
 export const connect = async ({
   userToken,
   storyId,
-  debug = false
+  debug = false,
+  baseUrl = "https://api.charisma.ai"
 }: {
   storyId: ID;
   userToken?: string;
   debug: boolean;
+  baseUrl: string;
 }) => {
   const headers: HeadersInit = {
     Accept: "application/json",
@@ -165,7 +168,7 @@ export const connect = async ({
   let token;
 
   try {
-    const response = await fetch(`${BASE_URL}/play/token`, {
+    const response = await fetch(`${baseUrl}/play/token`, {
       body: JSON.stringify({
         storyId,
         version: debug ? -1 : undefined
@@ -185,7 +188,7 @@ export const connect = async ({
     return;
   }
 
-  const socket = io(`${BASE_URL}/play`, {
+  const socket = io(`${baseUrl}/play`, {
     query: {
       token
     }

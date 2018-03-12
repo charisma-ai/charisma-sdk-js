@@ -1,0 +1,27 @@
+<html>
+
+<body>
+  Test
+</body>
+<script src="../dist/umd/index.js"></script>
+<script>
+  Charisma.connect({ storyId: 13, baseUrl: "http://localhost:5000" }).then((charisma) => {
+    charisma.on('start-typing', () => {
+      console.log('start typing');
+    });
+    charisma.on('stop-typing', () => {
+      console.log('stop typing');
+    });
+    charisma.on('reply', (data) => {
+      charisma.speak(data.reply.speech.data);
+    });
+    charisma.on('recognise-interim', console.log);
+    charisma.on('recognise', message => {
+      charisma.reply({ message, speech: true });
+    });
+    charisma.startListening();
+    charisma.start({ speech: true });
+  });
+</script>
+
+</html>
