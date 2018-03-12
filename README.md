@@ -94,6 +94,40 @@ This event has no additional data.
 
 This event has no additional data.
 
+#### charisma.on('recognise', (message) => { ... })
+
+To be used in conjunction with speech recognition (see below).
+
+#### charisma.on('recognise-interim', (message) => { ... })
+
+To be used in conjunction with speech recognition (see below).
+
+## Utils
+
+To help you with speech-to-text and text-to-speech:
+
+#### charisma.speak(data)
+
+e.g.
+
+```js
+charisma.on("reply", data => {
+  if (data.reply.speech) {
+    charisma.speak(data.reply.speech.data);
+  }
+});
+```
+
+#### charisma.startListening()
+
+Starts browser speech recognition (Google Chrome only). `charisma` will then emit `recognise-interim` (player hasn't finished speaking, this is the current best guess) and `recognise` (player has finished speaking and we're confident about the result) events.
+
+The speech recognition will _automatically_ pause when a character is speaking via `charisma.speak`.
+
+#### charisma.stopListening()
+
+Stops browser speech recognition (Google Chrome only).
+
 ### Questions
 
 For further details or any questions, feel free to get in touch with [ben@charisma.ai](mailto:ben@charisma.ai)
