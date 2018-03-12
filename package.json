@@ -1,6 +1,6 @@
 {
   "name": "charisma-sdk-js",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Charisma.ai SDK for Javascript (browser)",
   "main": "dist/umd/index.js",
   "module": "dist/esm/index.js",
@@ -9,7 +9,9 @@
   "repository": "https://github.com/benhjames/charisma-sdk-js",
   "author": "To Play For",
   "license": "MIT",
-  "files": ["dist/*"],
+  "files": [
+    "dist/*"
+  ],
   "scripts": {
     "build": "tsc",
     "bundle": "rollup -c rollup.config.js",
@@ -35,6 +37,9 @@
     "typescript": "^2.7.2"
   },
   "lint-staged": {
-    "*.ts": ["tslint --fix", "git add"]
+    "*.ts": [
+      "tslint --fix",
+      "git add"
+    ]
   }
 }
