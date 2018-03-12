@@ -2,6 +2,10 @@
 
 ### Usage
 
+```
+yarn add charisma-sdk-js
+```
+
 The script can be pulled straight into the browser.
 
 ```html
