@@ -1,5 +1,9 @@
 # Changelog
 
+### v0.0.3
+
+* Microphone keeps better track of whether to resume speech recognition after speaking.
+
 ### v0.0.2
 
 * Support for recording speech-to-text via Chrome SpeechRecognition.

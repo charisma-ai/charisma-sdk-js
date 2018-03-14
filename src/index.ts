@@ -27,6 +27,7 @@ export class CharismaInstance extends EventEmitter {
   private buffered: Array<{ type: string }> = [];
   private ready: boolean = false;
   private listening: boolean = false;
+  private speaking: boolean = false;
   private socket: SocketIOClient.Socket;
   private microphone: Microphone;
 
@@ -106,14 +107,18 @@ export class CharismaInstance extends EventEmitter {
     if (this.listening) {
       this.microphone.stopListening();
     }
+    this.speaking = true;
     await speak(audio);
+    this.speaking = false;
     if (this.listening) {
       this.microphone.startListening();
     }
   };
 
   public startListening = () => {
-    this.microphone.startListening();
+    if (!this.speaking) {
+      this.microphone.startListening();
+    }
     this.listening = true;
   };
 

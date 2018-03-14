@@ -33,12 +33,30 @@ export default class CharismaMicrophone extends EventEmitter {
   private stream: ISpeechRecognition | null = null;
 
   public startListening = () => {
-    this.createStream();
-    this.startStream();
+    const stream = this.createStream();
+
+    stream.onresult = this.onStreamResult;
+    stream.onend = () => stream.start();
+    try {
+      stream.start();
+    } catch (err) {
+      console.log(err);
+      // this is fine, it just means we tried to start/stop a stream when it was already started/stopped
+    }
   };
 
   public stopListening = () => {
-    this.stopStream();
+    const stream = this.stream;
+    if (stream) {
+      stream.onresult = () => undefined;
+      stream.onend = () => undefined;
+      try {
+        stream.abort();
+      } catch (err) {
+        console.log(err);
+        // this is fine, it just means we tried to start/stop a stream when it was already started/stopped
+      }
+    }
   };
 
   private onStreamResult = (event: any) => {
@@ -67,33 +85,5 @@ export default class CharismaMicrophone extends EventEmitter {
     stream.lang = "en-GB";
     this.stream = stream;
     return stream;
-  };
-
-  private startStream = () => {
-    const stream = this.stream;
-    if (stream) {
-      stream.onresult = this.onStreamResult;
-      stream.onend = () => stream.start();
-      try {
-        stream.start();
-      } catch (err) {
-        console.log(err);
-        // this is fine, it just means we tried to start/stop a stream when it was already started/stopped
-      }
-    }
-  };
-
-  private stopStream = () => {
-    const stream = this.stream;
-    if (stream) {
-      stream.onresult = () => undefined;
-      stream.onend = () => undefined;
-      try {
-        stream.abort();
-      } catch (err) {
-        console.log(err);
-        // this is fine, it just means we tried to start/stop a stream when it was already started/stopped
-      }
-    }
   };
 }
