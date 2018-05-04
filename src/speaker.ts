@@ -20,7 +20,9 @@ const speak = async (audio: number[]) => {
     const arrayBuffer = new Uint8Array(audio).buffer;
     const source = context.createBufferSource();
     source.connect(context.destination);
-    source.buffer = await context.decodeAudioData(arrayBuffer);
+    source.buffer = (await new Promise((resolve, reject) => {
+      (context as AudioContext).decodeAudioData(arrayBuffer, resolve, reject);
+    })) as AudioBuffer;
     return new Promise(resolve => {
       source.onended = () => resolve();
       source.start();

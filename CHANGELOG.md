@@ -1,5 +1,9 @@
 # Changelog
 
+### v0.0.4
+
+* Fixed issue where audio was not working on Safari.
+
 ### v0.0.3
 
 * Microphone keeps better track of whether to resume speech recognition after speaking.
