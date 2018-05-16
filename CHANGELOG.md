@@ -1,5 +1,9 @@
 # Changelog
 
+### v0.1.1
+
+* `AudioContext` is now created on-demand rather than on initialisation.
+
 ### v0.1.0
 
 * Socket.io now forces websockets, skipping the long-polling check.
