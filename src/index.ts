@@ -170,6 +170,12 @@ export const connect = async ({
     headers.Authorization = `Bearer ${userToken}`;
   }
 
+  if (debug && typeof userToken !== "string") {
+    throw new Error(
+      "To use the debug version of a story, a `userToken` must also be passed to `connect`."
+    );
+  }
+
   let token;
 
   try {
@@ -189,14 +195,15 @@ export const connect = async ({
     }
     token = data.token;
   } catch (err) {
-    console.error(err);
-    return;
+    throw new Error(`A playthrough token could not be generated: ${err}`);
   }
 
   const socket = io(`${baseUrl}/play`, {
     query: {
       token
-    }
+    },
+    transports: ["websocket"],
+    upgrade: false
   });
 
   return new CharismaInstance(socket);
