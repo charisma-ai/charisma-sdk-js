@@ -1,5 +1,9 @@
 # Changelog
 
+### v0.1.2
+
+* The microphone now stops listening when a reply with `endStory` set to `true` is emitted.
+
 ### v0.1.1
 
 * `AudioContext` is now created on-demand rather than on initialisation.

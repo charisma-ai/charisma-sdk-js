@@ -138,6 +138,9 @@ export class CharismaInstance extends EventEmitter {
   };
 
   private onReply = (reply: IReply) => {
+    if (reply.endStory && this.listening) {
+      this.stopListening();
+    }
     this.emit("reply", reply);
   };
 
