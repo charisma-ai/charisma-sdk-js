@@ -15,8 +15,10 @@
   "scripts": {
     "build": "tsc",
     "bundle": "rollup -c rollup.config.js",
-    "lint": "tslint -p tsconfig.json src/*.ts",
-    "precommit": "lint-staged"
+    "cm": "git-cz",
+    "lint": "tslint src/*.ts",
+    "precommit": "lint-staged",
+    "semantic-release": "semantic-release"
   },
   "dependencies": {
     "@types/socket.io-client": "^1.4.32",
@@ -24,6 +26,8 @@
     "socket.io-client": "^2.1.0"
   },
   "devDependencies": {
+    "commitizen": "^2.10.1",
+    "cz-conventional-changelog": "^2.1.0",
     "husky": "^0.14.3",
     "lint-staged": "^7.1.0",
     "rollup": "^0.59.0",
@@ -32,14 +36,27 @@
     "rollup-plugin-strip": "^1.1.1",
     "rollup-plugin-typescript2": "^0.14.0",
     "rollup-plugin-uglify": "^3.0.0",
+    "semantic-release": "^15.9.12",
     "tslint": "^5.10.0",
     "tslint-config-prettier": "^1.12.0",
     "typescript": "^2.8.3"
   },
   "lint-staged": {
-    "*.ts": [
-      "tslint --fix",
-      "git add"
-    ]
+    "linters": {
+      "src/**/*.ts": [
+        "tslint --fix",
+        "git add"
+      ]
+    }
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
   }
 }
