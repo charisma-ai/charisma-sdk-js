@@ -156,12 +156,12 @@ export class CharismaInstance extends EventEmitter {
 export const connect = async ({
   userToken,
   storyId,
-  debug = false,
+  version = -1,
   baseUrl = "https://api.charisma.ai"
 }: {
   storyId: ID;
+  version: number;
   userToken?: string;
-  debug: boolean;
   baseUrl: string;
 }) => {
   const headers: HeadersInit = {
@@ -173,9 +173,9 @@ export const connect = async ({
     headers.Authorization = `Bearer ${userToken}`;
   }
 
-  if (debug && typeof userToken !== "string") {
+  if (version === -1 && typeof userToken !== "string") {
     throw new Error(
-      "To use the debug version of a story, a `userToken` must also be passed to `connect`."
+      "To play the draft version of a story, a `userToken` must also be passed to `connect`."
     );
   }
 
@@ -185,7 +185,7 @@ export const connect = async ({
     const response = await fetch(`${baseUrl}/play/token`, {
       body: JSON.stringify({
         storyId,
-        version: debug ? -1 : undefined
+        version
       }),
       headers,
       method: "POST",
