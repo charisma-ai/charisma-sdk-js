@@ -3,7 +3,7 @@
 ### Usage
 
 ```
-yarn add charisma-sdk-js
+yarn add @charisma-ai/sdk
 ```
 
 The script can be pulled straight into the browser.
@@ -24,7 +24,7 @@ The script can be pulled straight into the browser.
 
     charisma.start({ ... });
     charisma.reply({ ... });
-  }){}
+  })()
 </script>
 ```
 
@@ -32,18 +32,18 @@ The script can be pulled straight into the browser.
 
 Use this to connect to Charisma and set up a new playthrough.
 
-* `storyId` (`number`): The `id` of the story that you want to create a new playthrough for. The story must be published, unless a Charisma.ai user token has been passed and the user matches the owner of the story.
-* `version` (`number`, optional): The `version` of the story that you want to create a new playthrough for. If omitted, it will default to the most recent version. To get the debug story, pass `-1`.
-* `userToken` (`string`, optional): If the story is unpublished, pass a `userToken` to be able to access your story.
+- `storyId` (`number`): The `id` of the story that you want to create a new playthrough for. The story must be published, unless a Charisma.ai user token has been passed and the user matches the owner of the story.
+- `version` (`number`, optional): The `version` of the story that you want to create a new playthrough for. If omitted, it will default to the most recent version. To get the debug story, pass `-1`.
+- `userToken` (`string`, optional): If the story is unpublished, pass a `userToken` to be able to access your story.
 
 Returns a promise that resolves once the socket has connected.
 
 ```js
 const charisma = await Charisma.connect({
-  "storyId": 12,
-  "version": 4,
-  "userToken": "..."
-})
+  storyId: 12,
+  version: 4,
+  userToken: "..."
+});
 ```
 
 ## Events
@@ -80,10 +80,11 @@ To interact with the story, events are sent backwards and forwards along the web
     "message": "Greetings and good day.",
     "character": "Ted Baker",
     "avatar": "https://s3.charisma.ai/...",
-    "speech": "...", // Stringified buffer
+    "speech": "...", // Byte buffer
     "metadata": {
       "myMetadata": "someValue"
-    }
+    },
+    "media": null
   },
   "endStory": false,
   "path": [{ "id": 1, "type": "edge" }, { "id": 2, "type": "node" }]

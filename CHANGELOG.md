@@ -1,5 +1,9 @@
 # Changelog
 
+### v0.3.0
+
+- Package renamed (rescoped) to `@charisma-ai/sdk`.
+
 ### v0.2.0
 
 - The `debug` option has been replaced with the `version` option, which defaults to `undefined` (the latest published story version).
