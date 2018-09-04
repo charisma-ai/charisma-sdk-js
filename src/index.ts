@@ -156,11 +156,11 @@ export class CharismaInstance extends EventEmitter {
 export const connect = async ({
   userToken,
   storyId,
-  version = -1,
+  version,
   baseUrl = "https://api.charisma.ai"
 }: {
   storyId: ID;
-  version: number;
+  version?: number;
   userToken?: string;
   baseUrl: string;
 }) => {

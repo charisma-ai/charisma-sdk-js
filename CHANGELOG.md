@@ -1,5 +1,9 @@
 # Changelog
 
+### v0.3.1
+
+- Passing no `version` to the `connect` method now results in using the latest published version, rather than the draft version.
+
 ### v0.3.0
 
 - Package renamed (rescoped) to `@charisma-ai/sdk`.
