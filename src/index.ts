@@ -4,8 +4,6 @@ import io from "socket.io-client";
 import Microphone from "./microphone";
 import speak from "./speaker";
 
-type ID = string;
-
 interface IReply {
   reply: {
     message: string;
@@ -18,7 +16,7 @@ interface IReply {
   };
   endStory: boolean;
   path: Array<{
-    id: ID;
+    id: number;
     type: "node" | "edge";
   }>;
 }
@@ -45,6 +43,12 @@ export class CharismaInstance extends EventEmitter {
       console.error("Websocket error occured: ", error);
     });
 
+    socket.on("problem", (error: { type: string; error: string }) => {
+      console.warn(
+        `Problem occured with \`${error.type}\` event:\n${error.error}`
+      );
+    });
+
     this.socket = socket;
 
     const microphone = new Microphone();
@@ -62,9 +66,9 @@ export class CharismaInstance extends EventEmitter {
     speech = false,
     characterId
   }: {
-    startNodeId?: ID;
+    startNodeId?: number;
     speech: boolean;
-    characterId?: ID;
+    characterId?: number;
   }) => {
     const payload = {
       characterId,
@@ -87,7 +91,7 @@ export class CharismaInstance extends EventEmitter {
   }: {
     message: string;
     speech: boolean;
-    characterId?: ID;
+    characterId?: number;
   }) => {
     const payload = {
       characterId,
@@ -127,6 +131,16 @@ export class CharismaInstance extends EventEmitter {
     this.listening = false;
   };
 
+  public setMemory = ({
+    memoryId,
+    saveValue
+  }: {
+    memoryId: string;
+    saveValue: string;
+  }) => {
+    this.socket.emit("set-memory", { memoryId, saveValue });
+  };
+
   private onStatusChange = (status: string) => {
     if (status === "ready") {
       this.buffered.forEach(payload => {
@@ -159,7 +173,7 @@ export const connect = async ({
   version,
   baseUrl = "https://api.charisma.ai"
 }: {
-  storyId: ID;
+  storyId: number;
   version?: number;
   userToken?: string;
   baseUrl: string;

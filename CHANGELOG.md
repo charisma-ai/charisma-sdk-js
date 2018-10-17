@@ -1,5 +1,11 @@
 # Changelog
 
+### v0.4.0
+
+- **BREAKING**: UMD name changed from `Charisma` to `CharismaSDK`. The ES/CJS builds now don't bundle their dependencies.
+- Added `setMemory` method to directly set a memory.
+- Fixed all ID types to be `number`, not `string`.
+
 ### v0.3.1
 
 - Passing no `version` to the `connect` method now results in using the latest published version, rather than the draft version.

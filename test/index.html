@@ -5,7 +5,7 @@
 </body>
 <script src="../dist/umd/index.js"></script>
 <script>
-  Charisma.connect({ storyId: 13, baseUrl: "http://localhost:5000" }).then((charisma) => {
+  CharismaSDK.connect({ storyId: 499, version: 4, baseUrl: "http://localhost:5000" }).then((charisma) => {
     charisma.on('start-typing', () => {
       console.log('start typing');
     });
@@ -13,7 +13,11 @@
       console.log('stop typing');
     });
     charisma.on('reply', (data) => {
-      charisma.speak(data.reply.speech.data);
+      console.log(data.reply);
+      if (data.reply && data.reply.speech) {
+        charisma.speak(data.reply.speech.data);
+      }
+      charisma.setMemory({ memoryId: 'live_or_die', saveValue: 'die' });
     });
     charisma.on('recognise-interim', console.log);
     charisma.on('recognise', message => {
