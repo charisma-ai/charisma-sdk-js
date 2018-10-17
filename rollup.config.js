@@ -1,41 +1,54 @@
 import resolve from "rollup-plugin-node-resolve";
 import commonjs from "rollup-plugin-commonjs";
-import typescript from "rollup-plugin-typescript2";
 import strip from "rollup-plugin-strip";
-import uglify from "rollup-plugin-uglify";
+import minify from "rollup-plugin-babel-minify";
 
 import pkg from "./package.json";
 
-export default {
-  input: "src/index.ts",
-  output: [
-    {
-      file: pkg.main,
-      format: "umd",
-      exports: "named",
-      sourcemap: true,
-      name: "Charisma"
-    },
-    { file: pkg.module, format: "es", exports: "named", sourcemap: true }
-  ],
-  plugins: [
-    resolve({
-      browser: true
-    }),
-    commonjs(),
-    typescript({
-      typescript: require("typescript")
-    }),
-    strip({
-      functions: ["debug"]
-    }),
-    uglify()
-  ],
-  onwarn(warning, onwarn) {
-    if (warning.code === "THIS_IS_UNDEFINED") {
-      return;
-    }
+const input = "./compiled/index.js";
 
-    onwarn(warning);
+export default [
+  {
+    input,
+    output: {
+      exports: "named",
+      file: pkg.browser,
+      format: "umd",
+      name: "CharismaSDK",
+      sourcemap: true
+    },
+    plugins: [
+      resolve({
+        browser: true
+      }),
+      commonjs({
+        include: /node_modules/
+      }),
+      strip({
+        functions: ["debug"]
+      }),
+      minify({
+        comments: false
+      })
+    ]
+  },
+  {
+    input,
+    external: Object.keys(pkg.dependencies),
+    output: [
+      {
+        exports: "named",
+        file: pkg.module,
+        format: "es",
+        sourcemap: true
+      },
+      {
+        exports: "named",
+        file: pkg.main,
+        format: "cjs",
+        sourcemap: true
+      }
+    ],
+    plugins: [resolve()]
   }
-};
+];
