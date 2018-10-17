@@ -1,16 +1,17 @@
-let context: AudioContext | null = null;
-
-declare global {
-  // tslint:disable-next-line
-  interface Window {
-    AudioContext: typeof AudioContext;
-    webkitAudioContext: typeof AudioContext;
-  }
+interface IWindow extends Window {
+  AudioContext?: typeof AudioContext;
+  webkitAudioContext?: typeof AudioContext;
 }
 
+declare var window: IWindow;
+
+// Needs to work with server-side rendering
+let AudioContextClass: typeof AudioContext | undefined;
 if (typeof window !== "undefined") {
-  window.AudioContext = window.AudioContext || window.webkitAudioContext;
+  AudioContextClass = window.AudioContext || window.webkitAudioContext;
 }
+
+let context: AudioContext | null = null;
 
 const speak = async (audio: number[]) => {
   if (!audio) {
@@ -18,8 +19,8 @@ const speak = async (audio: number[]) => {
     return;
   }
 
-  if (!context && window.AudioContext) {
-    context = new window.AudioContext();
+  if (!context && AudioContextClass) {
+    context = new AudioContextClass();
   }
 
   if (!context) {

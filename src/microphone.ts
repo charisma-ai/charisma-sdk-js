@@ -1,36 +1,21 @@
 import EventEmitter from "eventemitter3";
 
-export interface ISpeechRecognition {
-  continuous: boolean;
-  interimResults: boolean;
-  lang: string;
-  onresult: (event: any) => void;
-  onend: (event: any) => void;
-  onerror: (event: any) => void;
-  abort(): Promise<void>;
-  start(): void;
+interface IWindow extends Window {
+  SpeechRecognition?: typeof SpeechRecognition;
+  webkitSpeechRecognition?: typeof SpeechRecognition;
 }
 
-export declare var SpeechRecognition: {
-  prototype: ISpeechRecognition;
-  new (): ISpeechRecognition;
-};
+declare var window: IWindow;
 
-declare global {
-  // tslint:disable-next-line
-  interface Window {
-    SpeechRecognition?: typeof SpeechRecognition;
-    webkitSpeechRecognition?: typeof SpeechRecognition;
-  }
-}
-
+// Needs to work with server-side rendering
+let SpeechRecognitionClass: typeof SpeechRecognition | undefined;
 if (typeof window !== "undefined") {
-  window.SpeechRecognition =
+  SpeechRecognitionClass =
     window.SpeechRecognition || window.webkitSpeechRecognition;
 }
 
 export default class CharismaMicrophone extends EventEmitter {
-  private stream: ISpeechRecognition | null = null;
+  private stream: SpeechRecognition | null = null;
 
   public startListening = () => {
     const stream = this.createStream();
@@ -71,7 +56,7 @@ export default class CharismaMicrophone extends EventEmitter {
   };
 
   private createStream = () => {
-    if (!window.SpeechRecognition) {
+    if (!SpeechRecognitionClass) {
       throw new Error("SpeechRecognition isn't supported in this browser.");
     }
 
@@ -79,7 +64,7 @@ export default class CharismaMicrophone extends EventEmitter {
       return this.stream;
     }
 
-    const stream = new window.SpeechRecognition();
+    const stream = new SpeechRecognitionClass();
     stream.continuous = false;
     stream.interimResults = true;
     stream.lang = "en-GB";
