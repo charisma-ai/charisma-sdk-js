@@ -1,5 +1,9 @@
 # Changelog
 
+### v0.4.1
+
+- `actIndex` and `sceneIndex` can now be set on the `start` event to start from a specific story scene.
+
 ### v0.4.0
 
 - **BREAKING**: UMD name changed from `Charisma` to `CharismaSDK`. The ES/CJS builds now don't bundle their dependencies.

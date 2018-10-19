@@ -62,16 +62,22 @@ export class CharismaInstance extends EventEmitter {
   }
 
   public start = ({
-    startNodeId,
+    actIndex,
+    characterId,
+    sceneIndex,
     speech = false,
-    characterId
+    startNodeId,
   }: {
-    startNodeId?: number;
-    speech: boolean;
+    actIndex?: number;
     characterId?: number;
+    sceneIndex?: number;
+    speech: boolean;
+    startNodeId?: number;
   }) => {
     const payload = {
+      actIndex,
       characterId,
+      sceneIndex,
       speech,
       startNodeId,
       type: "start"

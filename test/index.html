@@ -5,7 +5,7 @@
 </body>
 <script src="../dist/umd/index.js"></script>
 <script>
-  CharismaSDK.connect({ storyId: 499, version: 4, baseUrl: "http://localhost:5000" }).then((charisma) => {
+  CharismaSDK.connect({ storyId: 557, version: 1, baseUrl: "http://localhost:5000" }).then((charisma) => {
     charisma.on('start-typing', () => {
       console.log('start typing');
     });
@@ -24,7 +24,7 @@
       charisma.reply({ message, speech: true });
     });
     charisma.startListening();
-    charisma.start({ speech: true });
+    charisma.start({ speech: true, actIndex: 1, sceneIndex: 2 });
   });
 </script>
 
