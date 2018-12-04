@@ -144,7 +144,12 @@ export class CharismaInstance extends EventEmitter {
     memoryId: string;
     saveValue: string;
   }) => {
-    this.socket.emit("set-memory", { memoryId, saveValue });
+    const payload = { memoryId, saveValue };
+    if (this.ready === false) {
+      this.buffered.push({...payload, type: 'set-memory'});
+    } else {
+      this.socket.emit("set-memory", payload);
+    }
   };
 
   private onStatusChange = (status: string) => {
