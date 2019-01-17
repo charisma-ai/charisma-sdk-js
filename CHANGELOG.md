@@ -1,5 +1,18 @@
 # Changelog
 
+### v0.5.1
+
+- Fix broken 0.5.0 publish.
+
+### v0.5.0
+
+- Removed `browser` field from `package.json`. Consumers can use the UMD directly from unpkg.
+- Removed `actIndex` as it is no longer supported.
+
+### v0.4.2
+
+- Buffer `set-memory` events until `status: 'ready'` is received.
+
 ### v0.4.1
 
 - `actIndex` and `sceneIndex` can now be set on the `start` event to start from a specific story scene.

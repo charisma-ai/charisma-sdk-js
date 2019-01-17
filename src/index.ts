@@ -62,20 +62,17 @@ export class CharismaInstance extends EventEmitter {
   }
 
   public start = ({
-    actIndex,
     characterId,
     sceneIndex,
     speech = false,
-    startNodeId,
+    startNodeId
   }: {
-    actIndex?: number;
     characterId?: number;
     sceneIndex?: number;
     speech: boolean;
     startNodeId?: number;
   }) => {
     const payload = {
-      actIndex,
       characterId,
       sceneIndex,
       speech,
@@ -146,7 +143,7 @@ export class CharismaInstance extends EventEmitter {
   }) => {
     const payload = { memoryId, saveValue };
     if (this.ready === false) {
-      this.buffered.push({...payload, type: 'set-memory'});
+      this.buffered.push({ ...payload, type: "set-memory" });
     } else {
       this.socket.emit("set-memory", payload);
     }

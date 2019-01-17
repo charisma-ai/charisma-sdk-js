@@ -4,7 +4,7 @@
     "declaration": true,
     "declarationDir": "dist",
     "esModuleInterop": true,
-    "lib": ["es2015", "dom"],
+    "lib": ["es2017", "dom"],
     "module": "esnext",
     "moduleResolution": "node",
     "noFallthroughCasesInSwitch": true,

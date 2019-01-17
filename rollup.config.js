@@ -12,7 +12,7 @@ export default [
     input,
     output: {
       exports: "named",
-      file: pkg.browser,
+      file: "dist/umd/index.js",
       format: "umd",
       name: "CharismaSDK",
       sourcemap: true
