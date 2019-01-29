@@ -1,5 +1,9 @@
 # Changelog
 
+### v0.6.0 (`charisma-sdk-js@next`)
+
+- BREAKING: The `reply` event has been renamed to `message`, and now has a `type` field on the payload to distinguish between `character` and `media` events. Other fields have been refactored, such as `character` and `speech`. Please consult [src/types.ts](src/types.ts) to find the new message format.
+
 ### v0.5.1
 
 - Fix broken 0.5.0 publish.

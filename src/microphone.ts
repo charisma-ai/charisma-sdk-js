@@ -44,7 +44,7 @@ export default class CharismaMicrophone extends EventEmitter {
     }
   };
 
-  private onStreamResult = (event: any) => {
+  private onStreamResult = (event: SpeechRecognitionEvent) => {
     if (event.results && event.results[0] && event.results[0][0]) {
       const message = event.results[0][0].transcript.trim();
       if (event.results[0].isFinal === false) {

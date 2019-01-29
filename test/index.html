@@ -1,31 +1,41 @@
 <html>
+  <body>
+    <button onclick="start()">Start!</button>
+  </body>
+  <script src="../dist/umd/index.js"></script>
+  <script>
+    let charismaInstance;
 
-<body>
-  Test
-</body>
-<script src="../dist/umd/index.js"></script>
-<script>
-  CharismaSDK.connect({ storyId: 557, version: 1, baseUrl: "http://localhost:5000" }).then((charisma) => {
-    charisma.on('start-typing', () => {
-      console.log('start typing');
-    });
-    charisma.on('stop-typing', () => {
-      console.log('stop typing');
-    });
-    charisma.on('reply', (data) => {
-      console.log(data.reply);
-      if (data.reply && data.reply.speech) {
-        charisma.speak(data.reply.speech.data);
-      }
-      charisma.setMemory({ memoryId: 'live_or_die', saveValue: 'die' });
-    });
-    charisma.on('recognise-interim', console.log);
-    charisma.on('recognise', message => {
-      charisma.reply({ message, speech: true });
-    });
-    charisma.startListening();
-    charisma.start({ speech: true, actIndex: 1, sceneIndex: 2 });
-  });
-</script>
+    const start = () => {
+      charismaInstance.startListening();
+      charismaInstance.start({ speech: true });
+    };
 
+    CharismaSDK.connect({
+      storyId: 4,
+      version: -1,
+      baseUrl: "http://localhost:5000",
+      userToken:
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiY2hhcmlzbWFfcGVyc29uIiwicGVyc29uX2lkIjoxLCJpYXQiOjE1NDcwNDE1NDcsImV4cCI6MjE3ODE4MDU4NywiYXVkIjoicG9zdGdyYXBoaWxlIiwiaXNzIjoicG9zdGdyYXBoaWxlIn0.3yGSgtJFx7FpQSQssRshkfEOFd78UNCgvdfga9h-PhU"
+    }).then(charisma => {
+      charismaInstance = charisma;
+      charisma.on("start-typing", () => {
+        console.log("start typing");
+      });
+      charisma.on("stop-typing", () => {
+        console.log("stop typing");
+      });
+      charisma.on("message", data => {
+        console.log(data.message);
+        if (data.message && data.message.speech) {
+          charisma.speak(data.message.speech.audio.data);
+        }
+        charisma.setMemory({ memoryId: "live_or_die", saveValue: "die" });
+      });
+      charisma.on("recognise-interim", console.log);
+      charisma.on("recognise", message => {
+        charisma.reply({ message, speech: true });
+      });
+    });
+  </script>
 </html>

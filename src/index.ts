@@ -3,25 +3,18 @@ import io from "socket.io-client";
 
 import Microphone from "./microphone";
 import speak from "./speaker";
+import { Message } from "./types";
 
-interface IReply {
-  reply: {
-    message: string;
-    character: string;
-    avatar?: string;
-    speech?: string; // Stringified buffer
-    metadata: {
-      [key: string]: string;
-    };
-  };
-  endStory: boolean;
-  path: Array<{
-    id: number;
-    type: "node" | "edge";
-  }>;
-}
+export type CharismaEvents =
+  | "message"
+  | "start-typing"
+  | "stop-typing"
+  | "recognise-interim"
+  | "recognise";
 
-export class CharismaInstance extends EventEmitter {
+export { Message as CharismaMessage };
+
+export class CharismaInstance extends EventEmitter<CharismaEvents> {
   private buffered: Array<{ type: string }> = [];
   private ready: boolean = false;
   private listening: boolean = false;
@@ -34,7 +27,7 @@ export class CharismaInstance extends EventEmitter {
 
     // Events emitted by the server
     socket.on("status", this.onStatusChange);
-    socket.on("reply", this.onReply);
+    socket.on("message", this.onMessage);
     socket.on("start-typing", this.onStartTyping);
     socket.on("stop-typing", this.onStopTyping);
 
@@ -159,11 +152,11 @@ export class CharismaInstance extends EventEmitter {
     }
   };
 
-  private onReply = (reply: IReply) => {
-    if (reply.endStory && this.listening) {
+  private onMessage = (message: Message) => {
+    if (message.endStory && this.listening) {
       this.stopListening();
     }
-    this.emit("reply", reply);
+    this.emit("message", message);
   };
 
   private onStartTyping = () => {
