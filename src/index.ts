@@ -103,6 +103,17 @@ export class CharismaInstance extends EventEmitter<CharismaEvents> {
     }
   };
 
+  public tap = () => {
+    const payload = {
+      type: "tap"
+    };
+    if (this.ready === false) {
+      this.buffered.push(payload);
+    } else {
+      this.socket.emit("tap", payload);
+    }
+  };
+
   public speak = async (audio: number[]) => {
     if (this.listening) {
       this.microphone.stopListening();
