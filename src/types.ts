@@ -41,14 +41,11 @@ export interface IMessageMedia {
   mediaType: MediaType;
 }
 
-export interface IMessageTap {
-  text: string;
-}
-
 interface IMessage<T extends string, S> {
   type: T;
   message: S;
   endStory: boolean;
+  tapToContinue: boolean;
   path: MessagePath;
   characterMoods: Array<{
     id: number;
@@ -59,5 +56,4 @@ interface IMessage<T extends string, S> {
 
 export type Message =
   | IMessage<"character", IMessageCharacter>
-  | IMessage<"media", IMessageMedia>
-  | IMessage<"tap", IMessageTap>;
+  | IMessage<"media", IMessageMedia>;

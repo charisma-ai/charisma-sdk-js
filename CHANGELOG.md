@@ -3,6 +3,7 @@
 ### v0.6.0 (`@charisma-ai/sdk@next`)
 
 - BREAKING: The `reply` event has been renamed to `message`, and now has a `type` field on the payload to distinguish between `character` and `media` events. Other fields have been refactored, such as `character` and `speech`. Please consult [src/types.ts](src/types.ts) to find the new message format.
+- A new `tap` event is available for the client to send.
 
 ### v0.5.1
 
