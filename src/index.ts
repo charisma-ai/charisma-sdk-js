@@ -103,8 +103,9 @@ export class CharismaInstance extends EventEmitter<CharismaEvents> {
     }
   };
 
-  public tap = () => {
+  public tap = ({ speech = false }: { speech?: boolean } = {}) => {
     const payload = {
+      speech,
       type: "tap"
     };
     if (this.ready === false) {
