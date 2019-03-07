@@ -3,7 +3,12 @@ import io from "socket.io-client";
 
 import Microphone from "./microphone";
 import speak from "./speaker";
-import { ISynthesisConfig, Message } from "./types";
+import {
+  ISynthesisConfig,
+  Message,
+  SynthesisEncoding,
+  SynthesisOutput
+} from "./types";
 
 export type CharismaEvents =
   | "message"
@@ -12,7 +17,12 @@ export type CharismaEvents =
   | "recognise-interim"
   | "recognise";
 
-export { Message as CharismaMessage };
+export {
+  Message as CharismaMessage,
+  ISynthesisConfig,
+  SynthesisEncoding,
+  SynthesisOutput
+};
 
 export class CharismaInstance extends EventEmitter<CharismaEvents> {
   private buffered: Array<{ type: string }> = [];

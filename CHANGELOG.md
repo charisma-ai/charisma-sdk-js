@@ -1,5 +1,9 @@
 # Changelog
 
+### v0.7.2
+
+- `ISynthesisConfig` and some additional types are now exported.
+
 ### v0.7.1
 
 - `speech` now takes a config object as well as a boolean. It can specify the audio encoding to use and whether it returns the raw audio data, or a link to an audio file.
