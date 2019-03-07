@@ -1,5 +1,9 @@
 # Changelog
 
+### v0.7.1
+
+- `speech` now takes a config object as well as a boolean. It can specify the audio encoding to use and whether it returns the raw audio data, or a link to an audio file.
+
 ### v0.7.0
 
 - BREAKING: The `reply` event has been renamed to `message`, and now has a `type` field on the payload to distinguish between `character` and `media` events. Other fields have been refactored, such as `character` and `speech`. Please consult [src/types.ts](src/types.ts) to find the new message format.

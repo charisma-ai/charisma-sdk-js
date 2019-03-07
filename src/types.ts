@@ -57,3 +57,10 @@ interface IMessage<T extends string, S> {
 export type Message =
   | IMessage<"character", IMessageCharacter>
   | IMessage<"media", IMessageMedia>;
+
+export type SynthesisEncoding = "mp3" | "ogg" | "pcm";
+export type SynthesisOutput = "url" | "buffer";
+export interface ISynthesisConfig {
+  audioEncoding?: SynthesisEncoding;
+  output?: SynthesisOutput;
+}

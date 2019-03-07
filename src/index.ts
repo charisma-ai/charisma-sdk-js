@@ -3,7 +3,7 @@ import io from "socket.io-client";
 
 import Microphone from "./microphone";
 import speak from "./speaker";
-import { Message } from "./types";
+import { ISynthesisConfig, Message } from "./types";
 
 export type CharismaEvents =
   | "message"
@@ -62,7 +62,7 @@ export class CharismaInstance extends EventEmitter<CharismaEvents> {
   }: {
     characterId?: number;
     sceneIndex?: number;
-    speech: boolean;
+    speech: boolean | ISynthesisConfig;
     startNodeId?: number;
   }) => {
     const payload = {
@@ -86,7 +86,7 @@ export class CharismaInstance extends EventEmitter<CharismaEvents> {
     characterId
   }: {
     message: string;
-    speech: boolean;
+    speech: boolean | ISynthesisConfig;
     characterId?: number;
   }) => {
     const payload = {
@@ -103,7 +103,9 @@ export class CharismaInstance extends EventEmitter<CharismaEvents> {
     }
   };
 
-  public tap = ({ speech = false }: { speech?: boolean } = {}) => {
+  public tap = ({
+    speech = false
+  }: { speech?: boolean | ISynthesisConfig } = {}) => {
     const payload = {
       speech,
       type: "tap"
