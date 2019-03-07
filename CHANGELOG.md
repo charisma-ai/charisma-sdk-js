@@ -1,5 +1,9 @@
 # Changelog
 
+### v0.7.3
+
+- Fix `IMessageCharacter.speech` type.
+
 ### v0.7.2
 
 - `ISynthesisConfig` and some additional types are now exported.

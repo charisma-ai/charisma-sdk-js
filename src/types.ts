@@ -31,7 +31,7 @@ export interface IMessageCharacter {
     [key: string]: string;
   };
   speech: {
-    audio: Buffer;
+    audio: { data: number[]; type: "Buffer" } | string;
     duration: number;
   } | null;
 }
