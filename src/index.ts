@@ -1,9 +1,12 @@
 import EventEmitter from "eventemitter3";
+import jwtDecode from "jwt-decode";
 import io from "socket.io-client";
 
 import Microphone from "./microphone";
 import speak from "./speaker";
 import {
+  IGraphQLRequest,
+  IMessageHistoryQueryResult,
   ISynthesisConfig,
   Message,
   SynthesisEncoding,
@@ -25,6 +28,11 @@ export {
 };
 
 export class CharismaInstance extends EventEmitter<CharismaEvents> {
+  private options: {
+    baseUrl: string;
+    playthroughToken?: string;
+    userToken?: string;
+  } = { baseUrl: "https://api.charisma.ai" };
   private buffered: Array<{ type: string }> = [];
   private ready: boolean = false;
   private listening: boolean = false;
@@ -32,8 +40,19 @@ export class CharismaInstance extends EventEmitter<CharismaEvents> {
   private socket: SocketIOClient.Socket;
   private microphone: Microphone;
 
-  constructor(socket: SocketIOClient.Socket) {
+  constructor(
+    socket: SocketIOClient.Socket,
+    options?: {
+      baseUrl: string;
+      playthroughToken?: string;
+      userToken?: string;
+    }
+  ) {
     super();
+
+    if (options) {
+      this.options = options;
+    }
 
     // Events emitted by the server
     socket.on("status", this.onStatusChange);
@@ -166,6 +185,76 @@ export class CharismaInstance extends EventEmitter<CharismaEvents> {
     }
   };
 
+  public getMessageHistory = async () => {
+    const { baseUrl, playthroughToken, userToken } = this.options;
+    if (!playthroughToken || !userToken) {
+      throw new Error(
+        "`playthroughToken` and `userToken` must be provided to get message history."
+      );
+    }
+
+    const query = `
+      query ($playthroughId: Int!) {
+        playthrough: playthroughById(id: $playthroughId) {
+          eventsByPlaythroughId {
+            nodes {
+              eventMessageCharacter: eventMessageCharacterByEventId {
+                text
+                character: characterByCharacterId {
+                  id
+                  name
+                  avatar
+                }
+                metadata
+                media
+                endStory
+                tapToContinue
+              }
+              eventMessagePlayer: eventMessagePlayerByEventId {
+                text
+              }
+            }
+          }
+        }
+      }
+    `;
+
+    const { playthrough_id } = jwtDecode<{ playthrough_id: number }>(
+      playthroughToken
+    );
+
+    const response = await fetch(`${baseUrl}/graphql`, {
+      body: JSON.stringify({
+        query,
+        variables: { playthroughId: playthrough_id }
+      }),
+      headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${userToken}`,
+        "Content-Type": "application/json"
+      },
+      method: "POST",
+      mode: "cors"
+    });
+
+    const data: IGraphQLRequest<
+      IMessageHistoryQueryResult
+    > = await response.json();
+    if (!response.ok || !data.data || data.errors) {
+      throw new Error("Message history could not be fetched.");
+    }
+    return data.data.playthrough.eventsByPlaythroughId.nodes
+      .map(event => {
+        if (event.eventMessageCharacter) {
+          return { ...event.eventMessageCharacter, type: "character" };
+        } else if (event.eventMessagePlayer) {
+          return { ...event.eventMessagePlayer, type: "player" };
+        }
+        return null;
+      })
+      .filter(_ => _);
+  };
+
   private onStatusChange = (status: string) => {
     if (status === "ready") {
       this.buffered.forEach(payload => {
@@ -194,50 +283,56 @@ export class CharismaInstance extends EventEmitter<CharismaEvents> {
 
 export const connect = async ({
   userToken,
+  playthroughToken,
   storyId,
   version,
   baseUrl = "https://api.charisma.ai"
 }: {
   storyId: number;
   version?: number;
+  playthroughToken?: string;
   userToken?: string;
   baseUrl: string;
 }) => {
-  const headers: HeadersInit = {
-    Accept: "application/json",
-    "Content-Type": "application/json"
-  };
+  let token = playthroughToken;
 
-  if (typeof userToken === "string") {
-    headers.Authorization = `Bearer ${userToken}`;
-  }
+  if (!token) {
+    const headers: HeadersInit = {
+      Accept: "application/json",
+      "Content-Type": "application/json"
+    };
 
-  if (version === -1 && typeof userToken !== "string") {
-    throw new Error(
-      "To play the draft version of a story, a `userToken` must also be passed to `connect`."
-    );
-  }
-
-  let token;
-
-  try {
-    const response = await fetch(`${baseUrl}/play/token`, {
-      body: JSON.stringify({
-        storyId,
-        version
-      }),
-      headers,
-      method: "POST",
-      mode: "cors"
-    });
-
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.error);
+    if (typeof userToken === "string") {
+      headers.Authorization = `Bearer ${userToken}`;
     }
-    token = data.token;
-  } catch (err) {
-    throw new Error(`A playthrough token could not be generated: ${err}`);
+
+    if (version === -1 && typeof userToken !== "string") {
+      throw new Error(
+        "To play the draft version of a story, a `userToken` must also be passed to `connect`."
+      );
+    }
+
+    try {
+      const response = await fetch(`${baseUrl}/play/token`, {
+        body: JSON.stringify({
+          storyId,
+          version
+        }),
+        headers,
+        method: "POST",
+        mode: "cors"
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error);
+      }
+      if (typeof data.token === "string") {
+        token = data.token;
+      }
+    } catch (err) {
+      throw new Error(`A playthrough token could not be generated: ${err}`);
+    }
   }
 
   const socket = io(`${baseUrl}/play`, {
@@ -248,7 +343,7 @@ export const connect = async ({
     upgrade: false
   });
 
-  return new CharismaInstance(socket);
+  return new CharismaInstance(socket, { baseUrl, playthroughToken, userToken });
 };
 
 export default { connect };

@@ -12,12 +12,15 @@
     };
 
     CharismaSDK.connect({
-      storyId: 4,
+      storyId: 27,
       version: -1,
       baseUrl: "http://localhost:5000",
       userToken:
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiY2hhcmlzbWFfcGVyc29uIiwicGVyc29uX2lkIjoxLCJpYXQiOjE1NDcwNDE1NDcsImV4cCI6MjE3ODE4MDU4NywiYXVkIjoicG9zdGdyYXBoaWxlIiwiaXNzIjoicG9zdGdyYXBoaWxlIn0.3yGSgtJFx7FpQSQssRshkfEOFd78UNCgvdfga9h-PhU"
-    }).then(charisma => {
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiY2hhcmlzbWFfcGVyc29uIiwicGVyc29uX2lkIjoyMywiZXhwIjoxNTU0NDYwMTEwLCJpYXQiOjE1NTE4NzE3MTAsImF1ZCI6InBvc3RncmFwaGlsZSIsImlzcyI6InBvc3RncmFwaGlsZSJ9.Ne45snlDQXa5I4awZ6gP8u_ZbAzQVhPatzAIypOmixU",
+      playthroughToken:
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwbGF5dGhyb3VnaF9pZCI6NDYzLCJpYXQiOjE1NTI2NTY5ODEsImV4cCI6MjE4Mzc5NjAyMSwiYXVkIjoiY2hhcmlzbWFfZW5naW5lIiwiaXNzIjoiY2hhcmlzbWFfZW5naW5lIn0.ERqVbOtYM6rwgQDQLrehxWvwQgCS7P-nVvsD6HgtQ_Y"
+    }).then(async charisma => {
+      console.log(await charisma.getMessageHistory());
       charismaInstance = charisma;
       charisma.on("start-typing", () => {
         console.log("start typing");

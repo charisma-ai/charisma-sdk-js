@@ -64,3 +64,31 @@ export interface ISynthesisConfig {
   audioEncoding?: SynthesisEncoding;
   output?: SynthesisOutput;
 }
+
+export interface IGraphQLRequest<Result = unknown> {
+  data?: Result;
+  errors?: { message: string };
+}
+
+export interface IMessageHistoryQueryResult {
+  playthrough: {
+    eventsByPlaythroughId: {
+      nodes: Array<{
+        eventMessageCharacter: {
+          text: string;
+          character: {
+            id: number;
+            name: string;
+            avatar: string | null;
+          } | null;
+          metadata: { [key: string]: string };
+          media: string | null;
+          endStory: boolean;
+        } | null;
+        eventMessagePlayer: {
+          text: string;
+        } | null;
+      }>;
+    };
+  };
+}

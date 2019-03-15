@@ -1,5 +1,10 @@
 # Changelog
 
+### v0.8.0
+
+- Can now specify `playthroughToken` to re-use a playthrough instead of creating a new one when connecting.
+- Can now fetch message history of the playthrough using `charisma.getMessageHistory`.
+
 ### v0.7.3
 
 - Fix `IMessageCharacter.speech` type.

@@ -23,9 +23,11 @@
   "dependencies": {
     "@types/socket.io-client": "^1.4.32",
     "eventemitter3": "^3.1.0",
+    "jwt-decode": "^2.2.0",
     "socket.io-client": "^2.2.0"
   },
   "devDependencies": {
+    "@types/jwt-decode": "^2.2.1",
     "commitizen": "^3.0.7",
     "cross-env": "^5.2.0",
     "cz-conventional-changelog": "^2.1.0",
