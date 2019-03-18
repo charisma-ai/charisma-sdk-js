@@ -85,6 +85,7 @@ export interface IMessageHistoryQueryResult {
           metadata: { [key: string]: string };
           media: string | null;
           endStory: boolean;
+          tapToContinue: boolean;
         } | null;
         eventMessagePlayer: {
           text: string;

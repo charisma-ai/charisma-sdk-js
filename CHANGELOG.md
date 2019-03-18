@@ -1,5 +1,9 @@
 # Changelog
 
+### v0.8.2
+
+- Add `tapToContinue` to message history type.
+
 ### v0.8.1
 
 - Add `timestamp` to messages returned from `getMessageHistory`.
