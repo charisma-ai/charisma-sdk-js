@@ -74,6 +74,7 @@ export interface IMessageHistoryQueryResult {
   playthrough: {
     eventsByPlaythroughId: {
       nodes: Array<{
+        timestamp: Date;
         eventMessageCharacter: {
           text: string;
           character: {

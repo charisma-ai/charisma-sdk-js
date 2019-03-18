@@ -27,6 +27,9 @@ export {
   SynthesisOutput
 };
 
+const notEmpty = <TValue>(value: TValue | null | undefined): value is TValue =>
+  value !== null && value !== undefined;
+
 export class CharismaInstance extends EventEmitter<CharismaEvents> {
   private options: {
     baseUrl: string;
@@ -198,6 +201,7 @@ export class CharismaInstance extends EventEmitter<CharismaEvents> {
         playthrough: playthroughById(id: $playthroughId) {
           eventsByPlaythroughId {
             nodes {
+              timestamp
               eventMessageCharacter: eventMessageCharacterByEventId {
                 text
                 character: characterByCharacterId {
@@ -243,16 +247,26 @@ export class CharismaInstance extends EventEmitter<CharismaEvents> {
     if (!response.ok || !data.data || data.errors) {
       throw new Error("Message history could not be fetched.");
     }
+
     return data.data.playthrough.eventsByPlaythroughId.nodes
       .map(event => {
+        const timestamp = new Date(event.timestamp).getTime();
         if (event.eventMessageCharacter) {
-          return { ...event.eventMessageCharacter, type: "character" };
+          return {
+            ...event.eventMessageCharacter,
+            timestamp,
+            type: "character" as "character"
+          };
         } else if (event.eventMessagePlayer) {
-          return { ...event.eventMessagePlayer, type: "player" };
+          return {
+            ...event.eventMessagePlayer,
+            timestamp,
+            type: "player" as "player"
+          };
         }
         return null;
       })
-      .filter(_ => _);
+      .filter(notEmpty);
   };
 
   private onStatusChange = (status: string) => {

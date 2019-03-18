@@ -1,5 +1,10 @@
 # Changelog
 
+### v0.8.1
+
+- Add `timestamp` to messages returned from `getMessageHistory`.
+- Improved type for `getMessageHistory`.
+
 ### v0.8.0
 
 - Can now specify `playthroughToken` to re-use a playthrough instead of creating a new one when connecting.
