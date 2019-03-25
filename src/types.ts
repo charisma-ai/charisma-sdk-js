@@ -34,6 +34,11 @@ export interface IMessageCharacter {
     audio: { data: number[]; type: "Buffer" } | string;
     duration: number;
   } | null;
+  media: {
+    imageLayers: Array<string | null>;
+    soundBackground: string | null;
+    soundEffect: string | null;
+  };
 }
 
 export interface IMessageMedia {

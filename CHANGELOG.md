@@ -1,5 +1,9 @@
 # Changelog
 
+### v0.8.3
+
+- Add `media` field onto the character message type.
+
 ### v0.8.2
 
 - Add `tapToContinue` to message history type.
