@@ -18,7 +18,8 @@ export type CharismaEvents =
   | "start-typing"
   | "stop-typing"
   | "recognise-interim"
-  | "recognise";
+  | "recognise"
+  | "scene-completed";
 
 export {
   Message as CharismaMessage,
@@ -35,6 +36,7 @@ export class CharismaInstance extends EventEmitter<CharismaEvents> {
     baseUrl: string;
     playthroughToken?: string;
     userToken?: string;
+    stopOnSceneComplete?: boolean;
   } = { baseUrl: "https://api.charisma.ai" };
   private buffered: Array<{ type: string }> = [];
   private ready: boolean = false;
@@ -49,6 +51,7 @@ export class CharismaInstance extends EventEmitter<CharismaEvents> {
       baseUrl: string;
       playthroughToken?: string;
       userToken?: string;
+      stopOnSceneComplete?: boolean;
     }
   ) {
     super();
@@ -62,6 +65,7 @@ export class CharismaInstance extends EventEmitter<CharismaEvents> {
     socket.on("message", this.onMessage);
     socket.on("start-typing", this.onStartTyping);
     socket.on("stop-typing", this.onStopTyping);
+    socket.on("scene-completed", this.onSceneCompleted);
 
     // Generic socket events
     socket.on("error", (error: object) => {
@@ -102,6 +106,7 @@ export class CharismaInstance extends EventEmitter<CharismaEvents> {
       sceneIndex,
       speech,
       startNodeId,
+      stopOnSceneComplete: this.options.stopOnSceneComplete,
       type: "start"
     };
 
@@ -125,6 +130,7 @@ export class CharismaInstance extends EventEmitter<CharismaEvents> {
       characterId,
       message,
       speech,
+      stopOnSceneComplete: this.options.stopOnSceneComplete,
       type: "reply"
     };
 
@@ -140,6 +146,7 @@ export class CharismaInstance extends EventEmitter<CharismaEvents> {
   }: { speech?: boolean | ISynthesisConfig } = {}) => {
     const payload = {
       speech,
+      stopOnSceneComplete: this.options.stopOnSceneComplete,
       type: "tap"
     };
     if (this.ready === false) {
@@ -292,6 +299,10 @@ export class CharismaInstance extends EventEmitter<CharismaEvents> {
 
   private onStopTyping = () => {
     this.emit("stop-typing");
+  };
+
+  private onSceneCompleted = () => {
+    this.emit("scene-completed");
   };
 }
 

@@ -1,5 +1,9 @@
 # Changelog
 
+### v0.9.0
+
+- Add `stopOnSceneComplete` option to prevent automatically continuing between scenes.
+
 ### v0.8.3
 
 - Add `media` field onto the character message type.
