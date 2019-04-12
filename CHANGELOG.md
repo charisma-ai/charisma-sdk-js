@@ -1,5 +1,9 @@
 # Changelog
 
+### v0.9.1
+
+- Pass `stopOnSceneComplete` through to the `CharismaInstance`.
+
 ### v0.9.0
 
 - Add `stopOnSceneComplete` option to prevent automatically continuing between scenes.

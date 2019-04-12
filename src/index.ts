@@ -318,13 +318,15 @@ export const connect = async ({
   playthroughToken,
   storyId,
   version,
-  baseUrl = "https://api.charisma.ai"
+  baseUrl = "https://api.charisma.ai",
+  stopOnSceneComplete
 }: {
   storyId: number;
   version?: number;
   playthroughToken?: string;
   userToken?: string;
   baseUrl: string;
+  stopOnSceneComplete?: boolean;
 }) => {
   let token = playthroughToken;
 
@@ -376,7 +378,12 @@ export const connect = async ({
     upgrade: false
   });
 
-  return new CharismaInstance(socket, { baseUrl, playthroughToken, userToken });
+  return new CharismaInstance(socket, {
+    baseUrl,
+    playthroughToken,
+    userToken,
+    stopOnSceneComplete
+  });
 };
 
 export default { connect };
