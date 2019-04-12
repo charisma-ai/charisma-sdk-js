@@ -35,7 +35,7 @@ export interface IMessageCharacter {
     duration: number;
   } | null;
   media: {
-    imageLayers: Array<string | null>;
+    imageLayers: (string | null)[];
     soundBackground: string | null;
     soundEffect: string | null;
   };
@@ -52,11 +52,11 @@ interface IMessage<T extends string, S> {
   endStory: boolean;
   tapToContinue: boolean;
   path: MessagePath;
-  characterMoods: Array<{
+  characterMoods: {
     id: number;
     name: string;
     mood: IMood;
-  }>;
+  }[];
 }
 
 export type Message =
@@ -78,7 +78,7 @@ export interface IGraphQLRequest<Result = unknown> {
 export interface IMessageHistoryQueryResult {
   playthrough: {
     eventsByPlaythroughId: {
-      nodes: Array<{
+      nodes: {
         timestamp: Date;
         eventMessageCharacter: {
           text: string;
@@ -95,7 +95,7 @@ export interface IMessageHistoryQueryResult {
         eventMessagePlayer: {
           text: string;
         } | null;
-      }>;
+      }[];
     };
   };
 }

@@ -1,13 +1,16 @@
 import EventEmitter from "eventemitter3";
 
 interface IWindow extends Window {
+  /* eslint-disable no-undef */
   SpeechRecognition?: typeof SpeechRecognition;
   webkitSpeechRecognition?: typeof SpeechRecognition;
+  /* eslint-enable no-undef */
 }
 
-declare var window: IWindow;
+declare const window: IWindow;
 
 // Needs to work with server-side rendering
+// eslint-disable-next-line no-undef
 let SpeechRecognitionClass: typeof SpeechRecognition | undefined;
 if (typeof window !== "undefined") {
   SpeechRecognitionClass =
@@ -31,7 +34,7 @@ export default class CharismaMicrophone extends EventEmitter {
   };
 
   public stopListening = () => {
-    const stream = this.stream;
+    const { stream } = this;
     if (stream) {
       stream.onresult = () => undefined;
       stream.onend = () => undefined;

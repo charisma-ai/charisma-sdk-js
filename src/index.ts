@@ -38,14 +38,20 @@ export class CharismaInstance extends EventEmitter<CharismaEvents> {
     userToken?: string;
     stopOnSceneComplete?: boolean;
   } = { baseUrl: "https://api.charisma.ai" };
-  private buffered: Array<{ type: string }> = [];
+
+  private buffered: { type: string }[] = [];
+
   private ready: boolean = false;
+
   private listening: boolean = false;
+
   private speaking: boolean = false;
+
   private socket: SocketIOClient.Socket;
+
   private microphone: Microphone;
 
-  constructor(
+  public constructor(
     socket: SocketIOClient.Socket,
     options?: {
       baseUrl: string;
@@ -230,14 +236,14 @@ export class CharismaInstance extends EventEmitter<CharismaEvents> {
       }
     `;
 
-    const { playthrough_id } = jwtDecode<{ playthrough_id: number }>(
-      playthroughToken
-    );
+    const { playthrough_id: playthroughId } = jwtDecode<{
+      playthrough_id: number;
+    }>(playthroughToken);
 
     const response = await fetch(`${baseUrl}/graphql`, {
       body: JSON.stringify({
         query,
-        variables: { playthroughId: playthrough_id }
+        variables: { playthroughId }
       }),
       headers: {
         Accept: "application/json",
@@ -264,7 +270,8 @@ export class CharismaInstance extends EventEmitter<CharismaEvents> {
             timestamp,
             type: "character" as "character"
           };
-        } else if (event.eventMessagePlayer) {
+        }
+        if (event.eventMessagePlayer) {
           return {
             ...event.eventMessagePlayer,
             timestamp,
@@ -353,6 +360,7 @@ export const connect = async ({
         throw new Error(data.error);
       }
       if (typeof data.token === "string") {
+        // eslint-disable-next-line prefer-destructuring
         token = data.token;
       }
     } catch (err) {

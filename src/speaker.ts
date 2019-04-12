@@ -3,7 +3,7 @@ interface IWindow extends Window {
   webkitAudioContext?: typeof AudioContext;
 }
 
-declare var window: IWindow;
+declare const window: IWindow;
 
 // Needs to work with server-side rendering
 let AudioContextClass: typeof AudioContext | undefined;
