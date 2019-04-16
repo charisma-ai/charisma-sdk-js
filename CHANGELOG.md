@@ -1,5 +1,9 @@
 # Changelog
 
+### v0.9.2
+
+- Pass data (containing `impacts`) through on scene complete event.
+
 ### v0.9.1
 
 - Pass `stopOnSceneComplete` through to the `CharismaInstance`.

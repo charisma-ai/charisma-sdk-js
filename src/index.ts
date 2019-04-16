@@ -308,8 +308,8 @@ export class CharismaInstance extends EventEmitter<CharismaEvents> {
     this.emit("stop-typing");
   };
 
-  private onSceneCompleted = () => {
-    this.emit("scene-completed");
+  private onSceneCompleted = (data: { impacts: string[] }) => {
+    this.emit("scene-completed", data);
   };
 }
 
