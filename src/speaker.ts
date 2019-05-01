@@ -1,43 +1,50 @@
+interface Constructable<T> {
+  new (): T;
+}
+
 interface IWindow extends Window {
-  AudioContext?: typeof AudioContext;
-  webkitAudioContext?: typeof AudioContext;
+  AudioContext?: Constructable<AudioContext>;
+  webkitAudioContext?: Constructable<AudioContext>;
 }
 
 declare const window: IWindow;
 
-// Needs to work with server-side rendering
-let AudioContextClass: typeof AudioContext | undefined;
-if (typeof window !== "undefined") {
-  AudioContextClass = window.AudioContext || window.webkitAudioContext;
+class Speaker {
+  private audioContext: AudioContext | undefined;
+
+  private getAudioContext(): AudioContext {
+    if (this.audioContext) {
+      return this.audioContext;
+    }
+
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+
+    if (!AudioContextClass) {
+      throw new Error("AudioContext isn't supported in this browser.");
+    }
+
+    const audioContext = new AudioContext();
+    this.audioContext = audioContext;
+    return audioContext;
+  }
+
+  public async play(audio: number[]): Promise<void> {
+    const audioContext = this.getAudioContext();
+    const arrayBuffer = new Uint8Array(audio).buffer;
+    const source = audioContext.createBufferSource();
+    source.connect(audioContext.destination);
+    source.buffer = await new Promise(
+      (resolve, reject): void => {
+        audioContext.decodeAudioData(arrayBuffer, resolve, reject);
+      }
+    );
+    return new Promise(
+      (resolve): void => {
+        source.onended = (): void => resolve();
+        source.start();
+      }
+    );
+  }
 }
 
-let context: AudioContext | null = null;
-
-const speak = async (audio: number[]) => {
-  if (!audio) {
-    console.error("No audio to speak was provided.");
-    return;
-  }
-
-  if (!context && AudioContextClass) {
-    context = new AudioContextClass();
-  }
-
-  if (!context) {
-    console.error("An `AudioContext` was not able to be created.");
-    return;
-  }
-
-  const arrayBuffer = new Uint8Array(audio).buffer;
-  const source = context.createBufferSource();
-  source.connect(context.destination);
-  source.buffer = (await new Promise((resolve, reject) => {
-    (context as AudioContext).decodeAudioData(arrayBuffer, resolve, reject);
-  })) as AudioBuffer;
-  await new Promise(resolve => {
-    source.onended = () => resolve();
-    source.start();
-  });
-};
-
-export default speak;
+export default Speaker;

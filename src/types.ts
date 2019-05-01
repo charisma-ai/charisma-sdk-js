@@ -65,37 +65,33 @@ export type Message =
 
 export type SynthesisEncoding = "mp3" | "ogg" | "pcm";
 export type SynthesisOutput = "url" | "buffer";
-export interface ISynthesisConfig {
+export interface SynthesisConfig {
   audioEncoding?: SynthesisEncoding;
   output?: SynthesisOutput;
 }
 
-export interface IGraphQLRequest<Result = unknown> {
-  data?: Result;
-  errors?: { message: string };
+export interface StartEvent {
+  sceneIndex?: number;
+  startNodeId?: number;
 }
 
-export interface IMessageHistoryQueryResult {
-  playthrough: {
-    eventsByPlaythroughId: {
-      nodes: {
-        timestamp: Date;
-        eventMessageCharacter: {
-          text: string;
-          character: {
-            id: number;
-            name: string;
-            avatar: string | null;
-          } | null;
-          metadata: { [key: string]: string };
-          media: string | null;
-          endStory: boolean;
-          tapToContinue: boolean;
-        } | null;
-        eventMessagePlayer: {
-          text: string;
-        } | null;
-      }[];
-    };
-  };
+export interface ReplyEvent {
+  text: string;
+}
+
+export interface StartTypingEvent {
+  conversationId: string;
+}
+
+export interface StopTypingEvent {
+  conversationId: string;
+}
+
+export interface MessageEvent {
+  conversationId: string;
+}
+
+export interface SceneCompletedEvent {
+  conversationId: string;
+  impacts: string[];
 }

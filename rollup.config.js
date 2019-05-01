@@ -1,7 +1,5 @@
 import resolve from "rollup-plugin-node-resolve";
 import commonjs from "rollup-plugin-commonjs";
-import strip from "rollup-plugin-strip";
-import minify from "rollup-plugin-babel-minify";
 
 import pkg from "./package.json";
 
@@ -23,12 +21,6 @@ export default [
       }),
       commonjs({
         include: /node_modules/
-      }),
-      strip({
-        functions: ["debug"]
-      }),
-      minify({
-        comments: false
       })
     ]
   },
