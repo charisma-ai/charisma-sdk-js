@@ -50,19 +50,6 @@
     "semantic-release": "^15.13.3",
     "typescript": "^3.4.5"
   },
-  "lint-staged": {
-    "linters": {
-      "src/**/*.ts": [
-        "eslint --fix",
-        "git add"
-      ]
-    }
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
   "config": {
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
