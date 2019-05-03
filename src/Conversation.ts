@@ -22,7 +22,8 @@ export type ConversationEvents =
   | "stop-typing"
   | "scene-completed";
 
-declare interface Conversation {
+// eslint-disable-next-line import/export
+export declare interface Conversation {
   on(event: "message", listener: (event: MessageEvent) => void): this;
   on(event: "start-typing", listener: (event: StartTypingEvent) => void): this;
   on(event: "stop-typing", listener: (event: StopTypingEvent) => void): this;
@@ -33,7 +34,8 @@ declare interface Conversation {
   on(event: string, listener: (...args: any[]) => void): this;
 }
 
-class Conversation extends EventEmitter<ConversationEvents> {
+// eslint-disable-next-line import/export
+export class Conversation extends EventEmitter<ConversationEvents> {
   private id: string;
 
   private charismaInstance: Charisma;
