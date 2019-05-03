@@ -183,6 +183,15 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
     );
   };
 
+  public leaveConversation = (conversationId: string): void => {
+    if (!this.activeConversations.has(conversationId)) {
+      throw new Error(
+        `The conversation with id \`${conversationId}\` has not been joined, so cannot be left.`
+      );
+    }
+    this.activeConversations.delete(conversationId);
+  };
+
   public getConversation = (
     conversationId: string
   ): Conversation | undefined => {
