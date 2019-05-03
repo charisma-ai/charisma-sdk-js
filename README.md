@@ -1,58 +1,111 @@
 # Charisma.ai SDK for JavaScript
 
-### Usage
+## Usage
 
 ```
 yarn add @charisma-ai/sdk
 ```
 
-The script can be pulled straight into the browser.
+```js
+import { Charisma, Microphone, Speaker } from '@charisma.ai/sdk';
 
-```html
-<script src="./charisma-sdk.js"></script>
-<script>
-  (async function () {
-    const charisma = await Charisma.connect({ storyId: 13 });
-    charisma.on('start-typing', () => { ... });
-    charisma.on('stop-typing', () => { ... });
+async function run() {
+  const token = await Charisma.createPlaythroughToken({ storyId: 4 });
+  const conversationId = await Charisma.createConversation(token);
 
-    charisma.on('reply', (data) => {
-      if (data.reply.speech) {
-        charisma.speak(data.reply.speech.data);
-      }
-    });
+  const charisma = new Charisma(token);
+  const speaker = new Speaker();
+  const microphone = new Microphone();
 
-    charisma.start({ ... });
-    charisma.reply({ ... });
-  })()
-</script>
+  const conversation = charisma.joinConversation(conversationId);
+  conversation.on('start-typing', () =>
+    console.log('Character started typing...'),
+  );
+  conversation.on('stop-typing', () =>
+    console.log('Character stopped typing...'),
+  );
+  conversation.on('message', message => {
+    console.log(message);
+    if (message.message.speech) {
+      microphone.stopListening();
+      speaker.play(message.message.speech.audio.data);
+      microphone.startListening();
+    }
+  });
+  conversation.options.speech = {
+    audioEncoding: 'mp3',
+    output: 'buffer',
+  };
+
+  charisma.connect();
+  conversation.start();
+
+  microphone.startListening();
+  microphone.on('recognise', text => conversation.reply({ text }));
+}
 ```
 
-#### Charisma.connect
+## API Reference
 
-Use this to connect to Charisma and set up a new playthrough.
+Create a new `Charisma` instance to connect to a playthrough and interact with the chat engine.
+
+- `playthroughToken` (`number`): The `token` generated in `Charisma.createPlaythroughToken`.
+
+#### (static) Charisma.createPlaythroughToken
+
+Use this to set up a new playthrough.
 
 - `storyId` (`number`): The `id` of the story that you want to create a new playthrough for. The story must be published, unless a Charisma.ai user token has been passed and the user matches the owner of the story.
 - `version` (`number`, optional): The `version` of the story that you want to create a new playthrough for. If omitted, it will default to the most recent version. To get the debug story, pass `-1`.
 - `userToken` (`string`, optional): If the story is unpublished, pass a `userToken` to be able to access your story.
 
-Returns a promise that resolves once the socket has connected.
+Returns a promise that resolves with the token.
 
 ```js
-const charisma = await Charisma.connect({
+const token = await Charisma.createPlaythroughToken({
   storyId: 12,
   version: 4,
-  userToken: "..."
+  userToken: '...',
 });
+```
+
+#### (static) Charisma.createConversation
+
+A playthrough can have many simultaneous conversations. In order to start interacting, a conversation needs to be created, which can then be joined.
+
+- `playthroughToken` (`string`): The token generated with `Charisma.createPlaythroughToken`.
+
+```js
+const conversationId = await Charisma.createConversation(token);
+```
+
+#### Charisma.joinConversation
+
+This makes the `Charisma` instance listen out for events for a particular conversation, and returns a `Conversation` that events can be called on and event listeners attached.
+
+- `conversationId` (`string`): The conversation id generated with `Charisma.createConversation`.
+
+Returns a `Conversation`, which can.
+
+```js
+await Charisma.joinConversation(conversationId);
+```
+
+#### Charisma.connect
+
+This is what kicks off the connection to the chat engine. Call this once you're ready to start sending and receiving events.
+
+```js
+await Charisma.connect();
 ```
 
 ## Events
 
-To interact with the story, events are sent backwards and forwards along the websocket.
+To interact with the story, events are sent to and from the server that the WebSocket is connected to.
 
 ### Events sent from client
 
-#### charisma.start({ ... })
+#### conversation.start({ ... })
 
 ```js
 {
@@ -61,26 +114,32 @@ To interact with the story, events are sent backwards and forwards along the web
 }
 ```
 
-#### charisma.reply({ ... })
+#### conversation.reply({ ... })
 
 ```js
 {
-  "message": "Please reply to this!",
+  "text": "Please reply to this!",
   "speech": true // Optional, default false
 }
 ```
 
 ### Events received by client
 
-#### charisma.on('reply', (data) => { ... })
+#### conversation.on('reply', (data) => { ... })
 
 ```js
 {
-  "reply": {
-    "message": "Greetings and good day.",
-    "character": "Ted Baker",
-    "avatar": "https://s3.charisma.ai/...",
-    "speech": "...", // Byte buffer
+  "message": {
+    "text": "Greetings and good day.",
+    "character": {
+      "id": 20,
+      "name": "Ted Baker",
+      "avatar": "https://s3.charisma.ai/..."
+    },
+    "speech": {
+      "duration": 203,
+      "audio": /* either a buffer, or a URL */,
+    }
     "metadata": {
       "myMetadata": "someValue"
     },
@@ -91,47 +150,63 @@ To interact with the story, events are sent backwards and forwards along the web
 }
 ```
 
-#### charisma.on('start-typing', () => { ... })
+#### conversation.on('start-typing', () => { ... })
 
 This event has no additional data.
 
-#### charisma.on('stop-typing', () => { ... })
+#### conversation.on('stop-typing', () => { ... })
 
 This event has no additional data.
 
-#### charisma.on('recognise', (message) => { ... })
+## Microphone
 
-To be used in conjunction with speech recognition (see below).
-
-#### charisma.on('recognise-interim', (message) => { ... })
-
-To be used in conjunction with speech recognition (see below).
-
-## Utils
-
-To help you with speech-to-text and text-to-speech:
-
-#### charisma.speak(data)
-
-e.g.
+The microphone can be used to provide speech-to-text functionality.
 
 ```js
-charisma.on("reply", data => {
-  if (data.reply.speech) {
-    charisma.speak(data.reply.speech.data);
+const microphone = new Microphone();
+```
+
+#### microphone.on('recognise', (text) => { ... })
+
+To be used in conjunction with speech recognition (see below).
+
+#### microphone.on('recognise-interim', (text) => { ... })
+
+To be used in conjunction with speech recognition (see below).
+
+#### microphone.startListening()
+
+Starts browser speech recognition (Google Chrome only). The microphone will then emit `recognise-interim` (player hasn't finished speaking, this is the current best guess) and `recognise` (player has finished speaking and we're confident about the result) events.
+
+The speech recognition will _NOT_ automatically pause when a character is speaking via `charisma.speak`.
+
+#### microphone.stopListening()
+
+Stops browser speech recognition (Google Chrome only).
+
+## Speaker
+
+The speaker can be used to provide text-to-speech functionality.
+
+```js
+const speaker = new Speaker();
+```
+
+#### speaker.play(data)
+
+Typically, you would want to use this in combination with a `message` conversation handler. You may also wish to pause the microphone while this happens.
+
+Returns a Promise that resolves once the speech has ended.
+
+```js
+conversation.on('message', async data => {
+  if (data.message.speech) {
+    microphone.stopListening();
+    await speaker.play(data.message.speech.audio.data);
+    microphone.startListening();
   }
 });
 ```
-
-#### charisma.startListening()
-
-Starts browser speech recognition (Google Chrome only). `charisma` will then emit `recognise-interim` (player hasn't finished speaking, this is the current best guess) and `recognise` (player has finished speaking and we're confident about the result) events.
-
-The speech recognition will _automatically_ pause when a character is speaking via `charisma.speak`.
-
-#### charisma.stopListening()
-
-Stops browser speech recognition (Google Chrome only).
 
 ### Questions
 
