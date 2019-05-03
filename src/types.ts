@@ -89,6 +89,7 @@ export interface StopTypingEvent {
 
 export interface MessageEvent {
   conversationId: string;
+  message: Message;
 }
 
 export interface SceneCompletedEvent {

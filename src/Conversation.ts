@@ -1,7 +1,15 @@
 import EventEmitter from "eventemitter3";
 
 import Charisma from "./Charisma";
-import { StartEvent, ReplyEvent, SynthesisConfig } from "./types";
+import {
+  StartEvent,
+  ReplyEvent,
+  SynthesisConfig,
+  MessageEvent,
+  StartTypingEvent,
+  StopTypingEvent,
+  SceneCompletedEvent
+} from "./types";
 
 export interface ConversationOptions {
   audioConfig?: SynthesisConfig;
@@ -13,6 +21,17 @@ export type ConversationEvents =
   | "start-typing"
   | "stop-typing"
   | "scene-completed";
+
+declare interface Conversation {
+  on(event: "message", listener: (event: MessageEvent) => void): this;
+  on(event: "start-typing", listener: (event: StartTypingEvent) => void): this;
+  on(event: "stop-typing", listener: (event: StopTypingEvent) => void): this;
+  on(
+    event: "scene-completed",
+    listener: (event: SceneCompletedEvent) => void
+  ): this;
+  on(event: string, listener: (...args: any[]) => void): this;
+}
 
 class Conversation extends EventEmitter<ConversationEvents> {
   private id: string;

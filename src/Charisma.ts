@@ -64,19 +64,26 @@ const fetchJson = async <T>(
   return data;
 };
 
+declare interface Charisma {
+  on(event: "ready", listener: () => void): this;
+  on(event: "connect", listener: () => void): this;
+  on(event: "error", listener: (error: any) => void): this;
+  on(event: string, listener: (...args: any[]) => void): this;
+}
+
 class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
   public static charismaUrl = "https://api.charisma.ai";
 
-  public static createPlaythroughToken(
+  public static async createPlaythroughToken(
     options: PlaythroughTokenOptions
-  ): Promise<{ token: string }> {
+  ): Promise<string> {
     if (options.version === -1 && options.userToken) {
       throw new Error(
         "To play the draft version (-1) of a story, a `userToken` must also be passed."
       );
     }
     try {
-      return fetchJson<{ token: string }>(
+      const { token } = await fetchJson<{ token: string }>(
         `${Charisma.charismaUrl}/play/token`,
         {
           storyId: options.storyId,
@@ -88,6 +95,7 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
             }
           : undefined
       );
+      return token;
     } catch (err) {
       throw new Error(`A playthrough token could not be generated: ${err}`);
     }
@@ -96,30 +104,29 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
   public static async createConversation(token: string): Promise<string> {
     const { id } = await fetchJson<{ id: string }>(
       `${Charisma.charismaUrl}/play/conversation`,
-      {},
-      { headers: { Authorization: `Bearer ${token}` } }
+      { playthroughToken: token }
     );
     return id;
   }
 
   public static async createEpilogueConversation(
-    token: string
+    token: string,
+    epilogueId: number
   ): Promise<string> {
     const { id } = await fetchJson<{ id: string }>(
       `${Charisma.charismaUrl}/play/conversation/epilogue`,
-      {},
-      { headers: { Authorization: `Bearer ${token}` } }
+      { playthroughToken: token, epilogueId }
     );
     return id;
   }
 
   public static async createCharacterConversation(
-    token: string
+    token: string,
+    characterId: number
   ): Promise<string> {
     const { id } = await fetchJson<{ id: string }>(
       `${Charisma.charismaUrl}/play/conversation/character`,
-      {},
-      { headers: { Authorization: `Bearer ${token}` } }
+      { playthroughToken: token, characterId }
     );
     return id;
   }
@@ -144,10 +151,10 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
     }
   }
 
-  public joinConversation(
+  public joinConversation = (
     conversationId: string,
     options?: ConversationOptions
-  ): Conversation {
+  ): Conversation => {
     const conversation = new Conversation(conversationId, this, options);
     if (this.activeConversations.has(conversationId)) {
       throw new Error(
@@ -156,11 +163,11 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
     }
     this.activeConversations.set(conversationId, conversation);
     return conversation;
-  }
+  };
 
-  public joinConversations(
+  public joinConversations = (
     conversations: ConversationToJoin[]
-  ): Promise<Conversation[]> {
+  ): Promise<Conversation[]> => {
     return Promise.all(
       conversations.map(
         (conversation): Conversation => {
@@ -174,13 +181,18 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
         }
       )
     );
-  }
+  };
 
-  public getConversation(conversationId: string): Conversation | undefined {
+  public getConversation = (
+    conversationId: string
+  ): Conversation | undefined => {
     return this.activeConversations.get(conversationId);
-  }
+  };
 
-  public addOutgoingEvent(eventName: string, ...eventData: unknown[]): void {
+  public addOutgoingEvent = (
+    eventName: string,
+    ...eventData: unknown[]
+  ): void => {
     this.eventQueue.add(
       (): void => {
         if (this.socket) {
@@ -188,9 +200,9 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
         }
       }
     );
-  }
+  };
 
-  public connect(): void {
+  public connect = (): void => {
     this.socket = io(`${this.charismaUrl}/play`, {
       query: { token: this.token },
       transports: ["websocket"],
@@ -201,57 +213,57 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
     this.socket.on("error", this.onError);
     this.socket.on("disconnect", this.onDisconnect);
 
-    this.socket.on("ready", this.onReady);
+    this.socket.on("status", this.onStatus);
     this.socket.on("start-typing", this.onStartTyping);
     this.socket.on("stop-typing", this.onStopTyping);
     this.socket.on("message", this.onMessage);
     this.socket.on("scene-completed", this.onSceneCompleted);
-  }
+  };
 
-  private onReady(): void {
+  private onStatus = (): void => {
     this.eventQueue.start();
     this.emit("ready");
-  }
+  };
 
-  private onConnect(): void {
+  private onConnect = (): void => {
     this.emit("connect");
-  }
+  };
 
-  private onError(error: unknown): void {
+  private onError = (error: unknown): void => {
     this.emit("error", error);
-  }
+  };
 
-  private onDisconnect(): void {
+  private onDisconnect = (): void => {
     this.eventQueue.pause();
-  }
+  };
 
-  private onStartTyping(event: StartTypingEvent): void {
+  private onStartTyping = (event: StartTypingEvent): void => {
     const conversation = this.activeConversations.get(event.conversationId);
     if (conversation) {
       conversation.emit("start-typing", event);
     }
-  }
+  };
 
-  private onStopTyping(event: StopTypingEvent): void {
+  private onStopTyping = (event: StopTypingEvent): void => {
     const conversation = this.activeConversations.get(event.conversationId);
     if (conversation) {
       conversation.emit("stop-typing", event);
     }
-  }
+  };
 
-  private onMessage(event: MessageEvent): void {
+  private onMessage = (event: MessageEvent): void => {
     const conversation = this.activeConversations.get(event.conversationId);
     if (conversation) {
       conversation.emit("message", event);
     }
-  }
+  };
 
-  private onSceneCompleted(event: SceneCompletedEvent): void {
+  private onSceneCompleted = (event: SceneCompletedEvent): void => {
     const conversation = this.activeConversations.get(event.conversationId);
     if (conversation) {
       conversation.emit("scene-completed", event);
     }
-  }
+  };
 }
 
 export default Charisma;

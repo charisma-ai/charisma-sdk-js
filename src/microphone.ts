@@ -16,7 +16,7 @@ type MicrophoneEvents = "recognise" | "recognise-interim";
 class Microphone extends EventEmitter<MicrophoneEvents> {
   private stream: SpeechRecognition | undefined;
 
-  private createStream = (): SpeechRecognition => {
+  private createStream(): SpeechRecognition {
     if (this.stream) {
       return this.stream;
     }
@@ -34,7 +34,7 @@ class Microphone extends EventEmitter<MicrophoneEvents> {
     stream.lang = "en-GB";
     this.stream = stream;
     return stream;
-  };
+  }
 
   public startListening(): void {
     const stream = this.createStream();

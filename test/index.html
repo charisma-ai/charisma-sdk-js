@@ -4,41 +4,38 @@
   </body>
   <script src="../dist/umd/index.js"></script>
   <script>
-    let charismaInstance;
+    async function start() {
+      const { Charisma, Speaker, Microphone } = CharismaSDK;
 
-    const start = () => {
-      charismaInstance.startListening();
-      charismaInstance.start({ speech: true });
-    };
+      Charisma.charismaUrl = "https://localhost:5000";
+      const token = await Charisma.createPlaythroughToken({ storyId: 4 });
+      const conversationId = await Charisma.createConversation(token);
 
-    CharismaSDK.connect({
-      storyId: 27,
-      version: -1,
-      baseUrl: "http://localhost:5000",
-      userToken:
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiY2hhcmlzbWFfcGVyc29uIiwicGVyc29uX2lkIjoyMywiZXhwIjoxNTU0NDYwMTEwLCJpYXQiOjE1NTE4NzE3MTAsImF1ZCI6InBvc3RncmFwaGlsZSIsImlzcyI6InBvc3RncmFwaGlsZSJ9.Ne45snlDQXa5I4awZ6gP8u_ZbAzQVhPatzAIypOmixU",
-      playthroughToken:
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwbGF5dGhyb3VnaF9pZCI6NDYzLCJpYXQiOjE1NTI2NTY5ODEsImV4cCI6MjE4Mzc5NjAyMSwiYXVkIjoiY2hhcmlzbWFfZW5naW5lIiwiaXNzIjoiY2hhcmlzbWFfZW5naW5lIn0.ERqVbOtYM6rwgQDQLrehxWvwQgCS7P-nVvsD6HgtQ_Y"
-    }).then(async charisma => {
-      console.log(await charisma.getMessageHistory());
-      charismaInstance = charisma;
-      charisma.on("start-typing", () => {
-        console.log("start typing");
+      const charisma = new Charisma(token, {
+        charismaUrl: "https://localhost:5000"
       });
-      charisma.on("stop-typing", () => {
-        console.log("stop typing");
-      });
-      charisma.on("message", data => {
-        console.log(data.message);
-        if (data.message && data.message.speech) {
-          charisma.speak(data.message.speech.audio.data);
+      const speaker = new Speaker();
+      const microphone = new Microphone();
+
+      const conversation = charisma.joinConversation(conversationId);
+      conversation.on("start-typing", () => console.log("started typing"));
+      conversation.on("stop-typing", () => console.log("stopped typing"));
+      conversation.on("message", message => {
+        console.log(message.message.text);
+        if (message.message.speech) {
+          speaker.play(message.message.speech.audio.data);
         }
-        charisma.setMemory({ memoryId: "live_or_die", saveValue: "die" });
       });
-      charisma.on("recognise-interim", console.log);
-      charisma.on("recognise", message => {
-        charisma.reply({ message, speech: true });
-      });
-    });
+      conversation.options.speech = {
+        audioEncoding: "mp3",
+        output: "buffer"
+      };
+
+      charisma.connect();
+      conversation.start();
+
+      microphone.startListening();
+      microphone.on("recognise", text => conversation.reply({ text }));
+    }
   </script>
 </html>
