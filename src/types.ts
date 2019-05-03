@@ -6,7 +6,7 @@ export type MediaType =
   | "vimeo"
   | "unknown";
 
-export interface IMood {
+export interface CharacterMood {
   happiness: number;
   anger: number;
   trust: number;
@@ -14,13 +14,13 @@ export interface IMood {
   fearlessness: number;
 }
 
-interface IMessagePathItem {
+interface MessagePathItem {
   id: number;
   type: "node" | "edge";
 }
-type MessagePath = IMessagePathItem[];
+type MessagePath = MessagePathItem[];
 
-export interface IMessageCharacter {
+export interface MessageCharacter {
   text: string;
   character: {
     id: number;
@@ -41,12 +41,12 @@ export interface IMessageCharacter {
   };
 }
 
-export interface IMessageMedia {
+export interface MessageMedia {
   url: string;
   mediaType: MediaType;
 }
 
-interface IMessage<T extends string, S> {
+interface GenericMessage<T extends string, S> {
   type: T;
   message: S;
   endStory: boolean;
@@ -55,13 +55,13 @@ interface IMessage<T extends string, S> {
   characterMoods: {
     id: number;
     name: string;
-    mood: IMood;
+    mood: CharacterMood;
   }[];
 }
 
 export type Message =
-  | IMessage<"character", IMessageCharacter>
-  | IMessage<"media", IMessageMedia>;
+  | GenericMessage<"character", MessageCharacter>
+  | GenericMessage<"media", MessageMedia>;
 
 export type SynthesisEncoding = "mp3" | "ogg" | "pcm";
 export type SynthesisOutput = "url" | "buffer";

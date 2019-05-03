@@ -2,12 +2,12 @@ interface Constructable<T> {
   new (): T;
 }
 
-interface IWindow extends Window {
+interface WindowWithAudioContext extends Window {
   AudioContext?: Constructable<AudioContext>;
   webkitAudioContext?: Constructable<AudioContext>;
 }
 
-declare const window: IWindow;
+declare const window: WindowWithAudioContext;
 
 class Speaker {
   private audioContext: AudioContext | undefined;

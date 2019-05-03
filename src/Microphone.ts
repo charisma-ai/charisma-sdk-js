@@ -4,12 +4,12 @@ interface Constructable<T> {
   new (): T;
 }
 
-interface IWindow extends Window {
+interface WindowWithSpeechRecognition extends Window {
   SpeechRecognition?: Constructable<SpeechRecognition>;
   webkitSpeechRecognition?: Constructable<SpeechRecognition>;
 }
 
-declare const window: IWindow;
+declare const window: WindowWithSpeechRecognition;
 
 type MicrophoneEvents = "recognise" | "recognise-interim";
 
