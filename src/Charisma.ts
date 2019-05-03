@@ -220,6 +220,13 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
     this.socket.on("scene-completed", this.onSceneCompleted);
   };
 
+  public cleanup = (): void => {
+    if (this.socket) {
+      this.socket.close();
+      this.socket = undefined;
+    }
+  };
+
   private onStatus = (): void => {
     this.eventQueue.start();
     this.emit("ready");
