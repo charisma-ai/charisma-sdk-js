@@ -32,10 +32,10 @@ async function run() {
       microphone.startListening();
     }
   });
-  conversation.options.speech = {
-    audioEncoding: 'mp3',
+  conversation.setSpeechConfig({
+    encoding: 'mp3',
     output: 'buffer',
-  };
+  });
 
   charisma.connect();
   conversation.start();
@@ -157,6 +157,27 @@ This event has no additional data.
 #### conversation.on('stop-typing', () => { ... })
 
 This event has no additional data.
+
+### Conversation helpers
+
+#### conversation.setSpeechConfig(config)
+
+This sets the speech configuration to use for all events in the conversation until set otherwise:
+
+```json
+{
+  "encoding": "mp3",
+  "output": "buffer"
+}
+```
+
+`encoding` is the file format of the resulting speech: `mp3`, `ogg` or `pcm`.
+
+`output` determines whether the speech received back is a `buffer` (a byte array) or whether it should instead be a `url` pointing to the audio file.
+
+#### conversation.setStopOnSceneEnd(stopOnSceneEnd)
+
+This sets whether the conversation should stop on scene end, or automatically continue to the next scene. By default, it is `false`, so automatically continues.
 
 ## Microphone
 

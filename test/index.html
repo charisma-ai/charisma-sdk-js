@@ -26,10 +26,10 @@
           speaker.play(message.message.speech.audio.data);
         }
       });
-      conversation.options.speech = {
-        audioEncoding: "mp3",
+      conversation.setSpeechConfig({
+        encoding: "mp3",
         output: "buffer"
-      };
+      });
 
       charisma.connect();
       conversation.start();
