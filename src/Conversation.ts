@@ -4,7 +4,7 @@ import Charisma from "./Charisma";
 import {
   StartEvent,
   ReplyEvent,
-  SynthesisConfig,
+  SpeechConfig,
   MessageEvent,
   StartTypingEvent,
   StopTypingEvent,
@@ -12,7 +12,7 @@ import {
 } from "./types";
 
 export interface ConversationOptions {
-  audioConfig?: SynthesisConfig;
+  speechConfig?: SpeechConfig;
   stopOnSceneEnd?: boolean;
 }
 
@@ -78,6 +78,14 @@ export class Conversation extends EventEmitter<ConversationEvents> {
       ...this.options,
       conversationId: this.id
     });
+  };
+
+  public setSpeechConfig = (speechConfig: SpeechConfig | undefined): void => {
+    this.options.speechConfig = speechConfig;
+  };
+
+  public setStopOnSceneEnd = (stopOnSceneEnd: boolean): void => {
+    this.options.stopOnSceneEnd = stopOnSceneEnd;
   };
 }
 

@@ -65,11 +65,11 @@ export type Message =
   | GenericMessage<"character", MessageCharacter>
   | GenericMessage<"media", MessageMedia>;
 
-export type SynthesisEncoding = "mp3" | "ogg" | "pcm";
-export type SynthesisOutput = "url" | "buffer";
-export interface SynthesisConfig {
-  audioEncoding?: SynthesisEncoding;
-  output?: SynthesisOutput;
+export type SpeechEncoding = "mp3" | "ogg" | "pcm";
+export type SpeechOutput = "url" | "buffer";
+export interface SpeechConfig {
+  audioEncoding?: SpeechEncoding;
+  output?: SpeechOutput;
 }
 
 export interface StartEvent {

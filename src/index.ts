@@ -10,9 +10,9 @@ export {
 
 export {
   Mood,
-  SynthesisConfig,
-  SynthesisEncoding,
-  SynthesisOutput,
+  SpeechConfig,
+  SpeechEncoding,
+  SpeechOutput,
   Message,
   StartEvent,
   ReplyEvent,

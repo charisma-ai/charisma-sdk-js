@@ -3,7 +3,7 @@ import PQueue from "p-queue";
 import io from "socket.io-client";
 
 import {
-  SynthesisConfig,
+  SpeechConfig,
   StartTypingEvent,
   StopTypingEvent,
   MessageEvent,
@@ -22,11 +22,11 @@ interface PlaythroughTokenOptions {
 }
 
 interface CharismaOptions extends GlobalOptions {
-  audioConfig?: SynthesisConfig;
+  speechConfig?: SpeechConfig;
 }
 
 interface ConversationOptions {
-  audioConfig?: SynthesisConfig;
+  speechConfig?: SpeechConfig;
   stopOnSceneEnd?: boolean;
 }
 
