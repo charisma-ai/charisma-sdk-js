@@ -9,7 +9,7 @@ export {
 } from "./Conversation";
 
 export {
-  CharacterMood,
+  Mood,
   SynthesisConfig,
   SynthesisEncoding,
   SynthesisOutput,

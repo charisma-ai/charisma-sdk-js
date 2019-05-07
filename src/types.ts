@@ -6,7 +6,7 @@ export type MediaType =
   | "vimeo"
   | "unknown";
 
-export interface CharacterMood {
+export interface Mood {
   happiness: number;
   anger: number;
   trust: number;
@@ -46,17 +46,19 @@ export interface MessageMedia {
   mediaType: MediaType;
 }
 
+export interface CharacterMood {
+  id: number;
+  name: string;
+  mood: Mood;
+}
+
 interface GenericMessage<T extends string, S> {
   type: T;
   message: S;
   endStory: boolean;
   tapToContinue: boolean;
   path: MessagePath;
-  characterMoods: {
-    id: number;
-    name: string;
-    mood: CharacterMood;
-  }[];
+  characterMoods: CharacterMood[];
 }
 
 export type Message =
@@ -87,10 +89,9 @@ export interface StopTypingEvent {
   conversationId: string;
 }
 
-export interface MessageEvent {
+export type MessageEvent = {
   conversationId: string;
-  message: Message;
-}
+} & Message;
 
 export interface SceneCompletedEvent {
   conversationId: string;
