@@ -13,10 +13,16 @@ declare const window: WindowWithSpeechRecognition;
 
 type MicrophoneEvents = "recognise" | "recognise-interim";
 
+declare interface Microphone {
+  on(event: "recognise", listener: (result: string) => void): this;
+  on(event: "recognise-interim", listener: (result: string) => void): this;
+  on(event: string, listener: (...args: any[]) => void): this;
+}
+
 class Microphone extends EventEmitter<MicrophoneEvents> {
   private stream: SpeechRecognition | undefined;
 
-  private createStream(): SpeechRecognition {
+  private createStream = (): SpeechRecognition => {
     if (this.stream) {
       return this.stream;
     }
@@ -34,9 +40,9 @@ class Microphone extends EventEmitter<MicrophoneEvents> {
     stream.lang = "en-GB";
     this.stream = stream;
     return stream;
-  }
+  };
 
-  public startListening(): void {
+  public startListening = (): void => {
     const stream = this.createStream();
 
     stream.onresult = this.onStreamResult;
@@ -46,9 +52,9 @@ class Microphone extends EventEmitter<MicrophoneEvents> {
     } catch (err) {
       // this is fine, it just means we tried to start/stop a stream when it was already started/stopped
     }
-  }
+  };
 
-  public stopListening(): void {
+  public stopListening = (): void => {
     const { stream } = this;
     if (stream) {
       stream.onresult = (): void => {};
@@ -59,7 +65,7 @@ class Microphone extends EventEmitter<MicrophoneEvents> {
         // this is fine, it just means we tried to start/stop a stream when it was already started/stopped
       }
     }
-  }
+  };
 
   private onStreamResult = (event: SpeechRecognitionEvent): void => {
     if (event.results && event.results[0] && event.results[0][0]) {

@@ -57,28 +57,28 @@ export class Conversation extends EventEmitter<ConversationEvents> {
     }
   }
 
-  public start(event: StartEvent): void {
+  public start = (event: StartEvent): void => {
     return this.charismaInstance.addOutgoingEvent("start", {
       ...this.options,
       ...event,
       conversationId: this.id
     });
-  }
+  };
 
-  public reply(event: ReplyEvent): void {
+  public reply = (event: ReplyEvent): void => {
     return this.charismaInstance.addOutgoingEvent("reply", {
       ...this.options,
       ...event,
       conversationId: this.id
     });
-  }
+  };
 
-  public tap(): void {
+  public tap = (): void => {
     return this.charismaInstance.addOutgoingEvent("tap", {
       ...this.options,
       conversationId: this.id
     });
-  }
+  };
 }
 
 export default Conversation;
