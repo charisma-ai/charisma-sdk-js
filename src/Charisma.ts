@@ -42,18 +42,18 @@ const fetchJson = async <T>(
   bodyData: object = {},
   options: RequestInit = {}
 ): Promise<T> => {
-  const headers: HeadersInit = {
+  const headers = new Headers({
     Accept: "application/json",
     "Content-Type": "application/json",
     ...(options.headers || {})
-  };
+  });
 
   const response = await fetch(endpoint, {
     body: JSON.stringify(bodyData),
-    headers,
     method: "POST",
     mode: "cors",
-    ...options
+    ...options,
+    headers
   });
 
   const data = await response.json();
