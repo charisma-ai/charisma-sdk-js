@@ -148,6 +148,52 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
     return id;
   }
 
+  public static async getPlaythroughInfo(
+    token: string
+  ): Promise<GetPlaythroughInfoResult> {
+    const result = await fetchJson<GetPlaythroughInfoResult>(
+      `${Charisma.charismaUrl}/play/playthrough-info`,
+      {},
+      { headers: { Authorization: `Bearer ${token}` }, method: "GET" }
+    );
+    return result;
+  }
+
+  public static async setMood(
+    token: string,
+    characterIdOrName: number | string,
+    modifier: Partial<Mood>
+  ): Promise<SetMoodResult> {
+    const result = await fetchJson<SetMoodResult>(
+      `${Charisma.charismaUrl}/play/set-mood`,
+      {
+        ...(typeof characterIdOrName === "number"
+          ? { characterId: characterIdOrName }
+          : { characterName: characterIdOrName }),
+        modifier
+      },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    return result;
+  }
+
+  public static async setMemory(
+    token: string,
+    memoryIdOrRecallValue: number | string,
+    saveValue: string
+  ): Promise<void> {
+    await fetchJson<void>(
+      `${Charisma.charismaUrl}/play/set-memory`,
+      {
+        ...(typeof memoryIdOrRecallValue === "number"
+          ? { memoryId: memoryIdOrRecallValue }
+          : { memoryRecallValue: memoryIdOrRecallValue }),
+        saveValue
+      },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+  }
+
   private eventQueue: PQueue = new PQueue({ autoStart: false });
 
   private token: string;
@@ -180,46 +226,22 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
     return Charisma.createCharacterConversation(this.token, characterId);
   }
 
-  public async getPlaythroughInfo(): Promise<GetPlaythroughInfoResult> {
-    const result = await fetchJson<GetPlaythroughInfoResult>(
-      `${Charisma.charismaUrl}/play/playthrough-info`,
-      {},
-      { headers: { Authorization: `Bearer ${this.token}` }, method: "GET" }
-    );
-    return result;
+  public getPlaythroughInfo(): Promise<GetPlaythroughInfoResult> {
+    return Charisma.getPlaythroughInfo(this.token);
   }
 
-  public async setMood(
-    characterIdOrName: string | number,
-    modifier: Partial<Mood>
-  ): Promise<SetMoodResult> {
-    const result = await fetchJson<SetMoodResult>(
-      `${Charisma.charismaUrl}/play/set-mood`,
-      {
-        ...(typeof characterIdOrName === "number"
-          ? { characterId: characterIdOrName }
-          : { characterName: characterIdOrName }),
-        modifier
-      },
-      { headers: { Authorization: `Bearer ${this.token}` } }
-    );
-    return result;
-  }
-
-  public async setMemory(
-    memoryIdOrRecallValue: string | number,
+  public setMemory(
+    memoryIdOrRecallValue: number | string,
     saveValue: string
   ): Promise<void> {
-    await fetchJson<void>(
-      `${Charisma.charismaUrl}/play/set-memory`,
-      {
-        ...(typeof memoryIdOrRecallValue === "number"
-          ? { memoryId: memoryIdOrRecallValue }
-          : { memoryRecallValue: memoryIdOrRecallValue }),
-        saveValue
-      },
-      { headers: { Authorization: `Bearer ${this.token}` } }
-    );
+    return Charisma.setMemory(this.token, memoryIdOrRecallValue, saveValue);
+  }
+
+  public setMood(
+    characterIdOrName: number | string,
+    modifier: Mood
+  ): Promise<SetMoodResult> {
+    return Charisma.setMood(this.token, characterIdOrName, modifier);
   }
 
   public joinConversation = (
