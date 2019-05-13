@@ -51,6 +51,10 @@ interface GetPlaythroughInfoResult {
   }[];
 }
 
+interface CreateConversationResult {
+  conversationId: number;
+}
+
 const fetchJson = async <T>(
   endpoint: string,
   bodyData: object = {},
@@ -118,37 +122,37 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
     }
   }
 
-  public static async createConversation(token: string): Promise<string> {
-    const { id } = await fetchJson<{ id: string }>(
+  public static async createConversation(token: string): Promise<number> {
+    const { conversationId } = await fetchJson<CreateConversationResult>(
       `${Charisma.charismaUrl}/play/conversation`,
       {},
       { headers: { Authorization: `Bearer ${token}` } }
     );
-    return id;
+    return conversationId;
   }
 
   public static async createEpilogueConversation(
     token: string,
     epilogueId: number
-  ): Promise<string> {
-    const { id } = await fetchJson<{ id: string }>(
+  ): Promise<number> {
+    const { conversationId } = await fetchJson<CreateConversationResult>(
       `${Charisma.charismaUrl}/play/conversation/epilogue`,
       { epilogueId },
       { headers: { Authorization: `Bearer ${token}` } }
     );
-    return id;
+    return conversationId;
   }
 
   public static async createCharacterConversation(
     token: string,
     characterId: number
-  ): Promise<string> {
-    const { id } = await fetchJson<{ id: string }>(
+  ): Promise<number> {
+    const { conversationId } = await fetchJson<CreateConversationResult>(
       `${Charisma.charismaUrl}/play/conversation/character`,
       { characterId },
       { headers: { Authorization: `Bearer ${token}` } }
     );
-    return id;
+    return conversationId;
   }
 
   public static async getPlaythroughInfo(
@@ -217,15 +221,15 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
     }
   }
 
-  public createConversation(): Promise<string> {
+  public createConversation(): Promise<number> {
     return Charisma.createConversation(this.token);
   }
 
-  public createEpilogueConversation(epilogueId: number): Promise<string> {
+  public createEpilogueConversation(epilogueId: number): Promise<number> {
     return Charisma.createEpilogueConversation(this.token, epilogueId);
   }
 
-  public createCharacterConversation(characterId: number): Promise<string> {
+  public createCharacterConversation(characterId: number): Promise<number> {
     return Charisma.createCharacterConversation(this.token, characterId);
   }
 
