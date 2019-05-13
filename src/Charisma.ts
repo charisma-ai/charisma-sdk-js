@@ -121,7 +121,8 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
   public static async createConversation(token: string): Promise<string> {
     const { id } = await fetchJson<{ id: string }>(
       `${Charisma.charismaUrl}/play/conversation`,
-      { playthroughToken: token }
+      {},
+      { headers: { Authorization: `Bearer ${token}` } }
     );
     return id;
   }
@@ -132,7 +133,8 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
   ): Promise<string> {
     const { id } = await fetchJson<{ id: string }>(
       `${Charisma.charismaUrl}/play/conversation/epilogue`,
-      { playthroughToken: token, epilogueId }
+      { epilogueId },
+      { headers: { Authorization: `Bearer ${token}` } }
     );
     return id;
   }
@@ -143,7 +145,8 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
   ): Promise<string> {
     const { id } = await fetchJson<{ id: string }>(
       `${Charisma.charismaUrl}/play/conversation/character`,
-      { playthroughToken: token, characterId }
+      { characterId },
+      { headers: { Authorization: `Bearer ${token}` } }
     );
     return id;
   }
