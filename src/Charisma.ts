@@ -8,7 +8,8 @@ import {
   StopTypingEvent,
   MessageEvent,
   SceneCompletedEvent,
-  Mood
+  Mood,
+  ConversationId
 } from "./types";
 import Conversation, { ConversationOptions } from "./Conversation";
 
@@ -27,9 +28,9 @@ interface CharismaOptions extends GlobalOptions {
 }
 
 type ConversationToJoin =
-  | string
+  | ConversationId
   | {
-      conversationId: string;
+      conversationId: ConversationId;
       options: ConversationOptions;
     };
 
@@ -52,7 +53,7 @@ interface GetPlaythroughInfoResult {
 }
 
 interface CreateConversationResult {
-  conversationId: number;
+  conversationId: ConversationId;
 }
 
 const fetchJson = async <T>(
@@ -122,7 +123,9 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
     }
   }
 
-  public static async createConversation(token: string): Promise<number> {
+  public static async createConversation(
+    token: string
+  ): Promise<ConversationId> {
     const { conversationId } = await fetchJson<CreateConversationResult>(
       `${Charisma.charismaUrl}/play/conversation`,
       {},
@@ -134,7 +137,7 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
   public static async createEpilogueConversation(
     token: string,
     epilogueId: number
-  ): Promise<number> {
+  ): Promise<ConversationId> {
     const { conversationId } = await fetchJson<CreateConversationResult>(
       `${Charisma.charismaUrl}/play/conversation/epilogue`,
       { epilogueId },
@@ -146,7 +149,7 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
   public static async createCharacterConversation(
     token: string,
     characterId: number
-  ): Promise<number> {
+  ): Promise<ConversationId> {
     const { conversationId } = await fetchJson<CreateConversationResult>(
       `${Charisma.charismaUrl}/play/conversation/character`,
       { characterId },
@@ -209,7 +212,7 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
 
   private socket: SocketIOClient.Socket | undefined;
 
-  private activeConversations: Map<string, Conversation> = new Map();
+  private activeConversations: Map<ConversationId, Conversation> = new Map();
 
   public constructor(token: string, options?: CharismaOptions) {
     super();
@@ -221,15 +224,19 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
     }
   }
 
-  public createConversation(): Promise<number> {
+  public createConversation(): Promise<ConversationId> {
     return Charisma.createConversation(this.token);
   }
 
-  public createEpilogueConversation(epilogueId: number): Promise<number> {
+  public createEpilogueConversation(
+    epilogueId: number
+  ): Promise<ConversationId> {
     return Charisma.createEpilogueConversation(this.token, epilogueId);
   }
 
-  public createCharacterConversation(characterId: number): Promise<number> {
+  public createCharacterConversation(
+    characterId: number
+  ): Promise<ConversationId> {
     return Charisma.createCharacterConversation(this.token, characterId);
   }
 
@@ -252,7 +259,7 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
   }
 
   public joinConversation = (
-    conversationId: string,
+    conversationId: ConversationId,
     options?: ConversationOptions
   ): Conversation => {
     const conversation = new Conversation(conversationId, this, options);
@@ -271,7 +278,7 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
     return Promise.all(
       conversations.map(
         (conversation): Conversation => {
-          if (typeof conversation === "string") {
+          if (typeof conversation === "number") {
             return this.joinConversation(conversation);
           }
           return this.joinConversation(
@@ -283,7 +290,7 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
     );
   };
 
-  public leaveConversation = (conversationId: string): void => {
+  public leaveConversation = (conversationId: ConversationId): void => {
     if (!this.activeConversations.has(conversationId)) {
       throw new Error(
         `The conversation with id \`${conversationId}\` has not been joined, so cannot be left.`
@@ -293,7 +300,7 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
   };
 
   public getConversation = (
-    conversationId: string
+    conversationId: ConversationId
   ): Conversation | undefined => {
     return this.activeConversations.get(conversationId);
   };

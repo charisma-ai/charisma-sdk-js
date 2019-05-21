@@ -9,6 +9,7 @@ export {
 } from "./Conversation";
 
 export {
+  ConversationId,
   Mood,
   SpeechConfig,
   SpeechEncoding,

@@ -36,14 +36,14 @@ export declare interface Conversation {
 
 // eslint-disable-next-line import/export
 export class Conversation extends EventEmitter<ConversationEvents> {
-  private id: string;
+  private id: number;
 
   private charismaInstance: Charisma;
 
   private options: ConversationOptions = {};
 
   public constructor(
-    conversationId: string,
+    conversationId: number,
     charismaInstance: Charisma,
     options?: ConversationOptions
   ) {

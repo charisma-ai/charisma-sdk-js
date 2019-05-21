@@ -72,6 +72,10 @@ export interface SpeechConfig {
   output?: SpeechOutput;
 }
 
+export type ConversationId = number;
+
+// Events sent to server
+
 export interface StartEvent {
   sceneIndex?: number;
   startNodeId?: number;
@@ -81,19 +85,21 @@ export interface ReplyEvent {
   text: string;
 }
 
+// Events sent to client
+
 export interface StartTypingEvent {
-  conversationId: string;
+  conversationId: ConversationId;
 }
 
 export interface StopTypingEvent {
-  conversationId: string;
+  conversationId: ConversationId;
 }
 
 export type MessageEvent = {
-  conversationId: string;
+  conversationId: ConversationId;
 } & Message;
 
 export interface SceneCompletedEvent {
-  conversationId: string;
+  conversationId: ConversationId;
   impacts: string[];
 }
