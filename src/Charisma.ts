@@ -96,10 +96,7 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
   public static async createPlaythroughToken(
     options: PlaythroughTokenOptions
   ): Promise<string> {
-    if (
-      (options.version === -1 || options.version === undefined) &&
-      options.userToken === undefined
-    ) {
+    if (options.version === -1 && options.userToken === undefined) {
       throw new Error(
         "To play the draft version (-1) of a story, a `userToken` must also be passed."
       );

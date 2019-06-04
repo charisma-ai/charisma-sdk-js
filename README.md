@@ -56,7 +56,7 @@ Create a new `Charisma` instance to connect to a playthrough and interact with t
 Use this to set up a new playthrough.
 
 - `storyId` (`number`): The `id` of the story that you want to create a new playthrough for. The story must be published, unless a Charisma.ai user token has been passed and the user matches the owner of the story.
-- `version` (`number`, optional): The `version` of the story that you want to create a new playthrough for. If omitted, it will default to the most recent version. To get the debug story, pass `-1`.
+- `version` (`number`, optional): The `version` of the story that you want to create a new playthrough for. If omitted, it will default to the most recent published version. To get the draft version of a story, pass `-1` and a `userToken`.
 - `userToken` (`string`, optional): If the story is unpublished, pass a `userToken` to be able to access your story.
 
 Returns a promise that resolves with the token.
