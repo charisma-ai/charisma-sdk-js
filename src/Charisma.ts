@@ -134,18 +134,6 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
     return conversationId;
   }
 
-  public static async createEpilogueConversation(
-    token: string,
-    epilogueId: number
-  ): Promise<ConversationId> {
-    const { conversationId } = await fetchJson<CreateConversationResult>(
-      `${Charisma.charismaUrl}/play/conversation/epilogue`,
-      { epilogueId },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    return conversationId;
-  }
-
   public static async createCharacterConversation(
     token: string,
     characterId: number
@@ -226,12 +214,6 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
 
   public createConversation(): Promise<ConversationId> {
     return Charisma.createConversation(this.token);
-  }
-
-  public createEpilogueConversation(
-    epilogueId: number
-  ): Promise<ConversationId> {
-    return Charisma.createEpilogueConversation(this.token, epilogueId);
   }
 
   public createCharacterConversation(
