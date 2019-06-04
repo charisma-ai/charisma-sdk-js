@@ -48,7 +48,7 @@
     "rollup-plugin-node-resolve": "^5.0.1",
     "rollup-plugin-uglify": "^6.0.2",
     "semantic-release": "^15.13.12",
-    "typescript": "^3.5.1"
+    "typescript": "~3.4"
   },
   "config": {
     "commitizen": {
