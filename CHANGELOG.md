@@ -1,5 +1,16 @@
 # Changelog
 
+### v1.0.1
+
+- Fix `createPlaythroughToken` throwing an error when both `version` and `userToken` are not provided.
+
+### v1.0.0
+
+- Initial stable release.
+- Completely overhauls the SDK API, please see the [README](./README.md) for more details on how to use the newer, conversation-based API.
+
+## Past major versions
+
 ### v0.9.2
 
 - Pass data (containing `impacts`) through on scene complete event.
