@@ -1,5 +1,9 @@
 # Changelog
 
+### v1.0.2
+
+- Rename `setStopOnSceneEnd` to `setStopOnSceneComplete` to ensure consistency with the event name.
+
 ### v1.0.1
 
 - Fix `createPlaythroughToken` throwing an error when both `version` and `userToken` are not provided.
