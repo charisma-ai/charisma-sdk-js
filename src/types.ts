@@ -99,7 +99,7 @@ export type MessageEvent = {
   conversationId: ConversationId;
 } & Message;
 
-export interface SceneCompletedEvent {
+export interface SceneCompleteEvent {
   conversationId: ConversationId;
   impacts: string[];
 }

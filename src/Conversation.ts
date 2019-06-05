@@ -8,27 +8,27 @@ import {
   MessageEvent,
   StartTypingEvent,
   StopTypingEvent,
-  SceneCompletedEvent
+  SceneCompleteEvent
 } from "./types";
 
 export interface ConversationOptions {
   speechConfig?: SpeechConfig;
-  stopOnSceneEnd?: boolean;
+  stopOnSceneComplete?: boolean;
 }
 
 export type ConversationEvents =
   | "message"
   | "start-typing"
   | "stop-typing"
-  | "scene-completed";
+  | "scene-complete";
 
 export declare interface Conversation {
   on(event: "message", listener: (event: MessageEvent) => void): this;
   on(event: "start-typing", listener: (event: StartTypingEvent) => void): this;
   on(event: "stop-typing", listener: (event: StopTypingEvent) => void): this;
   on(
-    event: "scene-completed",
-    listener: (event: SceneCompletedEvent) => void
+    event: "scene-complete",
+    listener: (event: SceneCompleteEvent) => void
   ): this;
   on(event: string, listener: (...args: any[]) => void): this;
 }
@@ -82,8 +82,8 @@ export class Conversation extends EventEmitter<ConversationEvents> {
     this.options.speechConfig = speechConfig;
   };
 
-  public setStopOnSceneEnd = (stopOnSceneEnd: boolean): void => {
-    this.options.stopOnSceneEnd = stopOnSceneEnd;
+  public setStopOnSceneComplete = (stopOnSceneComplete: boolean): void => {
+    this.options.stopOnSceneComplete = stopOnSceneComplete;
   };
 }
 

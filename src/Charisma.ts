@@ -7,7 +7,7 @@ import {
   StartTypingEvent,
   StopTypingEvent,
   MessageEvent,
-  SceneCompletedEvent,
+  SceneCompleteEvent,
   Mood,
   ConversationId
 } from "./types";
@@ -312,7 +312,7 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
     this.socket.on("start-typing", this.onStartTyping);
     this.socket.on("stop-typing", this.onStopTyping);
     this.socket.on("message", this.onMessage);
-    this.socket.on("scene-completed", this.onSceneCompleted);
+    this.socket.on("scene-complete", this.onSceneComplete);
   };
 
   public cleanup = (): void => {
@@ -360,10 +360,10 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
     }
   };
 
-  private onSceneCompleted = (event: SceneCompletedEvent): void => {
+  private onSceneComplete = (event: SceneCompleteEvent): void => {
     const conversation = this.activeConversations.get(event.conversationId);
     if (conversation) {
-      conversation.emit("scene-completed", event);
+      conversation.emit("scene-complete", event);
     }
   };
 }

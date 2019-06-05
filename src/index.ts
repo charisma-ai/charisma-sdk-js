@@ -20,7 +20,7 @@ export {
   MessageEvent,
   StartTypingEvent,
   StopTypingEvent,
-  SceneCompletedEvent
+  SceneCompleteEvent
 } from "./types";
 
 export { Charisma, Microphone, Speaker };
