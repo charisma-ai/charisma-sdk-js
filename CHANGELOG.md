@@ -1,5 +1,9 @@
 # Changelog
 
+### v1.0.4
+
+- Export the `Impact` type.
+
 ### v1.0.3
 
 - `impacts` are now objects containing their ID as well as the `impact` string.

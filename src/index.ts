@@ -10,6 +10,7 @@ export {
 
 export {
   ConversationId,
+  Impact,
   Mood,
   SpeechConfig,
   SpeechEncoding,
