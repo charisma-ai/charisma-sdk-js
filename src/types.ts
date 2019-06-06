@@ -20,6 +20,11 @@ interface MessagePathItem {
 }
 type MessagePath = MessagePathItem[];
 
+export interface Impact {
+  id: number;
+  impact: string;
+}
+
 export interface MessageCharacter {
   text: string;
   character: {
@@ -39,6 +44,7 @@ export interface MessageCharacter {
     soundBackground: string | null;
     soundEffect: string | null;
   };
+  impact: Impact | null;
 }
 
 export interface MessageMedia {
@@ -101,5 +107,5 @@ export type MessageEvent = {
 
 export interface SceneCompleteEvent {
   conversationId: ConversationId;
-  impacts: string[];
+  impacts: Impact[];
 }

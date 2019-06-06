@@ -1,5 +1,9 @@
 # Changelog
 
+### v1.0.3
+
+- `impacts` are now objects containing their ID as well as the `impact` string.
+
 ### v1.0.2
 
 - Rename `setStopOnSceneEnd` to `setStopOnSceneComplete` to ensure consistency with the event name.
