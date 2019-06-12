@@ -23,12 +23,12 @@
   "dependencies": {
     "@types/socket.io-client": "^1.4.32",
     "eventemitter3": "^3.1.2",
-    "p-queue": "^5.0.0",
+    "p-queue": "^6.0.2",
     "socket.io-client": "^2.2.0"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^1.9.0",
-    "@typescript-eslint/parser": "^1.9.0",
+    "@typescript-eslint/eslint-plugin": "^1.10.2",
+    "@typescript-eslint/parser": "^1.10.2",
     "commitizen": "^3.1.1",
     "cross-env": "^5.2.0",
     "cz-conventional-changelog": "^2.1.0",
@@ -39,16 +39,16 @@
     "eslint-plugin-jsx-a11y": "^6.2.1",
     "eslint-plugin-prettier": "^3.1.0",
     "eslint-plugin-react": "^7.13.0",
-    "husky": "^2.3.0",
-    "lint-staged": "^8.1.7",
-    "prettier": "^1.17.1",
+    "husky": "^2.4.1",
+    "lint-staged": "^8.2.0",
+    "prettier": "^1.18.2",
     "rimraf": "^2.6.3",
-    "rollup": "^1.13.1",
+    "rollup": "^1.15.1",
     "rollup-plugin-commonjs": "^10.0.0",
     "rollup-plugin-node-resolve": "^5.0.1",
     "rollup-plugin-uglify": "^6.0.2",
     "semantic-release": "^15.13.12",
-    "typescript": "~3.4"
+    "typescript": "~3.5.1"
   },
   "config": {
     "commitizen": {
