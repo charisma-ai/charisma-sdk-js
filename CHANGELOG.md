@@ -1,5 +1,9 @@
 # Changelog
 
+### v1.1.0
+
+- Add `createImpactConversation` to create conversations that change impacts.
+
 ### v1.0.4
 
 - Export the `Impact` type.

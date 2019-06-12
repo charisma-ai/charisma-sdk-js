@@ -143,6 +143,18 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
     return conversationId;
   }
 
+  public static async createImpactConversation(
+    token: string,
+    impactId: number
+  ): Promise<ConversationId> {
+    const { conversationId } = await fetchJson<CreateConversationResult>(
+      `${Charisma.charismaUrl}/play/conversation/impact`,
+      { impactId },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    return conversationId;
+  }
+
   public static async getPlaythroughInfo(
     token: string
   ): Promise<GetPlaythroughInfoResult> {
@@ -219,6 +231,10 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
     return Charisma.createCharacterConversation(this.token, characterId);
   }
 
+  public createImpactConversation(impactId: number): Promise<ConversationId> {
+    return Charisma.createImpactConversation(this.token, impactId);
+  }
+
   public getPlaythroughInfo(): Promise<GetPlaythroughInfoResult> {
     return Charisma.getPlaythroughInfo(this.token);
   }
@@ -288,13 +304,11 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
     eventName: string,
     ...eventData: unknown[]
   ): void => {
-    this.eventQueue.add(
-      (): void => {
-        if (this.socket) {
-          this.socket.emit(eventName, ...eventData);
-        }
+    this.eventQueue.add((): void => {
+      if (this.socket) {
+        this.socket.emit(eventName, ...eventData);
       }
-    );
+    });
   };
 
   public connect = (): void => {
