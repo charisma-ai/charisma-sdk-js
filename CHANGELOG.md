@@ -2,6 +2,7 @@
 
 ### v1.1.0
 
+- Add `changeable` and `replacedImpactId` to impact type.
 - Add `createImpactConversation` to create conversations that change impacts.
 
 ### v1.0.4
