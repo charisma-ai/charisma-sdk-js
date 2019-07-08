@@ -5,7 +5,7 @@ import Speaker from "./Speaker";
 export {
   Conversation,
   ConversationOptions,
-  ConversationEvents
+  ConversationEvents,
 } from "./Conversation";
 
 export {
@@ -21,7 +21,7 @@ export {
   MessageEvent,
   StartTypingEvent,
   StopTypingEvent,
-  SceneCompleteEvent
+  SceneCompleteEvent,
 } from "./types";
 
 export { Charisma, Microphone, Speaker };

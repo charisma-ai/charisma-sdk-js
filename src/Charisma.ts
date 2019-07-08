@@ -9,7 +9,7 @@ import {
   MessageEvent,
   SceneCompleteEvent,
   Mood,
-  ConversationId
+  ConversationId,
 } from "./types";
 import Conversation, { ConversationOptions } from "./Conversation";
 
@@ -59,12 +59,12 @@ interface CreateConversationResult {
 const fetchJson = async <T>(
   endpoint: string,
   bodyData: object = {},
-  options: RequestInit = {}
+  options: RequestInit = {},
 ): Promise<T> => {
   const headers = new Headers({
     Accept: "application/json",
     "Content-Type": "application/json",
-    ...(options.headers || {})
+    ...(options.headers || {}),
   });
 
   const response = await fetch(endpoint, {
@@ -72,7 +72,7 @@ const fetchJson = async <T>(
     method: "POST",
     mode: "cors",
     ...options,
-    headers
+    headers,
   });
 
   const data = await response.json();
@@ -94,11 +94,11 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
   public static charismaUrl = "https://api.charisma.ai";
 
   public static async createPlaythroughToken(
-    options: PlaythroughTokenOptions
+    options: PlaythroughTokenOptions,
   ): Promise<string> {
     if (options.version === -1 && options.userToken === undefined) {
       throw new Error(
-        "To play the draft version (-1) of a story, a `userToken` must also be passed."
+        "To play the draft version (-1) of a story, a `userToken` must also be passed.",
       );
     }
     try {
@@ -106,13 +106,13 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
         `${Charisma.charismaUrl}/play/token`,
         {
           storyId: options.storyId,
-          version: options.version
+          version: options.version,
         },
         options.userToken !== undefined
           ? {
-              headers: { Authorization: `Bearer ${options.userToken}` }
+              headers: { Authorization: `Bearer ${options.userToken}` },
             }
-          : undefined
+          : undefined,
       );
       return token;
     } catch (err) {
@@ -121,47 +121,47 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
   }
 
   public static async createConversation(
-    token: string
+    token: string,
   ): Promise<ConversationId> {
     const { conversationId } = await fetchJson<CreateConversationResult>(
       `${Charisma.charismaUrl}/play/conversation`,
       {},
-      { headers: { Authorization: `Bearer ${token}` } }
+      { headers: { Authorization: `Bearer ${token}` } },
     );
     return conversationId;
   }
 
   public static async createCharacterConversation(
     token: string,
-    characterId: number
+    characterId: number,
   ): Promise<ConversationId> {
     const { conversationId } = await fetchJson<CreateConversationResult>(
       `${Charisma.charismaUrl}/play/conversation/character`,
       { characterId },
-      { headers: { Authorization: `Bearer ${token}` } }
+      { headers: { Authorization: `Bearer ${token}` } },
     );
     return conversationId;
   }
 
   public static async createImpactConversation(
     token: string,
-    impactId: number
+    impactId: number,
   ): Promise<ConversationId> {
     const { conversationId } = await fetchJson<CreateConversationResult>(
       `${Charisma.charismaUrl}/play/conversation/impact`,
       { impactId },
-      { headers: { Authorization: `Bearer ${token}` } }
+      { headers: { Authorization: `Bearer ${token}` } },
     );
     return conversationId;
   }
 
   public static async getPlaythroughInfo(
-    token: string
+    token: string,
   ): Promise<GetPlaythroughInfoResult> {
     const result = await fetchJson<GetPlaythroughInfoResult>(
       `${Charisma.charismaUrl}/play/playthrough-info`,
       {},
-      { headers: { Authorization: `Bearer ${token}` }, method: "GET" }
+      { headers: { Authorization: `Bearer ${token}` }, method: "GET" },
     );
     return result;
   }
@@ -169,7 +169,7 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
   public static async setMood(
     token: string,
     characterIdOrName: number | string,
-    modifier: Partial<Mood>
+    modifier: Partial<Mood>,
   ): Promise<SetMoodResult> {
     const result = await fetchJson<SetMoodResult>(
       `${Charisma.charismaUrl}/play/set-mood`,
@@ -177,9 +177,9 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
         ...(typeof characterIdOrName === "number"
           ? { characterId: characterIdOrName }
           : { characterName: characterIdOrName }),
-        modifier
+        modifier,
       },
-      { headers: { Authorization: `Bearer ${token}` } }
+      { headers: { Authorization: `Bearer ${token}` } },
     );
     return result;
   }
@@ -187,7 +187,7 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
   public static async setMemory(
     token: string,
     memoryIdOrRecallValue: number | string,
-    saveValue: string
+    saveValue: string,
   ): Promise<void> {
     await fetchJson<void>(
       `${Charisma.charismaUrl}/play/set-memory`,
@@ -195,9 +195,9 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
         ...(typeof memoryIdOrRecallValue === "number"
           ? { memoryId: memoryIdOrRecallValue }
           : { memoryRecallValue: memoryIdOrRecallValue }),
-        saveValue
+        saveValue,
       },
-      { headers: { Authorization: `Bearer ${token}` } }
+      { headers: { Authorization: `Bearer ${token}` } },
     );
   }
 
@@ -226,7 +226,7 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
   }
 
   public createCharacterConversation(
-    characterId: number
+    characterId: number,
   ): Promise<ConversationId> {
     return Charisma.createCharacterConversation(this.token, characterId);
   }
@@ -241,26 +241,26 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
 
   public setMemory(
     memoryIdOrRecallValue: number | string,
-    saveValue: string
+    saveValue: string,
   ): Promise<void> {
     return Charisma.setMemory(this.token, memoryIdOrRecallValue, saveValue);
   }
 
   public setMood(
     characterIdOrName: number | string,
-    modifier: Mood
+    modifier: Mood,
   ): Promise<SetMoodResult> {
     return Charisma.setMood(this.token, characterIdOrName, modifier);
   }
 
   public joinConversation = (
     conversationId: ConversationId,
-    options?: ConversationOptions
+    options?: ConversationOptions,
   ): Conversation => {
     const conversation = new Conversation(conversationId, this, options);
     if (this.activeConversations.has(conversationId)) {
       throw new Error(
-        `The conversation with id \`${conversationId}\` has already been joined.`
+        `The conversation with id \`${conversationId}\` has already been joined.`,
       );
     }
     this.activeConversations.set(conversationId, conversation);
@@ -268,7 +268,7 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
   };
 
   public joinConversations = (
-    conversations: ConversationToJoin[]
+    conversations: ConversationToJoin[],
   ): Promise<Conversation[]> => {
     return Promise.all(
       conversations.map(
@@ -278,24 +278,24 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
           }
           return this.joinConversation(
             conversation.conversationId,
-            conversation.options
+            conversation.options,
           );
-        }
-      )
+        },
+      ),
     );
   };
 
   public leaveConversation = (conversationId: ConversationId): void => {
     if (!this.activeConversations.has(conversationId)) {
       throw new Error(
-        `The conversation with id \`${conversationId}\` has not been joined, so cannot be left.`
+        `The conversation with id \`${conversationId}\` has not been joined, so cannot be left.`,
       );
     }
     this.activeConversations.delete(conversationId);
   };
 
   public getConversation = (
-    conversationId: ConversationId
+    conversationId: ConversationId,
   ): Conversation | undefined => {
     return this.activeConversations.get(conversationId);
   };
@@ -315,7 +315,7 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
     this.socket = io(`${this.charismaUrl}/play`, {
       query: { token: this.token },
       transports: ["websocket"],
-      upgrade: false
+      upgrade: false,
     });
 
     this.socket.on("connect", this.onConnect);

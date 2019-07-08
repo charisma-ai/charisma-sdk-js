@@ -8,7 +8,7 @@ import {
   MessageEvent,
   StartTypingEvent,
   StopTypingEvent,
-  SceneCompleteEvent
+  SceneCompleteEvent,
 } from "./types";
 
 export interface ConversationOptions {
@@ -28,7 +28,7 @@ export declare interface Conversation {
   on(event: "stop-typing", listener: (event: StopTypingEvent) => void): this;
   on(
     event: "scene-complete",
-    listener: (event: SceneCompleteEvent) => void
+    listener: (event: SceneCompleteEvent) => void,
   ): this;
   on(event: string, listener: (...args: any[]) => void): this;
 }
@@ -43,7 +43,7 @@ export class Conversation extends EventEmitter<ConversationEvents> {
   public constructor(
     conversationId: number,
     charismaInstance: Charisma,
-    options?: ConversationOptions
+    options?: ConversationOptions,
   ) {
     super();
 
@@ -59,7 +59,7 @@ export class Conversation extends EventEmitter<ConversationEvents> {
     return this.charismaInstance.addOutgoingEvent("start", {
       ...this.options,
       ...event,
-      conversationId: this.id
+      conversationId: this.id,
     });
   };
 
@@ -67,14 +67,14 @@ export class Conversation extends EventEmitter<ConversationEvents> {
     return this.charismaInstance.addOutgoingEvent("reply", {
       ...this.options,
       ...event,
-      conversationId: this.id
+      conversationId: this.id,
     });
   };
 
   public tap = (): void => {
     return this.charismaInstance.addOutgoingEvent("tap", {
       ...this.options,
-      conversationId: this.id
+      conversationId: this.id,
     });
   };
 
