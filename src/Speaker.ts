@@ -23,7 +23,7 @@ class Speaker {
       throw new Error("AudioContext isn't supported in this browser.");
     }
 
-    const audioContext = new AudioContext();
+    const audioContext = new AudioContextClass();
     this.audioContext = audioContext;
     return audioContext;
   };
@@ -33,17 +33,13 @@ class Speaker {
     const arrayBuffer = new Uint8Array(audio).buffer;
     const source = audioContext.createBufferSource();
     source.connect(audioContext.destination);
-    source.buffer = await new Promise(
-      (resolve, reject): void => {
-        audioContext.decodeAudioData(arrayBuffer, resolve, reject);
-      }
-    );
-    return new Promise(
-      (resolve): void => {
-        source.onended = (): void => resolve();
-        source.start();
-      }
-    );
+    source.buffer = await new Promise((resolve, reject): void => {
+      audioContext.decodeAudioData(arrayBuffer, resolve, reject);
+    });
+    return new Promise((resolve): void => {
+      source.onended = (): void => resolve();
+      source.start();
+    });
   };
 }
 
