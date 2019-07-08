@@ -23,8 +23,6 @@ type MessagePath = MessagePathItem[];
 export interface Impact {
   id: number;
   impact: string;
-  changeable?: boolean;
-  replacedImpactId: number | null;
 }
 
 export interface MessageCharacter {

@@ -1,9 +1,8 @@
 # Changelog
 
-### v1.1.0
+### v1.0.5
 
-- Add `changeable` and `replacedImpactId` to impact type.
-- Add `createImpactConversation` to create conversations that change impacts.
+- Use `webkitAudioContext` for `Speaker` on Safari.
 
 ### v1.0.4
 
