@@ -78,6 +78,13 @@ export class Conversation extends EventEmitter<ConversationEvents> {
     });
   };
 
+  public resume = (): void => {
+    return this.charismaInstance.addOutgoingEvent("resume", {
+      ...this.options,
+      conversationId: this.id,
+    });
+  };
+
   public setSpeechConfig = (speechConfig: SpeechConfig | undefined): void => {
     this.options.speechConfig = speechConfig;
   };

@@ -1,5 +1,9 @@
 # Changelog
 
+### v1.1.0
+
+- Add `resume` event to SDK. This can be used to resume a conversation from where it left off.
+
 ### v1.0.5
 
 - Use `webkitAudioContext` for `Speaker` on Safari.
