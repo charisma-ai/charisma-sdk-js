@@ -13,16 +13,16 @@ export default [
       file: "dist/umd/index.js",
       format: "umd",
       name: "CharismaSDK",
-      sourcemap: true
+      sourcemap: true,
     },
     plugins: [
       resolve({
-        browser: true
+        browser: true,
       }),
       commonjs({
-        include: /node_modules/
-      })
-    ]
+        include: /node_modules/,
+      }),
+    ],
   },
   {
     input,
@@ -32,15 +32,15 @@ export default [
         exports: "named",
         file: pkg.module,
         format: "es",
-        sourcemap: true
+        sourcemap: true,
       },
       {
         exports: "named",
         file: pkg.main,
         format: "cjs",
-        sourcemap: true
-      }
+        sourcemap: true,
+      },
     ],
-    plugins: [resolve()]
-  }
+    plugins: [resolve()],
+  },
 ];

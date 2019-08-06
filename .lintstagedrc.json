@@ -1,6 +1,4 @@
 {
-  "linters": {
-    "src/**/*.ts": ["eslint --fix", "git add"],
-    "*.md": ["prettier --single-quote --trailing-comma all --write", "git add"]
-  }
+  "src/**/*.ts": ["eslint --fix", "git add"],
+  "*.md": ["prettier --single-quote --trailing-comma all --write", "git add"]
 }

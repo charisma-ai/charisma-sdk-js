@@ -16,7 +16,6 @@
     "cm": "git-cz",
     "lint": "tslint src/*.ts",
     "prebuild": "rimraf dist",
-    "precommit": "lint-staged",
     "prepublish": "yarn run build",
     "semantic-release": "semantic-release"
   },
