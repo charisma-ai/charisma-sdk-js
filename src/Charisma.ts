@@ -189,6 +189,17 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
     );
   }
 
+  public static async restartFromScene(
+    token: string,
+    sceneId: number,
+  ): Promise<void> {
+    await fetchJson<void>(
+      `${Charisma.charismaUrl}/play/restart-from-scene`,
+      { sceneId },
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
+  }
+
   private eventQueue: PQueue = new PQueue({ autoStart: false });
 
   private token: string;
@@ -235,6 +246,10 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
     modifier: Mood,
   ): Promise<SetMoodResult> {
     return Charisma.setMood(this.token, characterIdOrName, modifier);
+  }
+
+  public restartFromScene(sceneId: number): Promise<void> {
+    return Charisma.restartFromScene(this.token, sceneId);
   }
 
   public joinConversation = (
