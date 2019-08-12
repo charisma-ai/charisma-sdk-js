@@ -75,7 +75,14 @@ const fetchJson = async <T>(
     headers,
   });
 
-  const data = await response.json();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let data: any = {};
+  try {
+    data = await response.json();
+  } catch (err) {
+    // Some endpoints just return a status code and no JSON body data.
+  }
+
   if (!response.ok) {
     throw new Error(data.error);
   }
