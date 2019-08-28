@@ -8,20 +8,6 @@ export {
   ConversationEvents,
 } from "./Conversation";
 
-export {
-  ConversationId,
-  Impact,
-  Mood,
-  SpeechConfig,
-  SpeechEncoding,
-  SpeechOutput,
-  Message,
-  StartEvent,
-  ReplyEvent,
-  MessageEvent,
-  StartTypingEvent,
-  StopTypingEvent,
-  SceneCompleteEvent,
-} from "./types";
+export * from "./types";
 
 export { Charisma, Microphone, Speaker };

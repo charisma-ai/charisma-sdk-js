@@ -14,36 +14,44 @@ export interface Mood {
   fearlessness: number;
 }
 
-interface MessagePathItem {
+export interface MessagePathItem {
   id: number;
   type: "node" | "edge";
 }
-type MessagePath = MessagePathItem[];
+export type MessagePath = MessagePathItem[];
 
 export interface Impact {
   id: number;
   impact: string;
 }
 
+export interface Metadata {
+  [key: string]: string | undefined;
+}
+
+export interface Character {
+  id: number;
+  name: string;
+  avatar: string | null;
+}
+
+export interface Speech {
+  audio: { data: number[]; type: "Buffer" } | string;
+  duration: number;
+}
+
+export interface Media {
+  imageLayers: (string | null)[];
+  soundBackground: string | null;
+  soundEffect: string | null;
+}
+
 export interface MessageCharacter {
   text: string;
-  character: {
-    id: number;
-    name: string;
-    avatar: string | null;
-  } | null;
-  metadata: {
-    [key: string]: string;
-  };
-  speech: {
-    audio: { data: number[]; type: "Buffer" } | string;
-    duration: number;
-  } | null;
-  media: {
-    imageLayers: (string | null)[];
-    soundBackground: string | null;
-    soundEffect: string | null;
-  };
+  character: Character | null;
+  metadata: Metadata;
+  speech: Speech | null;
+  media: Media;
   impact: Impact | null;
 }
 
@@ -58,13 +66,22 @@ export interface CharacterMood {
   mood: Mood;
 }
 
+export interface Memory {
+  id: number;
+  recallValue: string;
+  saveValue: string | null;
+}
+
 interface GenericMessage<T extends string, S> {
   type: T;
   message: S;
+  eventId: number;
+  timestamp: number;
   endStory: boolean;
   tapToContinue: boolean;
   path: MessagePath;
   characterMoods: CharacterMood[];
+  memories: Memory[];
 }
 
 export type Message =

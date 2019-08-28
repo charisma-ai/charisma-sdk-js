@@ -1,8 +1,9 @@
 # Changelog
 
-### v1.2.0-alpha.1
+### v1.2.0
 
 - Add `restartFromScene` method to SDK. This can be used to reset the playthrough to the state it was in at the beginning of a particular scene.
+- Exports more types and adjusts message types to include `eventId`, `timestamp` and `memories`.
 
 ### v1.1.0
 
