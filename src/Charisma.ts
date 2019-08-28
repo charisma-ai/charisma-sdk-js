@@ -211,7 +211,7 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
 
   private token: string;
 
-  private charismaUrl: string = "https://api.charisma.ai";
+  private charismaUrl = "https://api.charisma.ai";
 
   private socket: SocketIOClient.Socket | undefined;
 
