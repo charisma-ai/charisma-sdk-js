@@ -2,7 +2,8 @@
 
 ### v1.3.0
 
-- Add an `interrupt` option to `Speaker` to ensure two replies don't play over each other.
+- Add an `interrupt` option to `Speaker` to ensure replies don't overlap.
+- **Breaking**: Target ES2018; drop support for pre-ES2018 environments.
 
 ### v1.2.0
 
