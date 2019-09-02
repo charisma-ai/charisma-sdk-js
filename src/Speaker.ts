@@ -12,6 +12,8 @@ declare const window: WindowWithAudioContext;
 class Speaker {
   private audioContext: AudioContext | undefined;
 
+  private currentSource: AudioBufferSourceNode | undefined;
+
   private getAudioContext = (): AudioContext => {
     if (this.audioContext) {
       return this.audioContext;
@@ -28,7 +30,7 @@ class Speaker {
     return audioContext;
   };
 
-  public play = async (audio: number[]): Promise<void> => {
+  public play = async (audio: number[], interrupt = false): Promise<void> => {
     const audioContext = this.getAudioContext();
     const arrayBuffer = new Uint8Array(audio).buffer;
     const source = audioContext.createBufferSource();
@@ -38,6 +40,10 @@ class Speaker {
     });
     return new Promise((resolve): void => {
       source.onended = (): void => resolve();
+      if (this.currentSource && interrupt) {
+        this.currentSource.stop();
+      }
+      this.currentSource = source;
       source.start();
     });
   };

@@ -1,5 +1,9 @@
 # Changelog
 
+### v1.3.0
+
+- Add an `interrupt` option to `Speaker` to ensure two replies don't play over each other.
+
 ### v1.2.0
 
 - Add `restartFromScene` method to SDK. This can be used to reset the playthrough to the state it was in at the beginning of a particular scene.
