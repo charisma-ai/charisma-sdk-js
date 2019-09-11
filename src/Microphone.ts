@@ -11,16 +11,25 @@ interface WindowWithSpeechRecognition extends Window {
 
 declare const window: WindowWithSpeechRecognition;
 
-type MicrophoneEvents = "recognise" | "recognise-interim";
+type MicrophoneEvents =
+  | "recognise"
+  | "recognise-interim"
+  | "timeout"
+  | "start"
+  | "stop";
 
 declare interface Microphone {
   on(event: "recognise", listener: (result: string) => void): this;
   on(event: "recognise-interim", listener: (result: string) => void): this;
-  on(event: string, listener: (...args: any[]) => void): this;
+  on(event: "timeout", listener: () => void): this;
+  on(event: "start", listener: () => void): this;
+  on(event: "stop", listener: () => void): this;
 }
 
 class Microphone extends EventEmitter<MicrophoneEvents> {
   private stream: SpeechRecognition | undefined;
+
+  private timeoutId: number | undefined;
 
   private createStream = (): SpeechRecognition => {
     if (this.stream) {
@@ -42,29 +51,57 @@ class Microphone extends EventEmitter<MicrophoneEvents> {
     return stream;
   };
 
-  public startListening = (): void => {
+  public startListening = (timeout?: number): void => {
+    if (this.timeoutId !== undefined) {
+      clearTimeout(this.timeoutId);
+    }
+
     const stream = this.createStream();
 
     stream.onresult = this.onStreamResult;
     stream.onend = (): void => stream.start();
     try {
+      this.emit("start");
       stream.start();
     } catch (err) {
       // this is fine, it just means we tried to start/stop a stream when it was already started/stopped
     }
+
+    if (timeout !== undefined) {
+      this.timeoutId = window.setTimeout(this.onTimeout, timeout);
+    }
   };
 
   public stopListening = (): void => {
+    if (this.timeoutId !== undefined) {
+      clearTimeout(this.timeoutId);
+    }
+
     const { stream } = this;
     if (stream) {
       stream.onresult = (): void => {};
       stream.onend = (): void => {};
       try {
+        this.emit("stop");
         stream.abort();
       } catch (err) {
         // this is fine, it just means we tried to start/stop a stream when it was already started/stopped
       }
     }
+  };
+
+  public resetTimeout = (timeout: number): void => {
+    if (this.timeoutId !== undefined) {
+      clearTimeout(this.timeoutId);
+    }
+
+    this.timeoutId = window.setTimeout(this.onTimeout, timeout);
+  };
+
+  private onTimeout = (): void => {
+    this.timeoutId = undefined;
+    this.emit("timeout");
+    this.stopListening();
   };
 
   private onStreamResult = (event: SpeechRecognitionEvent): void => {

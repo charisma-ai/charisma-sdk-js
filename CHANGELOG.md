@@ -1,5 +1,11 @@
 # Changelog
 
+### v1.4.0
+
+- `Microphone.startListening(timeout)` now has a timeout parameter to automatically stop the microphone after `timeout` milliseconds.
+  - `Microphone.resetTimeout(timeout)` will reset the timeout to `timeout` milliseconds.
+- Microphone now emits `start` and `stop` events, particularly useful in conjuction with timeout.
+
 ### v1.3.0
 
 - Add an `interrupt` option to `Speaker` to ensure replies don't overlap.

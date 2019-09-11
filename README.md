@@ -85,10 +85,10 @@ This makes the `Charisma` instance listen out for events for a particular conver
 
 - `conversationId` (`string`): The conversation id generated with `Charisma.createConversation`.
 
-Returns a `Conversation`, which can.
+Returns a `Conversation`, which can be used to send and receive events bound to that conversation.
 
 ```js
-await Charisma.joinConversation(conversationId);
+Charisma.joinConversation(conversationId);
 ```
 
 #### Charisma.connect
@@ -181,7 +181,7 @@ This sets whether the conversation should stop on scene complete, or automatical
 
 ## Microphone
 
-The microphone can be used to provide speech-to-text functionality.
+The microphone can be used to provide speech-to-text functionality. **This is only available in browsers that support `SpeechRecognition`, currently Google Chrome only.**
 
 ```js
 const microphone = new Microphone();
@@ -195,15 +195,33 @@ To be used in conjunction with speech recognition (see below).
 
 To be used in conjunction with speech recognition (see below).
 
-#### microphone.startListening()
+#### microphone.on('start', () => { ... })
 
-Starts browser speech recognition (Google Chrome only). The microphone will then emit `recognise-interim` (player hasn't finished speaking, this is the current best guess) and `recognise` (player has finished speaking and we're confident about the result) events.
+Emitted when the microphone is manually started via `startListening`.
+
+#### microphone.on('stop', () => { ... })
+
+Emitted when the microphone is either manually stopped via `stopListening` or automatically stopped after a timeout.
+
+#### microphone.on('timeout', () => { ... })
+
+Emitted when the microphone is automatically stopped after a timeout.
+
+#### microphone.startListening(timeout?: number)
+
+Starts browser speech recognition. The microphone will then emit `recognise-interim` (player hasn't finished speaking, this is the current best guess) and `recognise` (player has finished speaking and we're confident about the result) events.
 
 The speech recognition will _NOT_ automatically pause when a character is speaking via `charisma.speak`.
 
+A timeout can optionally be passed, which will automatically stop the microphone after `timeout` milliseconds.
+
 #### microphone.stopListening()
 
-Stops browser speech recognition (Google Chrome only).
+Stops browser speech recognition.
+
+#### microphone.resetTimeout(timeout: number)
+
+Resets the microphone timeout to `timeout` milliseconds.
 
 ## Speaker
 
