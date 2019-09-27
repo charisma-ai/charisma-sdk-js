@@ -1,6 +1,7 @@
 import EventEmitter from "eventemitter3";
 import PQueue from "p-queue";
 import io from "socket.io-client";
+import fetch from "unfetch";
 
 import {
   SpeechConfig,
@@ -61,11 +62,11 @@ const fetchJson = async <T>(
   bodyData: object = {},
   options: RequestInit = {},
 ): Promise<T> => {
-  const headers = new Headers({
+  const headers = {
     Accept: "application/json",
     "Content-Type": "application/json",
     ...(options.headers || {}),
-  });
+  };
 
   const response = await fetch(endpoint, {
     body: JSON.stringify(bodyData),

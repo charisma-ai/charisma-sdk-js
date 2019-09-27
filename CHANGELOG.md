@@ -1,5 +1,9 @@
 # Changelog
 
+### v1.5.0-alpha.1
+
+- Adds support for use in Node.js.
+
 ### v1.4.0
 
 - `Microphone.startListening(timeout)` now has a timeout parameter to automatically stop the microphone after `timeout` milliseconds.
