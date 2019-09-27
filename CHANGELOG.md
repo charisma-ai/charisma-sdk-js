@@ -1,6 +1,6 @@
 # Changelog
 
-### v1.5.0-alpha.1
+### v1.5.0
 
 - Adds support for use in Node.js.
 
