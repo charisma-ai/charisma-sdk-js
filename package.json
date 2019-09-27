@@ -23,9 +23,9 @@
     "@types/node-fetch": "^2.5.2",
     "@types/socket.io-client": "^1.4.32",
     "eventemitter3": "^4.0.0",
+    "isomorphic-unfetch": "^3.0.0",
     "p-queue": "^6.1.1",
-    "socket.io-client": "^2.2.0",
-    "unfetch": "^4.1.0"
+    "socket.io-client": "^2.2.0"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^2.2.0",
