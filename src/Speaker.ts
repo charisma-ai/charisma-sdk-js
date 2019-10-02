@@ -1,3 +1,5 @@
+import EventEmitter from "eventemitter3";
+
 interface Constructable<T> {
   new (): T;
 }
@@ -9,10 +11,17 @@ interface WindowWithAudioContext extends Window {
 
 declare const window: WindowWithAudioContext;
 
-class Speaker {
+type SpeakerEvents = "start" | "stop";
+
+declare interface Speaker {
+  on(event: "start", listener: () => void): this;
+  on(event: "stop", listener: () => void): this;
+}
+
+class Speaker extends EventEmitter<SpeakerEvents> {
   private audioContext: AudioContext | undefined;
 
-  private currentSource: AudioBufferSourceNode | undefined;
+  private currentSources: AudioBufferSourceNode[] = [];
 
   private getAudioContext = (): AudioContext => {
     if (this.audioContext) {
@@ -39,11 +48,22 @@ class Speaker {
       audioContext.decodeAudioData(arrayBuffer, resolve, reject);
     });
     return new Promise((resolve): void => {
-      source.onended = (): void => resolve();
-      if (this.currentSource && interrupt) {
-        this.currentSource.stop();
+      source.onended = (): void => {
+        resolve();
+        this.currentSources = this.currentSources.filter(
+          currentSource => currentSource !== source,
+        );
+        if (this.currentSources.length === 0) {
+          this.emit("stop");
+        }
+      };
+      if (this.currentSources.length > 0 && interrupt) {
+        this.currentSources.map(currentSource => currentSource.stop());
       }
-      this.currentSource = source;
+      if (this.currentSources.length === 0) {
+        this.emit("start");
+      }
+      this.currentSources.push(source);
       source.start();
     });
   };

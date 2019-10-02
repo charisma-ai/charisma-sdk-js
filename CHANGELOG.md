@@ -1,5 +1,9 @@
 # Changelog
 
+### v1.6.0
+
+- Add `start` and `stop` events to `Speaker`.
+
 ### v1.5.0
 
 - Adds support for use in Node.js.

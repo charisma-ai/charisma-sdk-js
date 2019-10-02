@@ -231,21 +231,31 @@ The speaker can be used to provide text-to-speech functionality.
 const speaker = new Speaker();
 ```
 
-#### speaker.play(data)
+#### speaker.play(data, interrupt)
 
 Typically, you would want to use this in combination with a `message` conversation handler. You may also wish to pause the microphone while this happens.
 
 Returns a Promise that resolves once the speech has ended.
 
+`interrupt` is a boolean used to interrupt (stop playing) all currently playing audio before starting the audio passed into `play`.
+
 ```js
 conversation.on('message', async data => {
   if (data.message.speech) {
     microphone.stopListening();
-    await speaker.play(data.message.speech.audio.data);
+    await speaker.play(data.message.speech.audio.data, true);
     microphone.startListening();
   }
 });
 ```
+
+#### speaker.on('start', () => { ... })
+
+Emitted when the speaker starts playing any audio.
+
+#### speaker.on('stop', () => { ... })
+
+Emitted when the speaker finishes playing all audio.
 
 ### Questions
 
