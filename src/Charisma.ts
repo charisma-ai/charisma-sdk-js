@@ -57,24 +57,24 @@ interface CreateConversationResult {
   conversationId: ConversationId;
 }
 
-const fetchJson = async <T>(
+const fetchHelper = async <T>(
   endpoint: string,
-  bodyData: object = {},
   options: RequestInit = {},
 ): Promise<T> => {
-  const headers = {
+  // Always default to `Accept: application/json`
+  let headers: Record<string, string> = {
     Accept: "application/json",
-    "Content-Type": "application/json",
-    ...(options.headers || {}),
+    ...(options.headers as Record<string, string>),
   };
+  if (
+    typeof options.method === "string" &&
+    options.method.toLowerCase() === "post"
+  ) {
+    // If it's a POST method, default to `Content-Type: application/json` for the body
+    headers = { "Content-Type": "application/json", ...headers };
+  }
 
-  const response = await fetch(endpoint, {
-    body: JSON.stringify(bodyData),
-    method: "POST",
-    mode: "cors",
-    ...options,
-    headers,
-  });
+  const response = await fetch(endpoint, { mode: "cors", ...options, headers });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let data: any = {};
@@ -110,17 +110,19 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
       );
     }
     try {
-      const { token } = await fetchJson<{ token: string }>(
+      const { token } = await fetchHelper<{ token: string }>(
         `${Charisma.charismaUrl}/play/token`,
         {
-          storyId: options.storyId,
-          version: options.version,
+          body: JSON.stringify({
+            storyId: options.storyId,
+            version: options.version,
+          }),
+          headers:
+            options.userToken !== undefined
+              ? { Authorization: `Bearer ${options.userToken}` }
+              : undefined,
+          method: "POST",
         },
-        options.userToken !== undefined
-          ? {
-              headers: { Authorization: `Bearer ${options.userToken}` },
-            }
-          : undefined,
       );
       return token;
     } catch (err) {
@@ -131,10 +133,13 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
   public static async createConversation(
     token: string,
   ): Promise<ConversationId> {
-    const { conversationId } = await fetchJson<CreateConversationResult>(
+    const { conversationId } = await fetchHelper<CreateConversationResult>(
       `${Charisma.charismaUrl}/play/conversation`,
-      {},
-      { headers: { Authorization: `Bearer ${token}` } },
+      {
+        body: JSON.stringify({}),
+        headers: { Authorization: `Bearer ${token}` },
+        method: "POST",
+      },
     );
     return conversationId;
   }
@@ -143,10 +148,13 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
     token: string,
     characterId: number,
   ): Promise<ConversationId> {
-    const { conversationId } = await fetchJson<CreateConversationResult>(
+    const { conversationId } = await fetchHelper<CreateConversationResult>(
       `${Charisma.charismaUrl}/play/conversation/character`,
-      { characterId },
-      { headers: { Authorization: `Bearer ${token}` } },
+      {
+        body: JSON.stringify({ characterId }),
+        headers: { Authorization: `Bearer ${token}` },
+        method: "POST",
+      },
     );
     return conversationId;
   }
@@ -154,10 +162,12 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
   public static async getPlaythroughInfo(
     token: string,
   ): Promise<GetPlaythroughInfoResult> {
-    const result = await fetchJson<GetPlaythroughInfoResult>(
+    const result = await fetchHelper<GetPlaythroughInfoResult>(
       `${Charisma.charismaUrl}/play/playthrough-info`,
-      {},
-      { headers: { Authorization: `Bearer ${token}` }, method: "GET" },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        method: "GET",
+      },
     );
     return result;
   }
@@ -167,15 +177,18 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
     characterIdOrName: number | string,
     modifier: Partial<Mood>,
   ): Promise<SetMoodResult> {
-    const result = await fetchJson<SetMoodResult>(
+    const result = await fetchHelper<SetMoodResult>(
       `${Charisma.charismaUrl}/play/set-mood`,
       {
-        ...(typeof characterIdOrName === "number"
-          ? { characterId: characterIdOrName }
-          : { characterName: characterIdOrName }),
-        modifier,
+        body: JSON.stringify({
+          ...(typeof characterIdOrName === "number"
+            ? { characterId: characterIdOrName }
+            : { characterName: characterIdOrName }),
+          modifier,
+        }),
+        headers: { Authorization: `Bearer ${token}` },
+        method: "POST",
       },
-      { headers: { Authorization: `Bearer ${token}` } },
     );
     return result;
   }
@@ -185,27 +198,27 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
     memoryIdOrRecallValue: number | string,
     saveValue: string,
   ): Promise<void> {
-    await fetchJson<void>(
-      `${Charisma.charismaUrl}/play/set-memory`,
-      {
+    await fetchHelper<void>(`${Charisma.charismaUrl}/play/set-memory`, {
+      body: JSON.stringify({
         ...(typeof memoryIdOrRecallValue === "number"
           ? { memoryId: memoryIdOrRecallValue }
           : { memoryRecallValue: memoryIdOrRecallValue }),
         saveValue,
-      },
-      { headers: { Authorization: `Bearer ${token}` } },
-    );
+      }),
+      headers: { Authorization: `Bearer ${token}` },
+      method: "POST",
+    });
   }
 
   public static async restartFromScene(
     token: string,
     sceneId: number,
   ): Promise<void> {
-    await fetchJson<void>(
-      `${Charisma.charismaUrl}/play/restart-from-scene`,
-      { sceneId },
-      { headers: { Authorization: `Bearer ${token}` } },
-    );
+    await fetchHelper<void>(`${Charisma.charismaUrl}/play/restart-from-scene`, {
+      body: JSON.stringify({ sceneId }),
+      headers: { Authorization: `Bearer ${token}` },
+      method: "POST",
+    });
   }
 
   private eventQueue: PQueue = new PQueue({ autoStart: false });

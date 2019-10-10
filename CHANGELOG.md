@@ -1,5 +1,9 @@
 # Changelog
 
+### v1.6.1
+
+- GET requests no longer try to add a body to the request.
+
 ### v1.6.0
 
 - Add `start` and `stop` events to `Speaker`.
