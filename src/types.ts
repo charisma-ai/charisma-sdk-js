@@ -122,7 +122,7 @@ export type MessageEvent = {
   conversationId: ConversationId;
 } & Message;
 
-export interface SceneCompleteEvent {
+export interface EpisodeCompleteEvent {
   conversationId: ConversationId;
   impacts: Impact[];
 }

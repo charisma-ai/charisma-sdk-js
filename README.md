@@ -175,10 +175,6 @@ This sets the speech configuration to use for all events in the conversation unt
 
 `output` determines whether the speech received back is a `buffer` (a byte array) or whether it should instead be a `url` pointing to the audio file.
 
-#### conversation.setStopOnSceneComplete(stopOnSceneComplete)
-
-This sets whether the conversation should stop on scene complete, or automatically continue to the next scene. By default, it is `false`, so automatically continues.
-
 ## Microphone
 
 The microphone can be used to provide speech-to-text functionality. **This is only available in browsers that support `SpeechRecognition`, currently Google Chrome only.**

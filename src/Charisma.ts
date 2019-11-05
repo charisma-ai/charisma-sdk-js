@@ -8,7 +8,7 @@ import {
   StartTypingEvent,
   StopTypingEvent,
   MessageEvent,
-  SceneCompleteEvent,
+  EpisodeCompleteEvent,
   Mood,
   ConversationId,
 } from "./types";
@@ -221,6 +221,20 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
     });
   }
 
+  public static async restartFromEpisode(
+    token: string,
+    episodeId: number,
+  ): Promise<void> {
+    await fetchHelper<void>(
+      `${Charisma.charismaUrl}/play/restart-from-episode`,
+      {
+        body: JSON.stringify({ episodeId }),
+        headers: { Authorization: `Bearer ${token}` },
+        method: "POST",
+      },
+    );
+  }
+
   private eventQueue: PQueue = new PQueue({ autoStart: false });
 
   private token: string;
@@ -271,6 +285,10 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
 
   public restartFromScene(sceneId: number): Promise<void> {
     return Charisma.restartFromScene(this.token, sceneId);
+  }
+
+  public restartFromEpisode(episodeId: number): Promise<void> {
+    return Charisma.restartFromEpisode(this.token, episodeId);
   }
 
   public joinConversation = (
@@ -346,7 +364,7 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
     this.socket.on("start-typing", this.onStartTyping);
     this.socket.on("stop-typing", this.onStopTyping);
     this.socket.on("message", this.onMessage);
-    this.socket.on("scene-complete", this.onSceneComplete);
+    this.socket.on("episode-complete", this.onEpisodeComplete);
   };
 
   public cleanup = (): void => {
@@ -394,10 +412,10 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
     }
   };
 
-  private onSceneComplete = (event: SceneCompleteEvent): void => {
+  private onEpisodeComplete = (event: EpisodeCompleteEvent): void => {
     const conversation = this.activeConversations.get(event.conversationId);
     if (conversation) {
-      conversation.emit("scene-complete", event);
+      conversation.emit("episode-complete", event);
     }
   };
 }

@@ -1,5 +1,11 @@
 # Changelog
 
+### v1.7.0
+
+- Removes `scene-complete` event and `stopOnSceneComplete` option.
+- Adds `episode-complete` event. The chat engine automatically stops on episode end if the episode is started by an app user.
+- Adds `restartFromEpisode` method, to be used similarly to `restartFromScene`.
+
 ### v1.6.1
 
 - GET requests no longer try to add a body to the request.
