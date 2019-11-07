@@ -20,36 +20,35 @@
     "semantic-release": "semantic-release"
   },
   "dependencies": {
-    "@types/node-fetch": "^2.5.2",
+    "@types/node-fetch": "^2.5.3",
     "@types/socket.io-client": "^1.4.32",
     "eventemitter3": "^4.0.0",
     "isomorphic-unfetch": "^3.0.0",
-    "p-queue": "^6.1.1",
-    "socket.io-client": "^2.2.0"
+    "p-queue": "^6.2.0",
+    "socket.io-client": "^2.3.0"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^2.2.0",
-    "@typescript-eslint/parser": "^2.2.0",
+    "@typescript-eslint/eslint-plugin": "^2.6.1",
+    "@typescript-eslint/parser": "^2.6.1",
     "commitizen": "^4.0.3",
-    "cross-env": "^5.2.1",
+    "cross-env": "^6.0.3",
     "cz-conventional-changelog": "^3.0.2",
-    "eslint": "^6.3.0",
+    "eslint": "^6.6.0",
     "eslint-config-airbnb-base": "^14.0.0",
-    "eslint-config-prettier": "^6.3.0",
+    "eslint-config-prettier": "^6.5.0",
     "eslint-plugin-import": "^2.18.2",
     "eslint-plugin-jsx-a11y": "^6.2.3",
-    "eslint-plugin-prettier": "^3.1.0",
-    "eslint-plugin-react": "^7.14.3",
-    "husky": "^3.0.5",
-    "lint-staged": "^9.2.5",
+    "eslint-plugin-prettier": "^3.1.1",
+    "husky": "^3.0.9",
+    "lint-staged": "^9.4.2",
     "prettier": "^1.18.2",
     "rimraf": "^3.0.0",
-    "rollup": "^1.21.2",
+    "rollup": "^1.26.3",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-uglify": "^6.0.3",
-    "semantic-release": "^15.13.24",
-    "typescript": "~3.6.3"
+    "semantic-release": "^15.13.30",
+    "typescript": "~3.7.2"
   },
   "config": {
     "commitizen": {
