@@ -210,18 +210,7 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
     });
   }
 
-  public static async restartFromScene(
-    token: string,
-    sceneId: number,
-  ): Promise<void> {
-    await fetchHelper<void>(`${Charisma.charismaUrl}/play/restart-from-scene`, {
-      body: JSON.stringify({ sceneId }),
-      headers: { Authorization: `Bearer ${token}` },
-      method: "POST",
-    });
-  }
-
-  public static async restartFromEpisode(
+  public static async restartFromEpisodeId(
     token: string,
     episodeId: number,
   ): Promise<void> {
@@ -229,6 +218,20 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
       `${Charisma.charismaUrl}/play/restart-from-episode`,
       {
         body: JSON.stringify({ episodeId }),
+        headers: { Authorization: `Bearer ${token}` },
+        method: "POST",
+      },
+    );
+  }
+
+  public static async restartFromEpisodeIndex(
+    token: string,
+    episodeIndex: number,
+  ): Promise<void> {
+    await fetchHelper<void>(
+      `${Charisma.charismaUrl}/play/restart-from-episode`,
+      {
+        body: JSON.stringify({ episodeIndex }),
         headers: { Authorization: `Bearer ${token}` },
         method: "POST",
       },
@@ -283,12 +286,12 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
     return Charisma.setMood(this.token, characterIdOrName, modifier);
   }
 
-  public restartFromScene(sceneId: number): Promise<void> {
-    return Charisma.restartFromScene(this.token, sceneId);
+  public restartFromEpisodeId(episodeId: number): Promise<void> {
+    return Charisma.restartFromEpisodeId(this.token, episodeId);
   }
 
-  public restartFromEpisode(episodeId: number): Promise<void> {
-    return Charisma.restartFromEpisode(this.token, episodeId);
+  public restartFromEpisodeIndex(episodeIndex: number): Promise<void> {
+    return Charisma.restartFromEpisodeIndex(this.token, episodeIndex);
   }
 
   public joinConversation = (
