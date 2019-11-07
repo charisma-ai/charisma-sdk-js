@@ -125,4 +125,6 @@ export type MessageEvent = {
 export interface EpisodeCompleteEvent {
   conversationId: ConversationId;
   impacts: Impact[];
+  completedEpisodeId: number;
+  nextEpisodeId: number | null;
 }
