@@ -2,6 +2,7 @@
 
 ### v1.7.0
 
+- Adjusted `setMemory` type to accept `null`.
 - Removes `scene-complete` event and `stopOnSceneComplete` option.
 - Adds `episode-complete` event. The chat engine automatically stops on episode end if the episode is started by an app user.
 - Adds `restartFromEpisodeId` and `restartFromEpisodeIndex` methods and removes `restartFromScene` method.

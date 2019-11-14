@@ -49,7 +49,7 @@ interface GetPlaythroughInfoResult {
   memories: {
     id: number;
     recallValue: string;
-    saveValue: string;
+    saveValue: string | null;
   }[];
 }
 
@@ -196,7 +196,7 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
   public static async setMemory(
     token: string,
     memoryIdOrRecallValue: number | string,
-    saveValue: string,
+    saveValue: string | null,
   ): Promise<void> {
     await fetchHelper<void>(`${Charisma.charismaUrl}/play/set-memory`, {
       body: JSON.stringify({
@@ -274,7 +274,7 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
 
   public setMemory(
     memoryIdOrRecallValue: number | string,
-    saveValue: string,
+    saveValue: string | null,
   ): Promise<void> {
     return Charisma.setMemory(this.token, memoryIdOrRecallValue, saveValue);
   }
