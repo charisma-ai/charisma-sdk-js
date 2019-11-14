@@ -35,22 +35,42 @@ export interface Character {
   avatar: string | null;
 }
 
+export interface SpeechAudio {
+  data: number[];
+  type: "Buffer";
+}
+
 export interface Speech {
-  audio: { data: number[]; type: "Buffer" } | string;
+  audio: SpeechAudio | string;
   duration: number;
 }
 
+export type BubblePoints = [number, number, number];
+export type BubbleTailPosition = string;
+export type BubbleStyle = string;
+
 export interface Media {
+  bubblePoints: BubblePoints | null;
+  bubbleTailPosition: BubbleTailPosition | null;
+  bubbleStyle: BubbleStyle | null;
   imageLayers: (string | null)[];
   soundBackground: string | null;
   soundEffect: string | null;
 }
+
+// Message types
 
 export interface MessageCharacter {
   text: string;
   character: Character | null;
   metadata: Metadata;
   speech: Speech | null;
+  media: Media;
+  impact: Impact | null;
+}
+
+export interface MessagePanel {
+  metadata: Metadata;
   media: Media;
   impact: Impact | null;
 }
@@ -86,7 +106,10 @@ interface GenericMessage<T extends string, S> {
 
 export type Message =
   | GenericMessage<"character", MessageCharacter>
+  | GenericMessage<"panel", MessagePanel>
   | GenericMessage<"media", MessageMedia>;
+
+// Speech config (set on Conversation)
 
 export type SpeechEncoding = "mp3" | "ogg" | "pcm";
 export type SpeechOutput = "url" | "buffer";
