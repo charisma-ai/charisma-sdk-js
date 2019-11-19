@@ -91,14 +91,17 @@ const fetchHelper = async <T>(
   return data;
 };
 
-declare interface Charisma {
-  on(event: "ready", listener: () => void): this;
-  on(event: "connect", listener: () => void): this;
-  on(event: "error", listener: (error: any) => void): this;
-  on(event: string, listener: (...args: any[]) => void): this;
+interface CharismaEvents {
+  connect: [];
+  reconnect: [];
+  reconnecting: [];
+  disconnect: [];
+  error: [any];
+  ready: [];
+  problem: [{ type: string; error: string }];
 }
 
-class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
+class Charisma extends EventEmitter<CharismaEvents> {
   public static charismaUrl = "https://api.charisma.ai";
 
   public static async createPlaythroughToken(
@@ -359,11 +362,19 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
       upgrade: false,
     });
 
+    // Fired upon a connection including a successful reconnection.
     this.socket.on("connect", this.onConnect);
-    this.socket.on("error", this.onError);
+    // Fired upon a successful reconnection.
+    this.socket.on("reconnect", this.onReconnect);
+    // Fired upon an attempt to reconnect.
+    this.socket.on("reconnecting", this.onReconnecting);
+    // Fired upon a disconnection.
     this.socket.on("disconnect", this.onDisconnect);
+    // Fired when an error occurs.
+    this.socket.on("error", this.onError);
 
     this.socket.on("status", this.onStatus);
+    this.socket.on("problem", this.onProblem);
     this.socket.on("start-typing", this.onStartTyping);
     this.socket.on("stop-typing", this.onStopTyping);
     this.socket.on("message", this.onMessage);
@@ -377,13 +388,16 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
     }
   };
 
-  private onStatus = (): void => {
-    this.eventQueue.start();
-    this.emit("ready");
-  };
-
   private onConnect = (): void => {
     this.emit("connect");
+  };
+
+  private onReconnect = (): void => {
+    this.emit("reconnect");
+  };
+
+  private onReconnecting = (): void => {
+    this.emit("reconnecting");
   };
 
   private onError = (error: unknown): void => {
@@ -392,6 +406,16 @@ class Charisma extends EventEmitter<"ready" | "connect" | "error"> {
 
   private onDisconnect = (): void => {
     this.eventQueue.pause();
+    this.emit("disconnect");
+  };
+
+  private onStatus = (): void => {
+    this.eventQueue.start();
+    this.emit("ready");
+  };
+
+  private onProblem = (problem: { type: string; error: string }): void => {
+    this.emit("problem", problem);
   };
 
   private onStartTyping = (event: StartTypingEvent): void => {

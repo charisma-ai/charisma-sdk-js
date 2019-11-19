@@ -2,6 +2,7 @@
 
 ### v1.7.0
 
+- Pass through more events: `reconnect`, `reconnecting`, `disconnect` and `problem`.
 - Added types for new `panel` message, and added bubble-related types onto the `media` key.
 - Adjusted `setMemory` type to accept `null`.
 - Removes `scene-complete` event and `stopOnSceneComplete` option.
