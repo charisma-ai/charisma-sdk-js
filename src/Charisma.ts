@@ -2,6 +2,7 @@ import EventEmitter from "eventemitter3";
 import PQueue from "p-queue";
 import io from "socket.io-client";
 import fetch from "isomorphic-unfetch";
+import querystring from "query-string";
 
 import {
   SpeechConfig,
@@ -172,10 +173,10 @@ class Charisma extends EventEmitter<CharismaEvents> {
     conversationId?: number | undefined,
     minEventId?: number | undefined,
   ): Promise<GetMessageHistoryResult> {
+    const query = querystring.stringify({ conversationId, minEventId });
     const result = await fetchHelper<GetMessageHistoryResult>(
-      `${Charisma.charismaUrl}/play/message-history`,
+      `${Charisma.charismaUrl}/play/message-history?${query}`,
       {
-        body: JSON.stringify({ conversationId, minEventId }),
         headers: { Authorization: `Bearer ${token}` },
         method: "GET",
       },

@@ -25,6 +25,7 @@
     "eventemitter3": "^4.0.0",
     "isomorphic-unfetch": "^3.0.0",
     "p-queue": "^6.2.0",
+    "query-string": "^6.9.0",
     "socket.io-client": "^2.3.0"
   },
   "devDependencies": {
