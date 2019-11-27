@@ -1,4 +1,5 @@
 import EventEmitter from "eventemitter3";
+import PQueue from "p-queue";
 
 import Charisma from "./Charisma";
 import {
@@ -20,10 +21,14 @@ export interface ConversationEvents {
   "start-typing": [StartTypingEvent];
   "stop-typing": [StopTypingEvent];
   "episode-complete": [EpisodeCompleteEvent];
+  "playback-start": [];
+  "playback-stop": [];
 }
 
 export class Conversation extends EventEmitter<ConversationEvents> {
   private id: number;
+
+  private eventQueue: PQueue = new PQueue();
 
   private lastEventId?: number;
 
@@ -45,12 +50,17 @@ export class Conversation extends EventEmitter<ConversationEvents> {
       this.options = options;
     }
 
-    // Whenever we receive a message, store the last event id so we know where to
+    // Whenever we emit a message, store the last event id so we know where to
     // restore from if a disconnection occurs.
     this.on("message", message => {
       this.lastEventId = message.eventId;
     });
   }
+
+  public addIncomingEvent: Conversation["emit"] = (eventName, ...eventArgs) => {
+    this.eventQueue.add(() => this.emit(eventName, ...eventArgs));
+    return true;
+  };
 
   public start = (event: StartEvent = {}): void => {
     return this.charismaInstance.addOutgoingEvent("start", {
@@ -89,13 +99,27 @@ export class Conversation extends EventEmitter<ConversationEvents> {
   public reconnect = async (): Promise<void> => {
     // If we haven't received any messages so far, there's nowhere to playback from.
     if (typeof this.lastEventId === "number") {
-      const { messages } = await this.charismaInstance.getMessageHistory(
-        this.id,
-        this.lastEventId + 1,
-      );
-      messages.forEach(message => {
-        this.emit("message", { ...message, conversationId: this.id });
-      });
+      // Receiving new events when trying to playback is confusing, so pause the event queue.
+      this.eventQueue.pause();
+      try {
+        const { messages } = await this.charismaInstance.getMessageHistory(
+          this.id,
+          this.lastEventId + 1,
+        );
+        if (messages.length > 0) {
+          this.emit("playback-start");
+          messages.forEach(message => {
+            // If we've emitted a new message since playback started, let's ignore playback ones.
+            if (message.eventId > (this.lastEventId as number)) {
+              this.emit("message", { ...message, conversationId: this.id });
+            }
+          });
+          this.emit("playback-stop");
+        }
+      } finally {
+        // We can restart the queue now playback is finished.
+        this.eventQueue.start();
+      }
     }
   };
 }

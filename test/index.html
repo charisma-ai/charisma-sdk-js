@@ -1,9 +1,12 @@
 <html>
   <body>
     <button onclick="start()">Start!</button>
+    <button onclick="tap()">Tap!</button>
   </body>
   <script src="../dist/umd/index.js"></script>
   <script>
+    let conversation;
+
     async function start() {
       const { Charisma, Speaker, Microphone } = CharismaSDK;
 
@@ -19,7 +22,7 @@
 
       const timeout = 10000;
 
-      const conversation = charisma.joinConversation(conversationId);
+      conversation = charisma.joinConversation(conversationId);
       conversation.on("start-typing", () => console.log("started typing"));
       conversation.on("stop-typing", () => console.log("stopped typing"));
       conversation.on("message", message => {
@@ -29,6 +32,8 @@
           speaker.play(message.message.speech.audio.data);
         }
       });
+      conversation.on("playback-start", () => console.log("playback start"));
+      conversation.on("playback-stop", () => console.log("playback stop"));
       conversation.setSpeechConfig({
         encoding: "mp3",
         output: "buffer",
@@ -47,6 +52,10 @@
         microphone.resetTimeout(timeout);
       });
       microphone.startListening(timeout);
+    }
+
+    function tap() {
+      conversation.tap();
     }
   </script>
 </html>

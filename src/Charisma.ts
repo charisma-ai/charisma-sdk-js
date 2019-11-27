@@ -458,28 +458,28 @@ class Charisma extends EventEmitter<CharismaEvents> {
   private onStartTyping = (event: StartTypingEvent): void => {
     const conversation = this.activeConversations.get(event.conversationId);
     if (conversation) {
-      conversation.emit("start-typing", event);
+      conversation.addIncomingEvent("start-typing", event);
     }
   };
 
   private onStopTyping = (event: StopTypingEvent): void => {
     const conversation = this.activeConversations.get(event.conversationId);
     if (conversation) {
-      conversation.emit("stop-typing", event);
+      conversation.addIncomingEvent("stop-typing", event);
     }
   };
 
   private onMessage = (event: MessageEvent): void => {
     const conversation = this.activeConversations.get(event.conversationId);
     if (conversation) {
-      conversation.emit("message", event);
+      conversation.addIncomingEvent("message", event);
     }
   };
 
   private onEpisodeComplete = (event: EpisodeCompleteEvent): void => {
     const conversation = this.activeConversations.get(event.conversationId);
     if (conversation) {
-      conversation.emit("episode-complete", event);
+      conversation.addIncomingEvent("episode-complete", event);
     }
   };
 }
