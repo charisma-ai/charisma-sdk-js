@@ -87,13 +87,16 @@ export class Conversation extends EventEmitter<ConversationEvents> {
   };
 
   public reconnect = async (): Promise<void> => {
-    const { messages } = await this.charismaInstance.getMessageHistory(
-      this.id,
-      this.lastEventId,
-    );
-    messages.forEach(message => {
-      this.emit("message", { ...message, conversationId: this.id });
-    });
+    // If we haven't received any messages so far, there's nowhere to playback from.
+    if (typeof this.lastEventId === "number") {
+      const { messages } = await this.charismaInstance.getMessageHistory(
+        this.id,
+        this.lastEventId + 1,
+      );
+      messages.forEach(message => {
+        this.emit("message", { ...message, conversationId: this.id });
+      });
+    }
   };
 }
 
