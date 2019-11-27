@@ -11,6 +11,7 @@ import {
   EpisodeCompleteEvent,
   Mood,
   ConversationId,
+  Message,
 } from "./types";
 import Conversation, { ConversationOptions } from "./Conversation";
 
@@ -51,6 +52,10 @@ interface GetPlaythroughInfoResult {
     recallValue: string;
     saveValue: string | null;
   }[];
+}
+
+interface GetMessageHistoryResult {
+  messages: Message[];
 }
 
 interface CreateConversationResult {
@@ -162,6 +167,22 @@ class Charisma extends EventEmitter<CharismaEvents> {
     return conversationId;
   }
 
+  public static async getMessageHistory(
+    token: string,
+    conversationId?: number | undefined,
+    minEventId?: number | undefined,
+  ): Promise<GetMessageHistoryResult> {
+    const result = await fetchHelper<GetMessageHistoryResult>(
+      `${Charisma.charismaUrl}/play/message-history`,
+      {
+        body: JSON.stringify({ conversationId, minEventId }),
+        headers: { Authorization: `Bearer ${token}` },
+        method: "GET",
+      },
+    );
+    return result;
+  }
+
   public static async getPlaythroughInfo(
     token: string,
   ): Promise<GetPlaythroughInfoResult> {
@@ -269,6 +290,13 @@ class Charisma extends EventEmitter<CharismaEvents> {
     characterId: number,
   ): Promise<ConversationId> {
     return Charisma.createCharacterConversation(this.token, characterId);
+  }
+
+  public getMessageHistory(
+    conversationId?: number | undefined,
+    minEventId?: number | undefined,
+  ): Promise<GetMessageHistoryResult> {
+    return Charisma.getMessageHistory(this.token, conversationId, minEventId);
   }
 
   public getPlaythroughInfo(): Promise<GetPlaythroughInfoResult> {
@@ -393,6 +421,14 @@ class Charisma extends EventEmitter<CharismaEvents> {
   };
 
   private onReconnect = (): void => {
+    this.activeConversations.forEach(conversation => {
+      conversation.reconnect().catch(err => {
+        console.error(
+          `Something went wrong reconnecting to conversation:`,
+          err,
+        );
+      });
+    });
     this.emit("reconnect");
   };
 

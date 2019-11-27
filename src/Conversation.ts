@@ -15,25 +15,17 @@ export interface ConversationOptions {
   speechConfig?: SpeechConfig;
 }
 
-export type ConversationEvents =
-  | "message"
-  | "start-typing"
-  | "stop-typing"
-  | "episode-complete";
-
-export declare interface Conversation {
-  on(event: "message", listener: (event: MessageEvent) => void): this;
-  on(event: "start-typing", listener: (event: StartTypingEvent) => void): this;
-  on(event: "stop-typing", listener: (event: StopTypingEvent) => void): this;
-  on(
-    event: "episode-complete",
-    listener: (event: EpisodeCompleteEvent) => void,
-  ): this;
-  on(event: string, listener: (...args: any[]) => void): this;
+export interface ConversationEvents {
+  message: [MessageEvent];
+  "start-typing": [StartTypingEvent];
+  "stop-typing": [StopTypingEvent];
+  "episode-complete": [EpisodeCompleteEvent];
 }
 
 export class Conversation extends EventEmitter<ConversationEvents> {
   private id: number;
+
+  private lastEventId?: number;
 
   private charismaInstance: Charisma;
 
@@ -52,6 +44,12 @@ export class Conversation extends EventEmitter<ConversationEvents> {
     if (options) {
       this.options = options;
     }
+
+    // Whenever we receive a message, store the last event id so we know where to
+    // restore from if a disconnection occurs.
+    this.on("message", message => {
+      this.lastEventId = message.eventId;
+    });
   }
 
   public start = (event: StartEvent = {}): void => {
@@ -86,6 +84,16 @@ export class Conversation extends EventEmitter<ConversationEvents> {
 
   public setSpeechConfig = (speechConfig: SpeechConfig | undefined): void => {
     this.options.speechConfig = speechConfig;
+  };
+
+  public reconnect = async (): Promise<void> => {
+    const { messages } = await this.charismaInstance.getMessageHistory(
+      this.id,
+      this.lastEventId,
+    );
+    messages.forEach(message => {
+      this.emit("message", { ...message, conversationId: this.id });
+    });
   };
 }
 

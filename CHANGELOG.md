@@ -1,5 +1,9 @@
 # Changelog
 
+### v1.8.0
+
+- Reconnecting will now fetch and emit messages that were emitted from the server after the last received message.
+
 ### v1.7.0
 
 - Pass through more events: `reconnect`, `reconnecting`, `disconnect` and `problem`.
