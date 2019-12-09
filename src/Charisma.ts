@@ -53,6 +53,10 @@ interface GetPlaythroughInfoResult {
     recallValue: string;
     saveValue: string | null;
   }[];
+  impacts: {
+    id: number;
+    impact: string;
+  }[];
 }
 
 interface GetMessageHistoryResult {

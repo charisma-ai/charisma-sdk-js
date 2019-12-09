@@ -3,6 +3,7 @@
 ### v1.8.0
 
 - Reconnecting will now fetch and emit messages that were emitted from the server after the last received message.
+- Add `impacts` field to `GetPlaythroughResult` type.
 
 ### v1.7.0
 
