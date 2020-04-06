@@ -8,6 +8,7 @@
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:@typescript-eslint/recommended-requiring-type-checking",
+    "plugin:import/typescript",
     "plugin:prettier/recommended",
     "prettier/@typescript-eslint"
   ],
@@ -16,11 +17,8 @@
     "project": "./tsconfig.eslint.json"
   },
   "plugins": ["@typescript-eslint"],
-  "settings": {
-    "import/resolver": {
-      "node": {
-        "extensions": [".js", ".ts"]
-      }
-    }
+  "rules": {
+    "import/extensions": ["error", "never"],
+    "import/no-cycle": "off"
   }
 }

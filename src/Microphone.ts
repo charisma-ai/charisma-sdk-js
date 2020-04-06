@@ -72,8 +72,12 @@ class Microphone extends EventEmitter<MicrophoneEvents> {
 
     const { stream } = this;
     if (stream) {
-      stream.onresult = (): void => {};
-      stream.onend = (): void => {};
+      stream.onresult = (): void => {
+        // empty fn
+      };
+      stream.onend = (): void => {
+        // empty fn
+      };
       try {
         this.emit("stop");
         stream.abort();

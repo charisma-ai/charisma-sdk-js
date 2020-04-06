@@ -52,7 +52,7 @@ export class Conversation extends EventEmitter<ConversationEvents> {
 
     // Whenever we emit a message, store the last event id so we know where to
     // restore from if a disconnection occurs.
-    this.on("message", message => {
+    this.on("message", (message) => {
       this.lastEventId = message.eventId;
     });
   }
@@ -108,7 +108,7 @@ export class Conversation extends EventEmitter<ConversationEvents> {
         );
         if (messages.length > 0) {
           this.emit("playback-start");
-          messages.forEach(message => {
+          messages.forEach((message) => {
             // If we've emitted a new message since playback started, let's ignore playback ones.
             if (message.eventId > (this.lastEventId as number)) {
               this.emit("message", { ...message, conversationId: this.id });

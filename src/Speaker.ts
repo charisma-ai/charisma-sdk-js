@@ -57,14 +57,14 @@ class Speaker extends EventEmitter<SpeakerEvents> {
       source.onended = (): void => {
         resolve();
         this.currentSources = this.currentSources.filter(
-          currentSource => currentSource !== source,
+          (currentSource) => currentSource !== source,
         );
         if (this.currentSources.length === 0) {
           this.emit("stop");
         }
       };
       if (this.currentSources.length > 0 && interrupt) {
-        this.currentSources.map(currentSource => currentSource.stop());
+        this.currentSources.map((currentSource) => currentSource.stop());
       }
       if (this.currentSources.length === 0) {
         this.emit("start");

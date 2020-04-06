@@ -14,6 +14,7 @@ import {
   ConversationId,
   Message,
 } from "./types";
+// eslint-disable-next-line import/no-named-as-default
 import Conversation, { ConversationOptions } from "./Conversation";
 
 interface GlobalOptions {
@@ -426,8 +427,8 @@ class Charisma extends EventEmitter<CharismaEvents> {
   };
 
   private onReconnect = (): void => {
-    this.activeConversations.forEach(conversation => {
-      conversation.reconnect().catch(err => {
+    this.activeConversations.forEach((conversation) => {
+      conversation.reconnect().catch((err) => {
         console.error(
           `Something went wrong reconnecting to conversation:`,
           err,
