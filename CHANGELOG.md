@@ -1,5 +1,9 @@
 # Changelog
 
+### v1.8.1
+
+- `Speaker` will no longer try to play audio if the context's state is not `running`. This resolves an issue where the user has not granted permission for the audio context to play sound, and so the `play(...)` promise never resolves.
+
 ### v1.8.0
 
 - Reconnecting will now fetch and emit messages that were emitted from the server after the last received message.

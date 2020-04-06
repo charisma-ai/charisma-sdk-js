@@ -11,19 +11,12 @@ interface WindowWithSpeechRecognition extends Window {
 
 declare const window: WindowWithSpeechRecognition;
 
-type MicrophoneEvents =
-  | "recognise"
-  | "recognise-interim"
-  | "timeout"
-  | "start"
-  | "stop";
-
-declare interface Microphone {
-  on(event: "recognise", listener: (result: string) => void): this;
-  on(event: "recognise-interim", listener: (result: string) => void): this;
-  on(event: "timeout", listener: () => void): this;
-  on(event: "start", listener: () => void): this;
-  on(event: "stop", listener: () => void): this;
+interface MicrophoneEvents {
+  recognise: [string];
+  "recognise-interim": [string];
+  timeout: [];
+  start: [];
+  stop: [];
 }
 
 class Microphone extends EventEmitter<MicrophoneEvents> {

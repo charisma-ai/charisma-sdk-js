@@ -11,11 +11,9 @@ interface WindowWithAudioContext extends Window {
 
 declare const window: WindowWithAudioContext;
 
-type SpeakerEvents = "start" | "stop";
-
-declare interface Speaker {
-  on(event: "start", listener: () => void): this;
-  on(event: "stop", listener: () => void): this;
+interface SpeakerEvents {
+  start: [];
+  stop: [];
 }
 
 class Speaker extends EventEmitter<SpeakerEvents> {
@@ -23,7 +21,7 @@ class Speaker extends EventEmitter<SpeakerEvents> {
 
   private currentSources: AudioBufferSourceNode[] = [];
 
-  private getAudioContext = (): AudioContext => {
+  public getAudioContext = (): AudioContext => {
     if (this.audioContext) {
       return this.audioContext;
     }
@@ -47,6 +45,14 @@ class Speaker extends EventEmitter<SpeakerEvents> {
     source.buffer = await new Promise((resolve, reject): void => {
       audioContext.decodeAudioData(arrayBuffer, resolve, reject);
     });
+
+    if (audioContext.state !== "running") {
+      // This could be because the user hasn't given permission for the context to run
+      // i.e. `state` is `suspended`
+      // Instead of waiting for eternity, let's resolve immediately
+      return Promise.resolve();
+    }
+
     return new Promise((resolve): void => {
       source.onended = (): void => {
         resolve();
