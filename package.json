@@ -1,6 +1,6 @@
 {
   "name": "@charisma-ai/sdk",
-  "version": "1.8.1",
+  "version": "1.9.0",
   "description": "Charisma.ai SDK for Javascript (browser)",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
