@@ -1,5 +1,9 @@
 # Changelog
 
+### v1.9.0
+
+- **BREAKING CHANGE**: `eventId`s are now emitted as `string`s. Please upgrade to this version to continue using the reconnection "catch-up" logic (though everything else should work).
+
 ### v1.8.1
 
 - `Speaker` will no longer try to play audio if the context's state is not `running`. This resolves an issue where the user has not granted permission for the audio context to play sound, and so the `play(...)` promise never resolves.

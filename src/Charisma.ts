@@ -176,7 +176,7 @@ class Charisma extends EventEmitter<CharismaEvents> {
   public static async getMessageHistory(
     token: string,
     conversationId?: number | undefined,
-    minEventId?: number | undefined,
+    minEventId?: string | undefined,
   ): Promise<GetMessageHistoryResult> {
     const query = querystring.stringify({ conversationId, minEventId });
     const result = await fetchHelper<GetMessageHistoryResult>(
@@ -300,7 +300,7 @@ class Charisma extends EventEmitter<CharismaEvents> {
 
   public getMessageHistory(
     conversationId?: number | undefined,
-    minEventId?: number | undefined,
+    minEventId?: string | undefined,
   ): Promise<GetMessageHistoryResult> {
     return Charisma.getMessageHistory(this.token, conversationId, minEventId);
   }

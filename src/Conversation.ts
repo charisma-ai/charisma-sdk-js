@@ -30,7 +30,9 @@ export class Conversation extends EventEmitter<ConversationEvents> {
 
   private eventQueue: PQueue = new PQueue();
 
-  private lastEventId?: number;
+  private lastEventId?: string;
+
+  private lastTimestamp?: number;
 
   private charismaInstance: Charisma;
 
@@ -54,6 +56,7 @@ export class Conversation extends EventEmitter<ConversationEvents> {
     // restore from if a disconnection occurs.
     this.on("message", (message) => {
       this.lastEventId = message.eventId;
+      this.lastTimestamp = message.timestamp;
     });
   }
 
@@ -98,19 +101,26 @@ export class Conversation extends EventEmitter<ConversationEvents> {
 
   public reconnect = async (): Promise<void> => {
     // If we haven't received any messages so far, there's nowhere to playback from.
-    if (typeof this.lastEventId === "number") {
+    if (typeof this.lastEventId === "string") {
       // Receiving new events when trying to playback is confusing, so pause the event queue.
       this.eventQueue.pause();
       try {
         const { messages } = await this.charismaInstance.getMessageHistory(
           this.id,
-          this.lastEventId + 1,
+          this.lastEventId,
         );
         if (messages.length > 0) {
           this.emit("playback-start");
           messages.forEach((message) => {
             // If we've emitted a new message since playback started, let's ignore playback ones.
-            if (message.eventId > (this.lastEventId as number)) {
+            // TODO: Remove this when Safari supports `bigint`s!
+            if (typeof BigInt === "undefined") {
+              if (message.timestamp > (this.lastTimestamp as number)) {
+                this.emit("message", { ...message, conversationId: this.id });
+              }
+            } else if (
+              BigInt(message.eventId) > BigInt(this.lastEventId as string)
+            ) {
               this.emit("message", { ...message, conversationId: this.id });
             }
           });

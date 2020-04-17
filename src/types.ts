@@ -95,7 +95,7 @@ export interface Memory {
 interface GenericMessage<T extends string, S> {
   type: T;
   message: S;
-  eventId: number;
+  eventId: string;
   timestamp: number;
   endStory: boolean;
   tapToContinue: boolean;
