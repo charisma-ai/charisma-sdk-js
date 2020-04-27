@@ -23,6 +23,8 @@ export type MessagePath = MessagePathItem[];
 export interface Impact {
   id: number;
   impact: string;
+  isImpactShareable: boolean;
+  impactImageUrl: string | null;
 }
 
 export interface Metadata {

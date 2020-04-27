@@ -1,5 +1,9 @@
 # Changelog
 
+### v1.9.1
+
+- Add `isImpactShareable` and `impactImageUrl` fields to impacts, and fix the type of impact `id`s to be `string`s.
+
 ### v1.9.0
 
 - **BREAKING CHANGE**: `eventId`s are now emitted as `string`s. Please upgrade to this version to continue using the reconnection "catch-up" logic (though everything else should work).
