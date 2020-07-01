@@ -1,5 +1,9 @@
 # Changelog
 
+### v1.10.0
+
+- Change `imageLayers` field to an array of object, each including `url`, `resizeMode` and `points`.
+
 ### v1.9.1
 
 - Add `isImpactShareable` and `impactImageUrl` fields to impacts, and fix the type of impact `id`s to be `string`s.

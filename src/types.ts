@@ -51,11 +51,22 @@ export type BubblePoints = [number, number, number];
 export type BubbleTailPosition = string;
 export type BubbleStyle = string;
 
+export type ImageLayerPoints = [[number, number], [number, number]];
+export enum ImageLayerResizeMode {
+  Contain = "contain",
+  Cover = "cover",
+}
+export interface ImageLayer {
+  url: string | null;
+  points: ImageLayerPoints;
+  resizeMode: ImageLayerResizeMode;
+}
+
 export interface Media {
   bubblePoints: BubblePoints | null;
   bubbleTailPosition: BubbleTailPosition | null;
   bubbleStyle: BubbleStyle | null;
-  imageLayers: (string | null)[];
+  imageLayers: ImageLayer[];
   soundBackground: string | null;
   soundEffect: string | null;
 }
