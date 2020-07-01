@@ -87,22 +87,25 @@ const fetchHelper = async <T>(
 
   const response = await fetch(endpoint, { mode: "cors", ...options, headers });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let data: any = {};
+  let data: unknown = {};
   try {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     data = await response.json();
   } catch (err) {
     // Some endpoints just return a status code and no JSON body data.
   }
 
   if (!response.ok) {
-    throw new Error(data.error);
+    throw new Error(
+      (data as { error?: string }).error ||
+        `Something went wrong calling \`${endpoint}\``,
+    );
   }
 
-  return data;
+  return data as T;
 };
 
-interface CharismaEvents {
+type CharismaEvents = {
   connect: [];
   reconnect: [];
   reconnecting: [];
@@ -110,7 +113,7 @@ interface CharismaEvents {
   error: [any];
   ready: [];
   problem: [{ type: string; error: string }];
-}
+};
 
 class Charisma extends EventEmitter<CharismaEvents> {
   public static charismaUrl = "https://api.charisma.ai";
@@ -276,7 +279,7 @@ class Charisma extends EventEmitter<CharismaEvents> {
 
   private socket: SocketIOClient.Socket | undefined;
 
-  private activeConversations: Map<ConversationId, Conversation> = new Map();
+  private activeConversations = new Map<ConversationId, Conversation>();
 
   public constructor(token: string, options?: CharismaOptions) {
     super();

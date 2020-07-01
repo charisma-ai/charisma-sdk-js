@@ -11,13 +11,13 @@ interface WindowWithSpeechRecognition extends Window {
 
 declare const window: WindowWithSpeechRecognition;
 
-interface MicrophoneEvents {
+type MicrophoneEvents = {
   recognise: [string];
   "recognise-interim": [string];
   timeout: [];
   start: [];
   stop: [];
-}
+};
 
 class Microphone extends EventEmitter<MicrophoneEvents> {
   private stream: SpeechRecognition | undefined;

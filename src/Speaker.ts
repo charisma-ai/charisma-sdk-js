@@ -11,10 +11,10 @@ interface WindowWithAudioContext extends Window {
 
 declare const window: WindowWithAudioContext;
 
-interface SpeakerEvents {
+type SpeakerEvents = {
   start: [];
   stop: [];
-}
+};
 
 class Speaker extends EventEmitter<SpeakerEvents> {
   private audioContext: AudioContext | undefined;

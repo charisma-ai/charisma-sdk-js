@@ -16,14 +16,14 @@ export interface ConversationOptions {
   speechConfig?: SpeechConfig;
 }
 
-export interface ConversationEvents {
+export type ConversationEvents = {
   message: [MessageEvent];
   "start-typing": [StartTypingEvent];
   "stop-typing": [StopTypingEvent];
   "episode-complete": [EpisodeCompleteEvent];
   "playback-start": [];
   "playback-stop": [];
-}
+};
 
 export class Conversation extends EventEmitter<ConversationEvents> {
   private id: number;
