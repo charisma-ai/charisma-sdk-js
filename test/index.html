@@ -3,19 +3,21 @@
     <button onclick="start()">Start!</button>
     <button onclick="tap()">Tap!</button>
   </body>
-  <script src="../dist/umd/index.js"></script>
+  <script src="../dist/index.umd.js"></script>
   <script>
+    const charismaUrl = "https://charisma-server.meh";
+
     let conversation;
 
     async function start() {
       const { Charisma, Speaker, Microphone } = CharismaSDK;
 
-      Charisma.charismaUrl = "https://localhost:5000";
+      Charisma.charismaUrl = charismaUrl;
       const token = await Charisma.createPlaythroughToken({ storyId: 4 });
       const conversationId = await Charisma.createConversation(token);
 
       const charisma = new Charisma(token, {
-        charismaUrl: "https://localhost:5000",
+        charismaUrl,
       });
       const speaker = new Speaker();
       const microphone = new Microphone();
@@ -25,7 +27,7 @@
       conversation = charisma.joinConversation(conversationId);
       conversation.on("start-typing", () => console.log("started typing"));
       conversation.on("stop-typing", () => console.log("stopped typing"));
-      conversation.on("message", message => {
+      conversation.on("message", (message) => {
         microphone.resetTimeout(timeout);
         console.log(message.message.text);
         if (message.message.speech) {
@@ -43,11 +45,11 @@
       conversation.start();
 
       microphone.on("timeout", () => console.log("Timed out!"));
-      microphone.on("recognise", text => {
+      microphone.on("recognise", (text) => {
         console.log("recognise", text);
         conversation.reply({ text });
       });
-      microphone.on("recognise-interim", text => {
+      microphone.on("recognise-interim", (text) => {
         console.log("recognise-interim", text);
         microphone.resetTimeout(timeout);
       });

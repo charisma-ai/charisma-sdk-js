@@ -1,4 +1,4 @@
 {
   "src/**/*.ts": ["eslint --fix"],
-  "*.md": ["prettier --single-quote --trailing-comma all --write"]
+  "*.{md,json}": ["prettier --trailing-comma all --write"]
 }

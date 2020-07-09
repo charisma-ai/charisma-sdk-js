@@ -2,8 +2,10 @@
   "name": "@charisma-ai/sdk",
   "version": "1.10.0-alpha.1",
   "description": "Charisma.ai SDK for Javascript (browser)",
-  "main": "dist/cjs/index.js",
-  "module": "dist/esm/index.js",
+  "source": "src/index.ts",
+  "main": "dist/index.js",
+  "umd:main": "dist/index.umd.js",
+  "module": "dist/index.module.js",
   "types": "dist/index.d.ts",
   "repository": "https://github.com/charisma-ai/charisma-sdk-js",
   "author": "To Play For",
@@ -12,7 +14,9 @@
     "dist/*"
   ],
   "scripts": {
-    "build": "cross-env NODE_ENV=production tsc && rollup -c && rimraf compiled",
+    "build:non-umd": "microbundle --format modern,es,cjs --compress false --jsx React.createElement --jsxFragment React.Fragment",
+    "build:umd": "microbundle --format umd --name CharismaSDK --external none --jsx React.createElement --jsxFragment React.Fragment",
+    "build": "yarn run build:non-umd && yarn run build:umd",
     "cm": "git-cz",
     "lint": "eslint --fix --ext js,ts,tsx .",
     "prebuild": "rimraf dist",
@@ -29,8 +33,6 @@
     "socket.io-client": "^2.3.0"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^13.0.0",
-    "@rollup/plugin-node-resolve": "^8.1.0",
     "@typescript-eslint/eslint-plugin": "^3.5.0",
     "@typescript-eslint/parser": "^3.5.0",
     "commitizen": "^4.1.2",
@@ -44,11 +46,11 @@
     "eslint-plugin-prettier": "^3.1.4",
     "husky": "^4.2.5",
     "lint-staged": "^10.2.11",
+    "microbundle": "^0.12.2",
     "prettier": "^2.0.5",
     "rimraf": "^3.0.2",
-    "rollup": "^2.18.1",
     "semantic-release": "^17.1.1",
-    "typescript": "~3.9.5"
+    "typescript": "^3.9.5"
   },
   "config": {
     "commitizen": {

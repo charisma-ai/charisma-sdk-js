@@ -5,8 +5,8 @@ yarn-error.log
 
 # Build-related
 dist/*
-src/**/*.js
-.rpt2_cache/*
 
 # IDE
 .vscode/*
+
+.DS_Store
