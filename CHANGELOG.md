@@ -1,5 +1,9 @@
 # Changelog
 
+### v2.0.0
+
+- Improved the implementation of `Microphone`.
+
 ### v1.10.0
 
 - Change `imageLayers` field to an array of object, each including `url`, `resizeMode` and `points`.

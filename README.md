@@ -7,7 +7,7 @@ yarn add @charisma-ai/sdk
 ```
 
 ```js
-import { Charisma, Microphone, Speaker } from '@charisma.ai/sdk';
+import { Charisma, Microphone, Speaker } from "@charisma.ai/sdk";
 
 async function run() {
   const token = await Charisma.createPlaythroughToken({ storyId: 4 });
@@ -18,13 +18,13 @@ async function run() {
   const microphone = new Microphone();
 
   const conversation = charisma.joinConversation(conversationId);
-  conversation.on('start-typing', () =>
-    console.log('Character started typing...'),
+  conversation.on("start-typing", () =>
+    console.log("Character started typing..."),
   );
-  conversation.on('stop-typing', () =>
-    console.log('Character stopped typing...'),
+  conversation.on("stop-typing", () =>
+    console.log("Character stopped typing..."),
   );
-  conversation.on('message', message => {
+  conversation.on("message", (message) => {
     console.log(message);
     if (message.message.speech) {
       microphone.stopListening();
@@ -33,15 +33,15 @@ async function run() {
     }
   });
   conversation.setSpeechConfig({
-    encoding: 'mp3',
-    output: 'buffer',
+    encoding: "mp3",
+    output: "buffer",
   });
 
   charisma.connect();
   conversation.start();
 
   microphone.startListening();
-  microphone.on('recognise', text => conversation.reply({ text }));
+  microphone.on("recognise", (text) => conversation.reply({ text }));
 }
 ```
 
@@ -65,7 +65,7 @@ Returns a promise that resolves with the token.
 const token = await Charisma.createPlaythroughToken({
   storyId: 12,
   version: 4,
-  userToken: '...',
+  userToken: "...",
 });
 ```
 
@@ -203,13 +203,24 @@ Emitted when the microphone is either manually stopped via `stopListening` or au
 
 Emitted when the microphone is automatically stopped after a timeout.
 
-#### microphone.startListening(timeout?: number)
+#### microphone.startListening(listeningOptions?: IListeningOptions)
 
 Starts browser speech recognition. The microphone will then emit `recognise-interim` (player hasn't finished speaking, this is the current best guess) and `recognise` (player has finished speaking and we're confident about the result) events.
 
 The speech recognition will _NOT_ automatically pause when a character is speaking via `charisma.speak`.
 
 A timeout can optionally be passed, which will automatically stop the microphone after `timeout` milliseconds.
+
+The options for this method are:
+
+```ts
+interface SpeechRecognitionOptions {
+  continuous?: boolean;
+  interimResults?: boolean;
+  lang?: string;
+  timeout?: number;
+}
+```
 
 #### microphone.stopListening()
 
@@ -236,7 +247,7 @@ Returns a Promise that resolves once the speech has ended.
 `interrupt` is a boolean used to interrupt (stop playing) all currently playing audio before starting the audio passed into `play`.
 
 ```js
-conversation.on('message', async data => {
+conversation.on("message", async (data) => {
   if (data.message.speech) {
     microphone.stopListening();
     await speaker.play(data.message.speech.audio.data, true);

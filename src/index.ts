@@ -1,6 +1,10 @@
-import Charisma from "./Charisma";
-import Microphone from "./Microphone";
-import Speaker from "./Speaker";
+export { default as Charisma } from "./Charisma";
+export {
+  default as Microphone,
+  SpeechRecognitionOptions,
+  SpeechRecognitionErrorCode,
+} from "./Microphone";
+export { default as Speaker } from "./Speaker";
 
 export {
   Conversation,
@@ -9,5 +13,3 @@ export {
 } from "./Conversation";
 
 export * from "./types";
-
-export { Charisma, Microphone, Speaker };

@@ -11,51 +11,79 @@ interface WindowWithSpeechRecognition extends Window {
 
 declare const window: WindowWithSpeechRecognition;
 
+const SpeechRecognitionClass =
+  window.SpeechRecognition || window.webkitSpeechRecognition;
+
+export interface SpeechRecognitionOptions {
+  continuous?: boolean;
+  interimResults?: boolean;
+  lang?: string;
+  timeout?: number;
+}
+
+export type SpeechRecognitionErrorCode =
+  | "no-speech"
+  | "aborted"
+  | "audio-capture"
+  | "network"
+  | "not-allowed"
+  | "service-not-allowed"
+  | "bad-grammar"
+  | "language-not-supported";
+
 type MicrophoneEvents = {
   recognise: [string];
   "recognise-interim": [string];
+  error: [SpeechRecognitionErrorCode];
   timeout: [];
   start: [];
   stop: [];
 };
 
 class Microphone extends EventEmitter<MicrophoneEvents> {
-  private stream: SpeechRecognition | undefined;
+  private recognition = SpeechRecognitionClass
+    ? new SpeechRecognitionClass()
+    : undefined;
 
   private timeoutId: number | undefined;
 
-  private createStream = (): SpeechRecognition => {
-    if (this.stream) {
-      return this.stream;
+  public isSupported = SpeechRecognitionClass !== undefined;
+
+  public startListening = ({
+    continuous = false,
+    interimResults = true,
+    lang = "en-GB",
+    timeout,
+  }: SpeechRecognitionOptions = {}): void => {
+    if (!this.recognition) {
+      return;
     }
 
-    const SpeechRecognitionClass =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
-
-    if (!SpeechRecognitionClass) {
-      throw new Error("SpeechRecognition isn't supported in this browser.");
-    }
-
-    const stream = new SpeechRecognitionClass();
-    stream.continuous = false;
-    stream.interimResults = true;
-    stream.lang = "en-GB";
-    this.stream = stream;
-    return stream;
-  };
-
-  public startListening = (timeout?: number): void => {
     if (this.timeoutId !== undefined) {
       clearTimeout(this.timeoutId);
     }
 
-    const stream = this.createStream();
-
-    stream.onresult = this.onStreamResult;
-    stream.onend = (): void => stream.start();
-    try {
+    const { recognition } = this;
+    recognition.continuous = continuous;
+    recognition.interimResults = interimResults;
+    recognition.lang = lang;
+    recognition.onresult = this.onRecognitionResult;
+    recognition.onstart = (): void => {
       this.emit("start");
-      stream.start();
+    };
+    recognition.onend = (): void => {
+      this.emit("stop");
+      recognition.start();
+    };
+    recognition.onerror = (event): void => {
+      this.emit(
+        "error",
+        ((event as unknown) as { error: SpeechRecognitionErrorCode }).error,
+      );
+    };
+
+    try {
+      recognition.start();
     } catch (err) {
       // this is fine, it just means we tried to start/stop a stream when it was already started/stopped
     }
@@ -70,17 +98,14 @@ class Microphone extends EventEmitter<MicrophoneEvents> {
       clearTimeout(this.timeoutId);
     }
 
-    const { stream } = this;
-    if (stream) {
-      stream.onresult = (): void => {
-        // empty fn
-      };
-      stream.onend = (): void => {
-        // empty fn
+    const { recognition } = this;
+    if (recognition) {
+      recognition.onresult = (): void => undefined;
+      recognition.onend = (): void => {
+        this.emit("stop");
       };
       try {
-        this.emit("stop");
-        stream.abort();
+        recognition.abort();
       } catch (err) {
         // this is fine, it just means we tried to start/stop a stream when it was already started/stopped
       }
@@ -101,7 +126,7 @@ class Microphone extends EventEmitter<MicrophoneEvents> {
     this.stopListening();
   };
 
-  private onStreamResult = (event: SpeechRecognitionEvent): void => {
+  private onRecognitionResult = (event: SpeechRecognitionEvent): void => {
     if (event.results && event.results[0] && event.results[0][0]) {
       const message = event.results[0][0].transcript.trim();
       if (event.results[0].isFinal === false) {
