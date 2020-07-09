@@ -1,3 +1,6 @@
+export * as api from "./api";
+export * from "./api";
+
 export { default as Charisma } from "./Charisma";
 export {
   default as Microphone,

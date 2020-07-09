@@ -1,17 +1,23 @@
 # Charisma.ai SDK for JavaScript
 
-## Usage
-
 ```
 yarn add @charisma-ai/sdk
 ```
 
+## Usage
+
 ```js
-import { Charisma, Microphone, Speaker } from "@charisma.ai/sdk";
+import {
+  Charisma,
+  Microphone,
+  Speaker,
+  createPlaythroughToken,
+  createConversation,
+} from "@charisma-ai/sdk";
 
 async function run() {
-  const token = await Charisma.createPlaythroughToken({ storyId: 4 });
-  const conversationId = await Charisma.createConversation(token);
+  const token = await createPlaythroughToken({ storyId: 4 });
+  const conversationId = await createConversation(token);
 
   const charisma = new Charisma(token);
   const speaker = new Speaker();
@@ -47,11 +53,24 @@ async function run() {
 
 ## API Reference
 
-Create a new `Charisma` instance to connect to a playthrough and interact with the chat engine.
+There are two ways to use the API directly, either by importing `api`, which includes all the API methods, or you can import API methods individually, like `createPlaythroughToken`.
 
-- `playthroughToken` (`number`): The `token` generated in `Charisma.createPlaythroughToken`.
+```js
+import { api, createPlaythroughToken } from "@charisma-ai/sdk";
 
-#### (static) Charisma.createPlaythroughToken
+api.createPlaythroughToken();
+createPlaythroughToken();
+```
+
+Most API methods are also callable using an instance of the `Charisma` class, which automatically scopes the API calls to the playthrough `token` passed when creating the instance:
+
+```js
+const charisma = new Charisma(token);
+// No need to pass `token` here!
+charisma.createConversation();
+```
+
+#### createPlaythroughToken
 
 Use this to set up a new playthrough.
 
@@ -62,28 +81,34 @@ Use this to set up a new playthrough.
 Returns a promise that resolves with the token.
 
 ```js
-const token = await Charisma.createPlaythroughToken({
+const token = await createPlaythroughToken({
   storyId: 12,
   version: 4,
   userToken: "...",
 });
 ```
 
-#### (static) Charisma.createConversation
+#### createConversation
 
 A playthrough can have many simultaneous conversations. In order to start interacting, a conversation needs to be created, which can then be joined.
 
-- `playthroughToken` (`string`): The token generated with `Charisma.createPlaythroughToken`.
+- `playthroughToken` (`string`): The token generated with `createPlaythroughToken`.
 
 ```js
-const conversationId = await Charisma.createConversation(token);
+const conversationId = await createConversation(token);
 ```
+
+## Charisma
+
+Create a new `Charisma` instance to connect to a playthrough and interact with the chat engine.
+
+- `playthroughToken` (`number`): The `token` generated in `createPlaythroughToken`.
 
 #### Charisma.joinConversation
 
 This makes the `Charisma` instance listen out for events for a particular conversation, and returns a `Conversation` that events can be called on and event listeners attached.
 
-- `conversationId` (`string`): The conversation id generated with `Charisma.createConversation`.
+- `conversationId` (`string`): The conversation id generated with `createConversation`.
 
 Returns a `Conversation`, which can be used to send and receive events bound to that conversation.
 
@@ -119,6 +144,14 @@ To interact with the story, events are sent to and from the server that the WebS
 ```js
 {
   "text": "Please reply to this!",
+  "speech": true // Optional, default false
+}
+```
+
+#### conversation.tap({ ... })
+
+```js
+{
   "speech": true // Optional, default false
 }
 ```
@@ -180,6 +213,8 @@ This sets the speech configuration to use for all events in the conversation unt
 The microphone can be used to provide speech-to-text functionality. **This is only available in browsers that support `SpeechRecognition`, currently Google Chrome only.**
 
 ```js
+import { Microphone } from "@charisma-ai/sdk";
+
 const microphone = new Microphone();
 ```
 
@@ -203,7 +238,7 @@ Emitted when the microphone is either manually stopped via `stopListening` or au
 
 Emitted when the microphone is automatically stopped after a timeout.
 
-#### microphone.startListening(listeningOptions?: IListeningOptions)
+#### microphone.startListening(listeningOptions?: SpeechRecognitionOptions)
 
 Starts browser speech recognition. The microphone will then emit `recognise-interim` (player hasn't finished speaking, this is the current best guess) and `recognise` (player has finished speaking and we're confident about the result) events.
 
@@ -235,6 +270,8 @@ Resets the microphone timeout to `timeout` milliseconds.
 The speaker can be used to provide text-to-speech functionality.
 
 ```js
+import { Speaker } from "@charisma-ai/sdk";
+
 const speaker = new Speaker();
 ```
 

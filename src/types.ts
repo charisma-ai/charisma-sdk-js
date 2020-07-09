@@ -1,3 +1,7 @@
+export type ConversationId = number;
+
+// Message field types
+
 export type MediaType =
   | "image"
   | "video"
@@ -130,8 +134,6 @@ export interface SpeechConfig {
   encoding?: SpeechEncoding;
   output?: SpeechOutput;
 }
-
-export type ConversationId = number;
 
 // Events sent to server
 

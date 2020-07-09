@@ -2,6 +2,7 @@
 
 ### v2.0.0
 
+- API methods are now individually exported instead of being static methods on the Charisma class, as well as being exported under a bracket `api` object.
 - Improved the implementation of `Microphone`.
 
 ### v1.10.0
