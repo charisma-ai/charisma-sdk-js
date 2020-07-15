@@ -12,7 +12,9 @@ interface WindowWithSpeechRecognition extends Window {
 declare const window: WindowWithSpeechRecognition;
 
 const SpeechRecognitionClass =
-  window.SpeechRecognition || window.webkitSpeechRecognition;
+  typeof window !== "undefined"
+    ? window.SpeechRecognition || window.webkitSpeechRecognition
+    : undefined;
 
 export interface SpeechRecognitionOptions {
   continuous?: boolean;
