@@ -21,6 +21,7 @@
     "@typescript-eslint/no-floating-promises": "off",
     "@typescript-eslint/restrict-template-expressions": "off",
     "import/extensions": ["error", "never"],
-    "import/no-cycle": "off"
+    "import/no-cycle": "off",
+    "no-console": "off"
   }
 }

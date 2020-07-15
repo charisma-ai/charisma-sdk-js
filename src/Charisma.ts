@@ -1,5 +1,4 @@
 import EventEmitter from "eventemitter3";
-import PQueue from "p-queue";
 import io from "socket.io-client";
 
 import * as api from "./api";
@@ -15,31 +14,20 @@ import {
 // eslint-disable-next-line import/no-named-as-default
 import Conversation, { ConversationOptions } from "./Conversation";
 
-type ConversationToJoin =
-  | ConversationId
-  | {
-      conversationId: ConversationId;
-      options: ConversationOptions;
-    };
+export type ConnectionStatus = "disconnected" | "connecting" | "connected";
 
 type CharismaEvents = {
-  connect: [];
-  reconnect: [];
-  reconnecting: [];
-  disconnect: [];
+  "connection-status": [ConnectionStatus];
   error: [any];
-  ready: [];
   problem: [{ type: string; error: string }];
 };
 
 class Charisma extends EventEmitter<CharismaEvents> {
-  private eventQueue: PQueue = new PQueue({ autoStart: false });
-
   private token: string;
 
-  private charismaUrl = "https://api.charisma.ai";
-
   private socket: SocketIOClient.Socket | undefined;
+
+  private connectionStatus: ConnectionStatus = "disconnected";
 
   private activeConversations = new Map<ConversationId, Conversation>();
 
@@ -101,30 +89,10 @@ class Charisma extends EventEmitter<CharismaEvents> {
   ): Conversation => {
     const conversation = new Conversation(conversationId, this, options);
     if (this.activeConversations.has(conversationId)) {
-      throw new Error(
-        `The conversation with id \`${conversationId}\` has already been joined.`,
-      );
+      return this.activeConversations.get(conversationId) as Conversation;
     }
     this.activeConversations.set(conversationId, conversation);
     return conversation;
-  };
-
-  public joinConversations = (
-    conversations: ConversationToJoin[],
-  ): Promise<Conversation[]> => {
-    return Promise.all(
-      conversations.map(
-        (conversation): Conversation => {
-          if (typeof conversation === "number") {
-            return this.joinConversation(conversation);
-          }
-          return this.joinConversation(
-            conversation.conversationId,
-            conversation.options,
-          );
-        },
-      ),
-    );
   };
 
   public leaveConversation = (conversationId: ConversationId): void => {
@@ -146,22 +114,29 @@ class Charisma extends EventEmitter<CharismaEvents> {
     eventName: string,
     ...eventData: unknown[]
   ): void => {
-    this.eventQueue.add((): void => {
-      if (this.socket) {
+    if (this.socket) {
+      if (this.connectionStatus === "connected") {
         this.socket.emit(eventName, ...eventData);
+      } else {
+        console.warn(
+          `Event \`${eventName}\` was not sent as the socket was not ready. Wait for the \`connection-status\` event to be called with \`connected\` before sending events.`,
+        );
       }
-    });
+    } else {
+      console.log(
+        `Event \`${eventName}\` was not sent as the socket was not initialised. Call \`charisma.connect()\` to connect the socket.`,
+      );
+    }
   };
 
   public connect = (): void => {
-    this.socket = io(`${this.charismaUrl}/play`, {
+    const charismaUrl = api.getBaseUrl();
+    this.socket = io(`${charismaUrl}/play`, {
       query: { token: this.token },
       transports: ["websocket"],
       upgrade: false,
     });
 
-    // Fired upon a connection including a successful reconnection.
-    this.socket.on("connect", this.onConnect);
     // Fired upon a successful reconnection.
     this.socket.on("reconnect", this.onReconnect);
     // Fired upon an attempt to reconnect.
@@ -186,8 +161,11 @@ class Charisma extends EventEmitter<CharismaEvents> {
     }
   };
 
-  private onConnect = (): void => {
-    this.emit("connect");
+  private changeConnectionStatus = (newStatus: ConnectionStatus): void => {
+    if (newStatus !== this.connectionStatus) {
+      this.connectionStatus = newStatus;
+      this.emit("connection-status", newStatus);
+    }
   };
 
   private onReconnect = (): void => {
@@ -199,25 +177,22 @@ class Charisma extends EventEmitter<CharismaEvents> {
         );
       });
     });
-    this.emit("reconnect");
   };
 
   private onReconnecting = (): void => {
-    this.emit("reconnecting");
+    this.changeConnectionStatus("connecting");
+  };
+
+  private onDisconnect = (): void => {
+    this.changeConnectionStatus("disconnected");
+  };
+
+  private onStatus = (): void => {
+    this.changeConnectionStatus("connected");
   };
 
   private onError = (error: unknown): void => {
     this.emit("error", error);
-  };
-
-  private onDisconnect = (): void => {
-    this.eventQueue.pause();
-    this.emit("disconnect");
-  };
-
-  private onStatus = (): void => {
-    this.eventQueue.start();
-    this.emit("ready");
   };
 
   private onProblem = (problem: { type: string; error: string }): void => {
