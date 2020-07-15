@@ -8,7 +8,7 @@ yarn add @charisma-ai/sdk
 
 ```js
 import {
-  Charisma,
+  Playthrough,
   Microphone,
   Speaker,
   createPlaythroughToken,
@@ -19,11 +19,11 @@ async function run() {
   const token = await createPlaythroughToken({ storyId: 4 });
   const conversationId = await createConversation(token);
 
-  const charisma = new Charisma(token);
+  const playthrough = new Playthrough(token);
   const speaker = new Speaker();
   const microphone = new Microphone();
 
-  const conversation = charisma.joinConversation(conversationId);
+  const conversation = playthrough.joinConversation(conversationId);
   conversation.on("start-typing", () =>
     console.log("Character started typing..."),
   );
@@ -43,7 +43,7 @@ async function run() {
     output: "buffer",
   });
 
-  charisma.connect();
+  playthrough.connect();
   conversation.start();
 
   microphone.startListening();
@@ -62,12 +62,12 @@ api.createPlaythroughToken();
 createPlaythroughToken();
 ```
 
-Most API methods are also callable using an instance of the `Charisma` class, which automatically scopes the API calls to the playthrough `token` passed when creating the instance:
+Most API methods are also callable using an instance of the `Playthrough` class, which automatically scopes the API calls to the playthrough `token` passed when creating the instance:
 
 ```js
-const charisma = new Charisma(token);
+const playthrough = new Playthrough(token);
 // No need to pass `token` here!
-charisma.createConversation();
+playthrough.createConversation();
 ```
 
 #### createPlaythroughToken
@@ -98,30 +98,30 @@ A playthrough can have many simultaneous conversations. In order to start intera
 const conversationId = await createConversation(token);
 ```
 
-## Charisma
+## Playthrough
 
-Create a new `Charisma` instance to connect to a playthrough and interact with the chat engine.
+Create a new `Playthrough` instance to connect to a playthrough and interact with the chat engine.
 
 - `playthroughToken` (`number`): The `token` generated in `createPlaythroughToken`.
 
-#### Charisma.joinConversation
+#### Playthrough.joinConversation
 
-This makes the `Charisma` instance listen out for events for a particular conversation, and returns a `Conversation` that events can be called on and event listeners attached.
+This makes the `Playthrough` instance listen out for events for a particular conversation, and returns a `Conversation` that events can be called on and event listeners attached.
 
 - `conversationId` (`string`): The conversation id generated with `createConversation`.
 
 Returns a `Conversation`, which can be used to send and receive events bound to that conversation.
 
 ```js
-Charisma.joinConversation(conversationId);
+playthrough.joinConversation(conversationId);
 ```
 
-#### Charisma.connect
+#### Playthrough.connect
 
 This is what kicks off the connection to the chat engine. Call this once you're ready to start sending and receiving events.
 
 ```js
-await Charisma.connect();
+await playthrough.connect();
 ```
 
 ## Events
@@ -242,7 +242,7 @@ Emitted when the microphone is automatically stopped after a timeout.
 
 Starts browser speech recognition. The microphone will then emit `recognise-interim` (player hasn't finished speaking, this is the current best guess) and `recognise` (player has finished speaking and we're confident about the result) events.
 
-The speech recognition will _NOT_ automatically pause when a character is speaking via `charisma.speak`.
+The speech recognition will _NOT_ automatically pause when a character is speaking via `speaker.play`, but this could be set up by subscribing to the `start` and `stop` events on `speaker`, and calling `startListening` and `stopListening` on `microphone`.
 
 A timeout can optionally be passed, which will automatically stop the microphone after `timeout` milliseconds.
 

@@ -5,6 +5,7 @@
 - API methods are now individually exported instead of being static methods on the Charisma class, as well as being exported under a bracket `api` object.
 - Improved the implementation of `Microphone`.
 - Replace multiple connection events from `Charisma` (`connect`, `disconnect` etc) with single `connection-status` event.
+- The `Charisma` class has been renamed to `Playthrough`.
 
 ### v1.10.0
 

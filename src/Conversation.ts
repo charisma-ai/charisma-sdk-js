@@ -1,7 +1,7 @@
 import EventEmitter from "eventemitter3";
 import PQueue from "p-queue";
 
-import Charisma from "./Charisma";
+import Playthrough from "./Playthrough";
 import {
   StartEvent,
   ReplyEvent,
@@ -34,19 +34,19 @@ export class Conversation extends EventEmitter<ConversationEvents> {
 
   private lastTimestamp?: number;
 
-  private charismaInstance: Charisma;
+  private playthroughInstance: Playthrough;
 
   private options: ConversationOptions = {};
 
   public constructor(
     conversationId: number,
-    charismaInstance: Charisma,
+    playthroughInstance: Playthrough,
     options?: ConversationOptions,
   ) {
     super();
 
     this.id = conversationId;
-    this.charismaInstance = charismaInstance;
+    this.playthroughInstance = playthroughInstance;
 
     if (options) {
       this.options = options;
@@ -66,7 +66,7 @@ export class Conversation extends EventEmitter<ConversationEvents> {
   };
 
   public start = (event: StartEvent = {}): void => {
-    return this.charismaInstance.addOutgoingEvent("start", {
+    return this.playthroughInstance.addOutgoingEvent("start", {
       ...this.options,
       ...event,
       conversationId: this.id,
@@ -74,7 +74,7 @@ export class Conversation extends EventEmitter<ConversationEvents> {
   };
 
   public reply = (event: ReplyEvent): void => {
-    return this.charismaInstance.addOutgoingEvent("reply", {
+    return this.playthroughInstance.addOutgoingEvent("reply", {
       ...this.options,
       ...event,
       conversationId: this.id,
@@ -82,14 +82,14 @@ export class Conversation extends EventEmitter<ConversationEvents> {
   };
 
   public tap = (): void => {
-    return this.charismaInstance.addOutgoingEvent("tap", {
+    return this.playthroughInstance.addOutgoingEvent("tap", {
       ...this.options,
       conversationId: this.id,
     });
   };
 
   public resume = (): void => {
-    return this.charismaInstance.addOutgoingEvent("resume", {
+    return this.playthroughInstance.addOutgoingEvent("resume", {
       ...this.options,
       conversationId: this.id,
     });
@@ -105,7 +105,7 @@ export class Conversation extends EventEmitter<ConversationEvents> {
       // Receiving new events when trying to playback is confusing, so pause the event queue.
       this.eventQueue.pause();
       try {
-        const { messages } = await this.charismaInstance.getMessageHistory(
+        const { messages } = await this.playthroughInstance.getMessageHistory(
           this.id,
           this.lastEventId,
         );

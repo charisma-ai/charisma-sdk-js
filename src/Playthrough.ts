@@ -16,13 +16,13 @@ import Conversation, { ConversationOptions } from "./Conversation";
 
 export type ConnectionStatus = "disconnected" | "connecting" | "connected";
 
-type CharismaEvents = {
+type PlaythroughEvents = {
   "connection-status": [ConnectionStatus];
   error: [any];
   problem: [{ type: string; error: string }];
 };
 
-class Charisma extends EventEmitter<CharismaEvents> {
+class Playthrough extends EventEmitter<PlaythroughEvents> {
   private token: string;
 
   private socket: SocketIOClient.Socket | undefined;
@@ -124,7 +124,7 @@ class Charisma extends EventEmitter<CharismaEvents> {
       }
     } else {
       console.log(
-        `Event \`${eventName}\` was not sent as the socket was not initialised. Call \`charisma.connect()\` to connect the socket.`,
+        `Event \`${eventName}\` was not sent as the socket was not initialised. Call \`playthrough.connect()\` to connect the socket.`,
       );
     }
   };
@@ -228,4 +228,4 @@ class Charisma extends EventEmitter<CharismaEvents> {
   };
 }
 
-export default Charisma;
+export default Playthrough;

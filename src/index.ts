@@ -1,7 +1,7 @@
 export * as api from "./api";
 export * from "./api";
 
-export { default as Charisma, ConnectionStatus } from "./Charisma";
+export { default as Playthrough, ConnectionStatus } from "./Playthrough";
 export {
   default as Microphone,
   SpeechRecognitionOptions,
