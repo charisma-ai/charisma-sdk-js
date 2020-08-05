@@ -230,3 +230,14 @@ export async function restartFromEpisodeIndex(
     method: "POST",
   });
 }
+
+export async function restartFromEventId(
+  token: string,
+  eventId: string,
+): Promise<void> {
+  await fetchHelper<void>(`${baseUrl}/play/restart-from-event`, {
+    body: JSON.stringify({ eventId }),
+    headers: { Authorization: `Bearer ${token}` },
+    method: "POST",
+  });
+}
