@@ -83,6 +83,12 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
     return api.restartFromEpisodeIndex(this.token, episodeIndex);
   }
 
+  public restartFromEventId(
+    eventId: string,
+  ): ReturnType<typeof api.restartFromEventId> {
+    return api.restartFromEventId(this.token, eventId);
+  }
+
   public joinConversation = (
     conversationId: ConversationId,
     options?: ConversationOptions,
