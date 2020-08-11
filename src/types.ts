@@ -31,6 +31,14 @@ export interface Impact {
   impactImageUrl: string | null;
 }
 
+export interface CharacterMoodChange {
+  characterId: number;
+  characterName: string | null;
+  characterAvatar: string | null;
+  moodChange: Partial<Mood>;
+}
+export type CharacterMoodChanges = CharacterMoodChange[];
+
 export interface Metadata {
   [key: string]: string | undefined;
 }
@@ -165,4 +173,5 @@ export interface EpisodeCompleteEvent {
   impacts: Impact[];
   completedEpisodeId: number;
   nextEpisodeId: number | null;
+  characterMoodChanges: CharacterMoodChanges;
 }
