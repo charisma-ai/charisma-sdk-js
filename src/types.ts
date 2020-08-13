@@ -108,6 +108,7 @@ export interface MessageMedia {
 export interface CharacterMood {
   id: number;
   name: string;
+  avatar: string | null;
   mood: Mood;
 }
 
