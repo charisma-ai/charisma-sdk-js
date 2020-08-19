@@ -74,13 +74,26 @@ export interface ImageLayer {
   resizeMode: ImageLayerResizeMode;
 }
 
+export enum AudioTrackBehaviour {
+  Continue = "contine",
+  Restart = "restart",
+}
+export interface AudioTrack {
+  url: string | null;
+  behaviour: AudioTrackBehaviour;
+  loop: boolean;
+  volume: number;
+  stopPlaying: boolean;
+}
+
 export interface Media {
+  animationIn: string | null;
+  animationOut: string | null;
   bubblePoints: BubblePoints | null;
   bubbleTailPosition: BubbleTailPosition | null;
   bubbleStyle: BubbleStyle | null;
   imageLayers: ImageLayer[];
-  soundBackground: string | null;
-  soundEffect: string | null;
+  audioTracks: AudioTrack[];
 }
 
 // Message types
