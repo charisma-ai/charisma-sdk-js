@@ -94,6 +94,7 @@ export interface Media {
   bubbleStyle: BubbleStyle | null;
   imageLayers: ImageLayer[];
   audioTracks: AudioTrack[];
+  stopAllAudio: boolean;
 }
 
 // Message types
