@@ -94,9 +94,9 @@ export async function createPlaythroughToken(
   }
 }
 
-export async function createConversation(token: string): Promise<number> {
+export async function createConversation(token: string): Promise<string> {
   const { conversationId } = await fetchHelper<{
-    conversationId: number;
+    conversationId: string;
   }>(`${baseUrl}/play/conversation`, {
     body: JSON.stringify({}),
     headers: { Authorization: `Bearer ${token}` },
@@ -108,9 +108,9 @@ export async function createConversation(token: string): Promise<number> {
 export async function createCharacterConversation(
   token: string,
   characterId: number,
-): Promise<number> {
+): Promise<string> {
   const { conversationId } = await fetchHelper<{
-    conversationId: number;
+    conversationId: string;
   }>(`${baseUrl}/play/conversation/character`, {
     body: JSON.stringify({ characterId }),
     headers: { Authorization: `Bearer ${token}` },
@@ -125,7 +125,7 @@ export interface GetMessageHistoryResult {
 
 export async function getMessageHistory(
   token: string,
-  conversationId?: number | undefined,
+  conversationId?: string | undefined,
   minEventId?: string | undefined,
 ): Promise<GetMessageHistoryResult> {
   const query = querystring.stringify({ conversationId, minEventId });

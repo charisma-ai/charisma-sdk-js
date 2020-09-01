@@ -1,4 +1,4 @@
-export type ConversationId = number;
+export type ConversationId = string;
 
 // Message field types
 

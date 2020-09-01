@@ -6,6 +6,7 @@
 - Improved the implementation of `Microphone`.
 - Replace multiple connection events from `Charisma` (`connect`, `disconnect` etc) with single `connection-status` event.
 - The `Charisma` class has been renamed to `Playthrough`.
+- Conversation IDs are now UUIDs instead of numbers.
 
 ### v1.10.0
 

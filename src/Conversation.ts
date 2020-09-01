@@ -26,7 +26,7 @@ export type ConversationEvents = {
 };
 
 export class Conversation extends EventEmitter<ConversationEvents> {
-  private id: number;
+  private id: string;
 
   private eventQueue: PQueue = new PQueue();
 
@@ -39,7 +39,7 @@ export class Conversation extends EventEmitter<ConversationEvents> {
   private options: ConversationOptions = {};
 
   public constructor(
-    conversationId: number,
+    conversationId: string,
     playthroughInstance: Playthrough,
     options?: ConversationOptions,
   ) {

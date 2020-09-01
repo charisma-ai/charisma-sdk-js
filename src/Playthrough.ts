@@ -47,7 +47,7 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
   }
 
   public getMessageHistory(
-    conversationId?: number | undefined,
+    conversationId?: string | undefined,
     minEventId?: string | undefined,
   ): ReturnType<typeof api.getMessageHistory> {
     return api.getMessageHistory(this.token, conversationId, minEventId);
