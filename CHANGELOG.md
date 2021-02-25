@@ -2,6 +2,11 @@
 
 ### v2.0.0
 
+This release makes **several breaking changes**. The main change is replacing `socket.io` with `colyseus.js`.
+
+- Replaces `socket.io` with `colyseus.js`.
+  - Due to how Colyseus serializes data, `audio` is now an `ArrayBuffer` instead of an object with the `data` property.
+- API methods and the `Playthrough` constructor now accept a `baseUrl` option, which is used in preference to `globalBaseUrl`. `globalBaseUrl` is now set with `setGlobalBaseUrl` instead of `setBaseUrl`.
 - API methods are now individually exported instead of being static methods on the Charisma class, as well as being exported under a bracket `api` object.
 - Improved the implementation of `Microphone`.
 - Replace multiple connection events from `Charisma` (`connect`, `disconnect` etc) with single `connection-status` event.

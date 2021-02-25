@@ -40,15 +40,19 @@ const fetchHelper = async <T>(
   return data as T;
 };
 
-let baseUrl = "https://api.charisma.ai";
+let globalBaseUrl = "https://play.charisma.ai";
 
-export const getBaseUrl = (): string => baseUrl;
+export const getGlobalBaseUrl = (): string => globalBaseUrl;
 
-export const setBaseUrl = (newBaseUrl: string): void => {
-  baseUrl = newBaseUrl;
+export const setGlobalBaseUrl = (newBaseUrl: string): void => {
+  globalBaseUrl = newBaseUrl;
 };
 
-export interface CreatePlaythroughTokenOptions {
+export type CommonApiOptions = {
+  baseUrl?: string;
+};
+
+export type CreatePlaythroughTokenOptions = {
   /**
    * The `id` of the story that you want to create a new playthrough for. The story must be published, unless a Charisma.ai user token has been passed and the user matches the owner of the story.
    */
@@ -61,12 +65,13 @@ export interface CreatePlaythroughTokenOptions {
    * If the story is unpublished, pass a `userToken` to be able to access your story.
    */
   userToken?: string;
-}
+};
 
 export type CreatePlaythroughTokenResult = string;
 
 export async function createPlaythroughToken(
   options: CreatePlaythroughTokenOptions,
+  apiOptions?: CommonApiOptions,
 ): Promise<CreatePlaythroughTokenResult> {
   if (options.version === -1 && options.userToken === undefined) {
     throw new Error(
@@ -75,7 +80,7 @@ export async function createPlaythroughToken(
   }
   try {
     const { token } = await fetchHelper<{ token: string }>(
-      `${baseUrl}/play/token`,
+      `${apiOptions?.baseUrl || globalBaseUrl}/play/token`,
       {
         body: JSON.stringify({
           storyId: options.storyId,
@@ -94,10 +99,13 @@ export async function createPlaythroughToken(
   }
 }
 
-export async function createConversation(token: string): Promise<string> {
+export async function createConversation(
+  token: string,
+  apiOptions?: CommonApiOptions,
+): Promise<string> {
   const { conversationId } = await fetchHelper<{
     conversationId: string;
-  }>(`${baseUrl}/play/conversation`, {
+  }>(`${apiOptions?.baseUrl || globalBaseUrl}/play/conversation`, {
     body: JSON.stringify({}),
     headers: { Authorization: `Bearer ${token}` },
     method: "POST",
@@ -108,10 +116,11 @@ export async function createConversation(token: string): Promise<string> {
 export async function createCharacterConversation(
   token: string,
   characterId: number,
+  apiOptions?: CommonApiOptions,
 ): Promise<string> {
   const { conversationId } = await fetchHelper<{
     conversationId: string;
-  }>(`${baseUrl}/play/conversation/character`, {
+  }>(`${apiOptions?.baseUrl || globalBaseUrl}/play/conversation/character`, {
     body: JSON.stringify({ characterId }),
     headers: { Authorization: `Bearer ${token}` },
     method: "POST",
@@ -127,10 +136,11 @@ export async function getMessageHistory(
   token: string,
   conversationId?: string | undefined,
   minEventId?: string | undefined,
+  apiOptions?: CommonApiOptions,
 ): Promise<GetMessageHistoryResult> {
   const query = querystring.stringify({ conversationId, minEventId });
   const result = await fetchHelper<GetMessageHistoryResult>(
-    `${baseUrl}/play/message-history?${query}`,
+    `${apiOptions?.baseUrl || globalBaseUrl}/play/message-history?${query}`,
     {
       headers: { Authorization: `Bearer ${token}` },
       method: "GET",
@@ -158,9 +168,10 @@ export interface GetPlaythroughInfoResult {
 
 export async function getPlaythroughInfo(
   token: string,
+  apiOptions?: CommonApiOptions,
 ): Promise<GetPlaythroughInfoResult> {
   const result = await fetchHelper<GetPlaythroughInfoResult>(
-    `${baseUrl}/play/playthrough-info`,
+    `${apiOptions?.baseUrl || globalBaseUrl}/play/playthrough-info`,
     {
       headers: { Authorization: `Bearer ${token}` },
       method: "GET",
@@ -178,17 +189,21 @@ export async function setMood(
   token: string,
   characterIdOrName: number | string,
   modifier: Partial<Mood>,
+  apiOptions?: CommonApiOptions,
 ): Promise<SetMoodResult> {
-  const result = await fetchHelper<SetMoodResult>(`${baseUrl}/play/set-mood`, {
-    body: JSON.stringify({
-      ...(typeof characterIdOrName === "number"
-        ? { characterId: characterIdOrName }
-        : { characterName: characterIdOrName }),
-      modifier,
-    }),
-    headers: { Authorization: `Bearer ${token}` },
-    method: "POST",
-  });
+  const result = await fetchHelper<SetMoodResult>(
+    `${apiOptions?.baseUrl || globalBaseUrl}/play/set-mood`,
+    {
+      body: JSON.stringify({
+        ...(typeof characterIdOrName === "number"
+          ? { characterId: characterIdOrName }
+          : { characterName: characterIdOrName }),
+        modifier,
+      }),
+      headers: { Authorization: `Bearer ${token}` },
+      method: "POST",
+    },
+  );
   return result;
 }
 
@@ -196,48 +211,64 @@ export async function setMemory(
   token: string,
   memoryIdOrRecallValue: number | string,
   saveValue: string | null,
+  apiOptions?: CommonApiOptions,
 ): Promise<void> {
-  await fetchHelper<void>(`${baseUrl}/play/set-memory`, {
-    body: JSON.stringify({
-      ...(typeof memoryIdOrRecallValue === "number"
-        ? { memoryId: memoryIdOrRecallValue }
-        : { memoryRecallValue: memoryIdOrRecallValue }),
-      saveValue,
-    }),
-    headers: { Authorization: `Bearer ${token}` },
-    method: "POST",
-  });
+  await fetchHelper<void>(
+    `${apiOptions?.baseUrl || globalBaseUrl}/play/set-memory`,
+    {
+      body: JSON.stringify({
+        ...(typeof memoryIdOrRecallValue === "number"
+          ? { memoryId: memoryIdOrRecallValue }
+          : { memoryRecallValue: memoryIdOrRecallValue }),
+        saveValue,
+      }),
+      headers: { Authorization: `Bearer ${token}` },
+      method: "POST",
+    },
+  );
 }
 
 export async function restartFromEpisodeId(
   token: string,
   episodeId: number,
+  apiOptions?: CommonApiOptions,
 ): Promise<void> {
-  await fetchHelper<void>(`${baseUrl}/play/restart-from-episode`, {
-    body: JSON.stringify({ episodeId }),
-    headers: { Authorization: `Bearer ${token}` },
-    method: "POST",
-  });
+  await fetchHelper<void>(
+    `${apiOptions?.baseUrl || globalBaseUrl}/play/restart-from-episode`,
+    {
+      body: JSON.stringify({ episodeId }),
+      headers: { Authorization: `Bearer ${token}` },
+      method: "POST",
+    },
+  );
 }
 
 export async function restartFromEpisodeIndex(
   token: string,
   episodeIndex: number,
+  apiOptions?: CommonApiOptions,
 ): Promise<void> {
-  await fetchHelper<void>(`${baseUrl}/play/restart-from-episode`, {
-    body: JSON.stringify({ episodeIndex }),
-    headers: { Authorization: `Bearer ${token}` },
-    method: "POST",
-  });
+  await fetchHelper<void>(
+    `${apiOptions?.baseUrl || globalBaseUrl}/play/restart-from-episode`,
+    {
+      body: JSON.stringify({ episodeIndex }),
+      headers: { Authorization: `Bearer ${token}` },
+      method: "POST",
+    },
+  );
 }
 
 export async function restartFromEventId(
   token: string,
   eventId: string,
+  apiOptions?: CommonApiOptions,
 ): Promise<void> {
-  await fetchHelper<void>(`${baseUrl}/play/restart-from-event`, {
-    body: JSON.stringify({ eventId }),
-    headers: { Authorization: `Bearer ${token}` },
-    method: "POST",
-  });
+  await fetchHelper<void>(
+    `${apiOptions?.baseUrl || globalBaseUrl}/play/restart-from-event`,
+    {
+      body: JSON.stringify({ eventId }),
+      headers: { Authorization: `Bearer ${token}` },
+      method: "POST",
+    },
+  );
 }

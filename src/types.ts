@@ -49,13 +49,8 @@ export interface Character {
   avatar: string | null;
 }
 
-export interface SpeechAudio {
-  data: number[];
-  type: "Buffer";
-}
-
 export interface Speech {
-  audio: SpeechAudio | string;
+  audio: ArrayBuffer | string;
   duration: number;
 }
 

@@ -5,7 +5,7 @@
   </body>
   <script src="../dist/index.umd.js"></script>
   <script>
-    const charismaUrl = "https://charisma-server.meh";
+    const charismaUrl = "https://play.charisma.ai";
 
     let conversation;
 
@@ -16,12 +16,12 @@
         Microphone,
         createPlaythroughToken,
         createConversation,
-        setBaseUrl,
+        setGlobalBaseUrl,
       } = CharismaSDK;
 
-      setBaseUrl(charismaUrl);
+      setGlobalBaseUrl(charismaUrl);
 
-      const token = await createPlaythroughToken({ storyId: 4 });
+      const token = await createPlaythroughToken({ storyId: 167 });
       const conversationId = await createConversation(token);
 
       const playthrough = new Playthrough(token);
@@ -37,7 +37,8 @@
         microphone.resetTimeout(timeout);
         console.log(message.message.text);
         if (message.message.speech) {
-          speaker.play(message.message.speech.audio.data);
+          console.log(message.message.speech.audio);
+          speaker.play(message.message.speech.audio);
         }
       });
       conversation.on("playback-start", () => console.log("playback start"));
@@ -46,9 +47,6 @@
         encoding: "mp3",
         output: "buffer",
       });
-
-      playthrough.connect();
-      conversation.start();
 
       microphone.on("timeout", () => console.log("Timed out!"));
       microphone.on("recognise", (text) => {
@@ -59,6 +57,16 @@
         console.log("recognise-interim", text);
         microphone.resetTimeout(timeout);
       });
+
+      playthrough.on("connection-status", (status) => {
+        console.log("connection status", status);
+        if (status === "connected") {
+          conversation.start();
+        }
+      });
+
+      playthrough.connect();
+
       microphone.startListening(timeout);
     }
 

@@ -37,13 +37,15 @@ class Speaker extends EventEmitter<SpeakerEvents> {
     return audioContext;
   };
 
-  public play = async (audio: number[], interrupt = false): Promise<void> => {
+  public play = async (
+    audio: ArrayBuffer,
+    interrupt = false,
+  ): Promise<void> => {
     const audioContext = this.getAudioContext();
-    const arrayBuffer = new Uint8Array(audio).buffer;
     const source = audioContext.createBufferSource();
     source.connect(audioContext.destination);
     source.buffer = await new Promise((resolve, reject): void => {
-      audioContext.decodeAudioData(arrayBuffer, resolve, reject);
+      audioContext.decodeAudioData(audio, resolve, reject);
     });
 
     if (audioContext.state !== "running") {
