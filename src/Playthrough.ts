@@ -10,7 +10,6 @@ import {
   MessageEvent,
   EpisodeCompleteEvent,
   Mood,
-  ConversationId,
 } from "./types";
 // eslint-disable-next-line import/no-named-as-default
 import Conversation, { ConversationOptions } from "./Conversation";
@@ -34,7 +33,7 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
 
   private connectionStatus: ConnectionStatus = "disconnected";
 
-  private activeConversations = new Map<ConversationId, Conversation>();
+  private activeConversations = new Map<number, Conversation>();
 
   public constructor(token: string, baseUrl?: string) {
     super();
@@ -55,7 +54,7 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
   }
 
   public getMessageHistory(
-    conversationId?: string | undefined,
+    conversationId?: number | undefined,
     minEventId?: string | undefined,
   ): ReturnType<typeof api.getMessageHistory> {
     return api.getMessageHistory(this.token, conversationId, minEventId, {
@@ -110,7 +109,7 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
   }
 
   public joinConversation = (
-    conversationId: ConversationId,
+    conversationId: number,
     options?: ConversationOptions,
   ): Conversation => {
     const conversation = new Conversation(conversationId, this, options);
@@ -121,7 +120,7 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
     return conversation;
   };
 
-  public leaveConversation = (conversationId: ConversationId): void => {
+  public leaveConversation = (conversationId: number): void => {
     if (!this.activeConversations.has(conversationId)) {
       throw new Error(
         `The conversation with id \`${conversationId}\` has not been joined, so cannot be left.`,
@@ -131,7 +130,7 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
   };
 
   public getConversation = (
-    conversationId: ConversationId,
+    conversationId: number,
   ): Conversation | undefined => {
     return this.activeConversations.get(conversationId);
   };

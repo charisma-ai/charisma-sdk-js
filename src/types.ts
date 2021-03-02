@@ -1,5 +1,3 @@
-export type ConversationId = string;
-
 // Message field types
 
 export type MediaType =
@@ -167,19 +165,19 @@ export interface ReplyEvent {
 // Events sent to client
 
 export interface StartTypingEvent {
-  conversationId: ConversationId;
+  conversationId: number;
 }
 
 export interface StopTypingEvent {
-  conversationId: ConversationId;
+  conversationId: number;
 }
 
 export type MessageEvent = {
-  conversationId: ConversationId;
+  conversationId: number;
 } & Message;
 
 export interface EpisodeCompleteEvent {
-  conversationId: ConversationId;
+  conversationId: number;
   impacts: Impact[];
   completedEpisodeId: number;
   nextEpisodeId: number | null;

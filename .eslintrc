@@ -9,8 +9,7 @@
     "plugin:@typescript-eslint/recommended",
     "plugin:@typescript-eslint/recommended-requiring-type-checking",
     "plugin:import/typescript",
-    "plugin:prettier/recommended",
-    "prettier/@typescript-eslint"
+    "plugin:prettier/recommended"
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
@@ -19,9 +18,11 @@
   "plugins": ["@typescript-eslint"],
   "rules": {
     "@typescript-eslint/no-floating-promises": "off",
+    "@typescript-eslint/no-shadow": "error",
     "@typescript-eslint/restrict-template-expressions": "off",
     "import/extensions": ["error", "never"],
     "import/no-cycle": "off",
-    "no-console": "off"
+    "no-console": "off",
+    "no-shadow": "off"
   }
 }

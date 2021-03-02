@@ -102,9 +102,9 @@ export async function createPlaythroughToken(
 export async function createConversation(
   token: string,
   apiOptions?: CommonApiOptions,
-): Promise<string> {
+): Promise<number> {
   const { conversationId } = await fetchHelper<{
-    conversationId: string;
+    conversationId: number;
   }>(`${apiOptions?.baseUrl || globalBaseUrl}/play/conversation`, {
     body: JSON.stringify({}),
     headers: { Authorization: `Bearer ${token}` },
@@ -117,9 +117,9 @@ export async function createCharacterConversation(
   token: string,
   characterId: number,
   apiOptions?: CommonApiOptions,
-): Promise<string> {
+): Promise<number> {
   const { conversationId } = await fetchHelper<{
-    conversationId: string;
+    conversationId: number;
   }>(`${apiOptions?.baseUrl || globalBaseUrl}/play/conversation/character`, {
     body: JSON.stringify({ characterId }),
     headers: { Authorization: `Bearer ${token}` },
@@ -134,7 +134,7 @@ export interface GetMessageHistoryResult {
 
 export async function getMessageHistory(
   token: string,
-  conversationId?: string | undefined,
+  conversationId?: number | undefined,
   minEventId?: string | undefined,
   apiOptions?: CommonApiOptions,
 ): Promise<GetMessageHistoryResult> {

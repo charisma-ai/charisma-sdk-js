@@ -37,7 +37,6 @@
         microphone.resetTimeout(timeout);
         console.log(message.message.text);
         if (message.message.speech) {
-          console.log(message.message.speech.audio);
           speaker.play(message.message.speech.audio);
         }
       });
