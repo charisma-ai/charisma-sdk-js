@@ -25,6 +25,8 @@ type PlaythroughEvents = {
 class Playthrough extends EventEmitter<PlaythroughEvents> {
   private token: string;
 
+  private playthroughId: number;
+
   private baseUrl?: string;
 
   private client: Colyseus.Client | undefined;
@@ -37,7 +39,16 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
 
   public constructor(token: string, baseUrl?: string) {
     super();
+
     this.token = token;
+
+    const { playthrough_id: playthroughId } = jwtDecode<{
+      // eslint-disable-next-line camelcase
+      playthrough_id: number;
+    }>(this.token);
+
+    this.playthroughId = playthroughId;
+
     this.baseUrl = baseUrl;
   }
 
@@ -158,37 +169,78 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
       this.client = new Colyseus.Client(baseUrl.replace(/^http/, "ws"));
     }
 
-    // eslint-disable-next-line camelcase
-    const { playthrough_id } = jwtDecode<{ playthrough_id: number }>(
-      this.token,
-    );
-
     this.room = await this.client.joinOrCreate("chat", {
-      playthroughId: playthrough_id,
+      playthroughId: this.playthroughId,
       token: this.token,
     });
 
-    // // Fired upon a successful reconnection.
-    // this.socket.on("reconnect", this.onReconnect);
-    // // Fired upon an attempt to reconnect.
-    // this.socket.on("reconnecting", this.onReconnecting);
-    // // Fired upon a disconnection.
-    // this.socket.on("disconnect", this.onDisconnect);
-    // // Fired when an error occurs.
-    // this.socket.on("error", this.onError);
-
-    this.room.onMessage("status", this.onStatus);
-    this.room.onMessage("problem", this.onProblem);
-    this.room.onMessage("start-typing", this.onStartTyping);
-    this.room.onMessage("stop-typing", this.onStopTyping);
-    this.room.onMessage("message", this.onMessage);
-    this.room.onMessage("episode-complete", this.onEpisodeComplete);
+    this.attachRoomHandlers(this.room);
   };
 
-  public cleanup = (): void => {
+  private attachRoomHandlers = (room: Colyseus.Room) => {
+    room.onMessage("status", this.onConnected);
+    room.onMessage("problem", this.onProblem);
+    room.onMessage("start-typing", this.onStartTyping);
+    room.onMessage("stop-typing", this.onStopTyping);
+    room.onMessage("message", this.onMessage);
+    room.onMessage("episode-complete", this.onEpisodeComplete);
+
+    room.onError(this.onError);
+
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    room.onLeave(async (code) => {
+      room.removeAllListeners();
+      this.room = undefined;
+
+      // Normal disconnection codes (i.e. user chose to disconnect explicitly)
+      if (code === 1000 || code === 4000) {
+        this.onDisconnect();
+        return;
+      }
+
+      try {
+        // Try to reconnect into the same room.
+        this.onReconnecting();
+        const newRoom = await this.client?.reconnect(room.id, room.sessionId);
+        if (newRoom) {
+          this.attachRoomHandlers(newRoom);
+          this.room = newRoom;
+          this.onReconnect();
+          this.onConnected();
+          return;
+        }
+      } catch (err) {
+        // If we could reconnect, but the exact room no longer exists, try and create a new room.
+        if (/room ".*" not found/.test((err as Error).message)) {
+          try {
+            const newRoom = await this.client?.joinOrCreate("chat", {
+              playthroughId: this.playthroughId,
+              token: this.token,
+            });
+            if (newRoom) {
+              this.attachRoomHandlers(newRoom);
+              this.room = newRoom;
+              this.onReconnect();
+              this.onConnected();
+              return;
+            }
+          } catch (err2) {
+            console.error(
+              "Could not reconnect to a Charisma playthrough.",
+              err2,
+            );
+          }
+        }
+      }
+
+      // We failed to both reconnect into the same room, and a new room, so disconnect.
+      this.onDisconnect();
+    });
+  };
+
+  public disconnect = (): void => {
     if (this.room) {
       this.room.leave();
-      this.room = undefined;
     }
   };
 
@@ -199,32 +251,32 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
     }
   };
 
-  // private onReconnect = (): void => {
-  //   this.activeConversations.forEach((conversation) => {
-  //     conversation.reconnect().catch((err) => {
-  //       console.error(
-  //         `Something went wrong reconnecting to conversation:`,
-  //         err,
-  //       );
-  //     });
-  //   });
-  // };
+  private onReconnect = (): void => {
+    this.activeConversations.forEach((conversation) => {
+      conversation.reconnect().catch((err) => {
+        console.error(
+          `Something went wrong reconnecting to conversation:`,
+          err,
+        );
+      });
+    });
+  };
 
-  // private onReconnecting = (): void => {
-  //   this.changeConnectionStatus("connecting");
-  // };
+  private onReconnecting = (): void => {
+    this.changeConnectionStatus("connecting");
+  };
 
-  // private onDisconnect = (): void => {
-  //   this.changeConnectionStatus("disconnected");
-  // };
+  private onDisconnect = (): void => {
+    this.changeConnectionStatus("disconnected");
+  };
 
-  private onStatus = (): void => {
+  private onConnected = (): void => {
     this.changeConnectionStatus("connected");
   };
 
-  // private onError = (error: unknown): void => {
-  //   this.emit("error", error);
-  // };
+  private onError = (code: number, message?: string): void => {
+    this.emit("error", { message, code });
+  };
 
   private onProblem = (problem: { type: string; error: string }): void => {
     this.emit("problem", problem);

@@ -11,6 +11,7 @@ This release makes **several breaking changes**. The main change is replacing `s
 - Improved the implementation of `Microphone`.
 - Replace multiple connection events from `Charisma` (`connect`, `disconnect` etc) with single `connection-status` event.
 - The `Charisma` class has been renamed to `Playthrough`.
+- The `cleanup` function has been renamed to `disconnect`.
 
 ### v1.10.0
 

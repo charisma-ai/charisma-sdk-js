@@ -2,11 +2,13 @@
   <body>
     <button onclick="start()">Start!</button>
     <button onclick="tap()">Tap!</button>
+    <button onclick="disconnect()">Disconnect</button>
   </body>
   <script src="../dist/index.umd.js"></script>
   <script>
     const charismaUrl = "https://play.charisma.ai";
 
+    let playthrough;
     let conversation;
 
     async function start() {
@@ -24,7 +26,7 @@
       const token = await createPlaythroughToken({ storyId: 167 });
       const conversationId = await createConversation(token);
 
-      const playthrough = new Playthrough(token);
+      playthrough = new Playthrough(token);
       const speaker = new Speaker();
       const microphone = new Microphone();
 
@@ -57,10 +59,12 @@
         microphone.resetTimeout(timeout);
       });
 
+      let started = false;
       playthrough.on("connection-status", (status) => {
         console.log("connection status", status);
-        if (status === "connected") {
+        if (status === "connected" && !started) {
           conversation.start();
+          started = true;
         }
       });
 
@@ -71,6 +75,10 @@
 
     function tap() {
       conversation.tap();
+    }
+
+    function disconnect() {
+      playthrough.disconnect();
     }
   </script>
 </html>
