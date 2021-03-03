@@ -34,7 +34,7 @@ async function run() {
     console.log(message);
     if (message.message.speech) {
       microphone.stopListening();
-      speaker.play(message.message.speech.audio.data);
+      speaker.play(message.message.speech.audio);
       microphone.startListening();
     }
   });
@@ -122,6 +122,14 @@ This is what kicks off the connection to the chat engine. Call this once you're 
 
 ```js
 await playthrough.connect();
+```
+
+#### Playthrough.disconnect
+
+If you want to end the connection to the playthrough, you can call `playthrough.disconnect()`.
+
+```js
+playthrough.disconnect();
 ```
 
 ## Events

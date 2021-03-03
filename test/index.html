@@ -6,7 +6,7 @@
   </body>
   <script src="../dist/index.umd.js"></script>
   <script>
-    const charismaUrl = "https://play.charisma.ai";
+    const charismaUrl = "https://charisma-server-play.meh";
 
     let playthrough;
     let conversation;
@@ -23,7 +23,7 @@
 
       setGlobalBaseUrl(charismaUrl);
 
-      const token = await createPlaythroughToken({ storyId: 167 });
+      const token = await createPlaythroughToken({ storyId: 27 });
       const conversationId = await createConversation(token);
 
       playthrough = new Playthrough(token);

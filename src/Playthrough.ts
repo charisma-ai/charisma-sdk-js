@@ -35,6 +35,8 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
 
   private connectionStatus: ConnectionStatus = "disconnected";
 
+  private shouldReconnect = true;
+
   private activeConversations = new Map<number, Conversation>();
 
   public constructor(token: string, baseUrl?: string) {
@@ -175,6 +177,8 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
     });
 
     this.attachRoomHandlers(this.room);
+
+    this.shouldReconnect = true;
   };
 
   private attachRoomHandlers = (room: Colyseus.Room) => {
@@ -193,26 +197,41 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
       this.room = undefined;
 
       // Normal disconnection codes (i.e. user chose to disconnect explicitly)
-      if (code === 1000 || code === 4000) {
+      if (code === 4000 || !this.shouldReconnect) {
         this.onDisconnect();
         return;
       }
 
-      try {
-        // Try to reconnect into the same room.
-        this.onReconnecting();
-        const newRoom = await this.client?.reconnect(room.id, room.sessionId);
-        if (newRoom) {
-          this.attachRoomHandlers(newRoom);
-          this.room = newRoom;
-          this.onReconnect();
-          this.onConnected();
-          return;
-        }
-      } catch (err) {
-        // If we could reconnect, but the exact room no longer exists, try and create a new room.
-        if (/room ".*" not found/.test((err as Error).message)) {
+      let roomExpired = false;
+
+      for (let attempts = 0; attempts < 20; attempts += 1) {
+        if (!roomExpired) {
           try {
+            // Try to reconnect into the same room.
+            this.onReconnecting();
+            // eslint-disable-next-line no-await-in-loop
+            const newRoom = await this.client?.reconnect(
+              room.id,
+              room.sessionId,
+            );
+            if (newRoom) {
+              this.attachRoomHandlers(newRoom);
+              this.room = newRoom;
+              this.onReconnect();
+              this.onConnected();
+              return;
+            }
+          } catch (err) {
+            if (/room ".*" not found/.test((err as Error).message)) {
+              roomExpired = true;
+            }
+          }
+        }
+
+        // If we could reconnect (network is up), but the exact room no longer exists (it expired), try and create a new room.
+        if (roomExpired) {
+          try {
+            // eslint-disable-next-line no-await-in-loop
             const newRoom = await this.client?.joinOrCreate("chat", {
               playthroughId: this.playthroughId,
               token: this.token,
@@ -231,6 +250,11 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
             );
           }
         }
+
+        // eslint-disable-next-line no-await-in-loop
+        await new Promise<void>((resolve) =>
+          setTimeout(() => resolve(), 5000 + Math.floor(Math.random() * 1000)),
+        );
       }
 
       // We failed to both reconnect into the same room, and a new room, so disconnect.
@@ -239,6 +263,8 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
   };
 
   public disconnect = (): void => {
+    this.shouldReconnect = false;
+
     if (this.room) {
       this.room.leave();
     }
