@@ -75,8 +75,8 @@ playthrough.createConversation();
 Use this to set up a new playthrough.
 
 - `storyId` (`number`): The `id` of the story that you want to create a new playthrough for. The story must be published, unless a Charisma.ai user token has been passed and the user matches the owner of the story.
-- `version` (`number`, optional): The `version` of the story that you want to create a new playthrough for. If omitted, it will default to the most recent published version. To get the draft version of a story, pass `-1` and a `userToken`.
-- `userToken` (`string`, optional): If the story is unpublished, pass a `userToken` to be able to access your story.
+- `version` (`number`, optional): The `version` of the story that you want to create a new playthrough for. If omitted, it will default to the most recent published version. To get the draft version of a story, pass `-1` and an `apiKey`.
+- `apiKey` (`string`, optional): To access draft, test or unpublished versions of your story, pass an `apiKey`. The API key can be found on the story overview page.
 
 Returns a promise that resolves with the token.
 
@@ -84,7 +84,7 @@ Returns a promise that resolves with the token.
 const token = await createPlaythroughToken({
   storyId: 12,
   version: 4,
-  userToken: "...",
+  apiKey: "...",
 });
 ```
 

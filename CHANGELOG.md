@@ -1,5 +1,9 @@
 # Changelog
 
+### v2.1.0
+
+- Adds the option to pass an `apiKey` to use for authentication for playthrough token creation. This is now the recommended way to authenticate as API keys do not expire (unless regenerated) and are more secure than the `userToken`. `userToken` should no longer be used.
+
 ### v2.0.0
 
 This release makes **several breaking changes**. The main change is replacing `socket.io` with `colyseus.js`.

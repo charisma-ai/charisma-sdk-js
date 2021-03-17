@@ -58,13 +58,17 @@ export type CreatePlaythroughTokenOptions = {
    */
   storyId: number;
   /**
-   * The `version` of the story that you want to create a new playthrough for. If omitted, it will default to the most recent published version. To get the draft version of a story, pass `-1` and a `userToken`.
+   * The `version` of the story that you want to create a new playthrough for. If omitted, it will default to the most recent published version. To get the draft version of a story, pass `-1` and an `apiKey`.
    */
   version?: number;
   /**
-   * If the story is unpublished, pass a `userToken` to be able to access your story.
+   * It is recommended to use the more secure `apiKey` instead of `userToken`. To access draft, test or unpublished versions of your story, pass a `userToken`.
    */
   userToken?: string;
+  /**
+   * To access draft, test or unpublished versions of your story, pass an `apiKey`. The API key can be found on the story overview page.
+   */
+  apiKey?: string;
 };
 
 export type CreatePlaythroughTokenResult = string;
@@ -73,11 +77,23 @@ export async function createPlaythroughToken(
   options: CreatePlaythroughTokenOptions,
   apiOptions?: CommonApiOptions,
 ): Promise<CreatePlaythroughTokenResult> {
-  if (options.version === -1 && options.userToken === undefined) {
+  if (
+    options.version === -1 &&
+    options.userToken === undefined &&
+    options.apiKey === undefined
+  ) {
     throw new Error(
-      "To play the draft version (-1) of a story, a `userToken` must also be passed.",
+      "To play the draft version (-1) of a story, an `apiKey` or `userToken` must also be passed.",
     );
   }
+
+  let authHeader: string | undefined;
+  if (options.apiKey) {
+    authHeader = `API-Key ${options.apiKey}`;
+  } else if (options.userToken) {
+    authHeader = `Bearer ${options.userToken}`;
+  }
+
   try {
     const { token } = await fetchHelper<{ token: string }>(
       `${apiOptions?.baseUrl || globalBaseUrl}/play/token`,
@@ -86,10 +102,7 @@ export async function createPlaythroughToken(
           storyId: options.storyId,
           version: options.version,
         }),
-        headers:
-          options.userToken !== undefined
-            ? { Authorization: `Bearer ${options.userToken}` }
-            : undefined,
+        headers: authHeader ? { Authorization: authHeader } : undefined,
         method: "POST",
       },
     );
