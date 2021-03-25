@@ -1,34 +1,41 @@
 <html>
+  <head>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
   <body>
     <button onclick="start()">Start!</button>
     <button onclick="tap()">Tap!</button>
     <button onclick="disconnect()">Disconnect</button>
+    <div id="messages"></div>
+    <input onkeypress="onKeyPress(event)" placeholder="Type a message..." />
   </body>
   <script src="../dist/index.umd.js"></script>
   <script>
+    const {
+      Playthrough,
+      Speaker,
+      Microphone,
+      createPlaythroughToken,
+      createConversation,
+      setGlobalBaseUrl,
+    } = CharismaSDK;
+
     const charismaUrl = "https://charisma-server-play.meh";
+    setGlobalBaseUrl(charismaUrl);
+
+    const speaker = new Speaker();
+    const microphone = new Microphone();
 
     let playthrough;
     let conversation;
 
+    const messagesDiv = document.getElementById("messages");
+
     async function start() {
-      const {
-        Playthrough,
-        Speaker,
-        Microphone,
-        createPlaythroughToken,
-        createConversation,
-        setGlobalBaseUrl,
-      } = CharismaSDK;
-
-      setGlobalBaseUrl(charismaUrl);
-
       const token = await createPlaythroughToken({ storyId: 27 });
       const conversationId = await createConversation(token);
 
       playthrough = new Playthrough(token);
-      const speaker = new Speaker();
-      const microphone = new Microphone();
 
       const timeout = 10000;
 
@@ -37,10 +44,11 @@
       conversation.on("stop-typing", () => console.log("stopped typing"));
       conversation.on("message", (message) => {
         microphone.resetTimeout(timeout);
-        console.log(message.message.text);
-        if (message.message.speech) {
-          speaker.play(message.message.speech.audio);
-        }
+
+        const div = document.createElement("div");
+        div.classList.add("message", "character");
+        div.innerHTML = `<b>${message.message.character.name}</b>: ${message.message.text}`;
+        messagesDiv.appendChild(div);
       });
       conversation.on("playback-start", () => console.log("playback start"));
       conversation.on("playback-stop", () => console.log("playback stop"));
@@ -71,6 +79,22 @@
       playthrough.connect();
 
       microphone.startListening(timeout);
+    }
+
+    function onKeyPress(event) {
+      if (event.key === "Enter") {
+        if (playthrough && conversation) {
+          const text = event.currentTarget.value;
+          conversation.reply({ text });
+          event.currentTarget.value = "";
+          const div = document.createElement("div");
+          div.classList.add("message", "player");
+          div.innerHTML = `<b>You</b>: ${text}`;
+          messagesDiv.appendChild(div);
+
+          speaker.play(new ArrayBuffer(0), true);
+        }
+      }
     }
 
     function tap() {

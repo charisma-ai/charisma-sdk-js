@@ -5,6 +5,7 @@ yarn-error.log
 
 # Build-related
 dist/*
+test/dist/*
 
 # IDE
 .vscode/*
