@@ -1,5 +1,10 @@
 # Changelog
 
+### v2.2.0
+
+- `Speaker.play()` now accepts an `options` parameter as its second parameter instead of a boolean value (which used to represent `interrupt`). This change is backwards compatible, but the old boolean way is deprecated and will be removed in the next major release.
+  - `options` contains two parameters: `trackId` and `interrupt`. `trackId` can be used to interrupt only a particular track, for example, to prevent a character talking over themselves. `interrupt` can now be configured to `all` (interrupt all playing audio), `track` (interrupt the specified `trackId` if playing), or `none` (don't interrupt any audio).
+
 ### v2.1.0
 
 - Adds the option to pass an `apiKey` to use for authentication for playthrough token creation. This is now the recommended way to authenticate as API keys do not expire (unless regenerated) and are more secure than the `userToken`. `userToken` should no longer be used.

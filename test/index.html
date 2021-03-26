@@ -92,7 +92,7 @@
           div.innerHTML = `<b>You</b>: ${text}`;
           messagesDiv.appendChild(div);
 
-          speaker.play(new ArrayBuffer(0), true);
+          speaker.play(new ArrayBuffer(0), { interrupt: "all" });
         }
       }
     }

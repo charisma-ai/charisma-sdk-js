@@ -34,7 +34,10 @@ async function run() {
     console.log(message);
     if (message.message.speech) {
       microphone.stopListening();
-      speaker.play(message.message.speech.audio);
+      speaker.play(message.message.speech.audio, {
+        trackId: message.message.character?.id,
+        interrupt: "track",
+      });
       microphone.startListening();
     }
   });
@@ -283,19 +286,37 @@ import { Speaker } from "@charisma-ai/sdk";
 const speaker = new Speaker();
 ```
 
-#### speaker.play(data, interrupt)
+#### speaker.play(data, options)
 
-Typically, you would want to use this in combination with a `message` conversation handler. You may also wish to pause the microphone while this happens.
+This plays the generated speech in the message event. Typically, you would want to use this in combination with a `message` conversation handler. You may also wish to pause the microphone while this happens.
 
 Returns a Promise that resolves once the speech has ended.
 
-`interrupt` is a boolean used to interrupt (stop playing) all currently playing audio before starting the audio passed into `play`.
+`options` is an object with two properties:
+
+```ts
+type SpeakerPlayOptions = {
+  /**
+   * Whether to interrupt the same track as the `trackId` passed (`track`), all currently playing audio (`all`), or not to interrupt anything (`none`). Default is `none`.
+   */
+  interrupt?: "track" | "all" | "none";
+  /**
+   * If you want to prevent a particular character to speak over themselves, a `trackId` can be set to a unique string. When playing another speech clip, if the same `trackId` is passed and `interrupt` is set to `true`, then the previous clip will stop playing. Default is unset.
+   */
+  trackId?: string;
+};
+```
+
+This method can be used like this:
 
 ```js
 conversation.on("message", async (data) => {
   if (data.message.speech) {
     microphone.stopListening();
-    await speaker.play(data.message.speech.audio.data, true);
+    await speaker.play(data.message.speech.audio, {
+      trackId: message.message.character?.id,
+      interrupt: "track",
+    });
     microphone.startListening();
   }
 });
