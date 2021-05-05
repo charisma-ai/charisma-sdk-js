@@ -1,5 +1,9 @@
 # Changelog
 
+### v2.3.0
+
+- `Microphone.stopListening()` now accepts an `options` parameter with a single option `waitForLastResult`. If set to `true`, then the `recognise` will be called a final time with the result of the audio captured so far. If `false`, the operation will be aborted, so no additional `recognise` event will occur.
+
 ### v2.2.0
 
 - `Speaker.play()` now accepts an `options` parameter as its second parameter instead of a boolean value (which used to represent `interrupt`). This change is backwards compatible, but the old boolean way is deprecated and will be removed in the next major release.

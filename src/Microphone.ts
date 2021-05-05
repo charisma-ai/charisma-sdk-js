@@ -23,6 +23,10 @@ export interface SpeechRecognitionOptions {
   timeout?: number;
 }
 
+export interface SpeechRecognitionStopOptions {
+  waitForLastResult?: boolean;
+}
+
 export type SpeechRecognitionErrorCode =
   | "no-speech"
   | "aborted"
@@ -95,19 +99,27 @@ class Microphone extends EventEmitter<MicrophoneEvents> {
     }
   };
 
-  public stopListening = (): void => {
+  public stopListening = ({
+    waitForLastResult = false,
+  }: SpeechRecognitionStopOptions = {}): void => {
     if (this.timeoutId !== undefined) {
       clearTimeout(this.timeoutId);
     }
 
     const { recognition } = this;
     if (recognition) {
-      recognition.onresult = (): void => undefined;
+      if (!waitForLastResult) {
+        recognition.onresult = (): void => undefined;
+      }
       recognition.onend = (): void => {
         this.emit("stop");
       };
       try {
-        recognition.abort();
+        if (waitForLastResult) {
+          recognition.stop();
+        } else {
+          recognition.abort();
+        }
       } catch (err) {
         // this is fine, it just means we tried to start/stop a stream when it was already started/stopped
       }
