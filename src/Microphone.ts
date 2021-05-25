@@ -27,16 +27,6 @@ export interface SpeechRecognitionStopOptions {
   waitForLastResult?: boolean;
 }
 
-export type SpeechRecognitionErrorCode =
-  | "no-speech"
-  | "aborted"
-  | "audio-capture"
-  | "network"
-  | "not-allowed"
-  | "service-not-allowed"
-  | "bad-grammar"
-  | "language-not-supported";
-
 type MicrophoneEvents = {
   recognise: [string];
   "recognise-interim": [string];
@@ -82,10 +72,7 @@ class Microphone extends EventEmitter<MicrophoneEvents> {
       recognition.start();
     };
     recognition.onerror = (event): void => {
-      this.emit(
-        "error",
-        ((event as unknown) as { error: SpeechRecognitionErrorCode }).error,
-      );
+      this.emit("error", event.error);
     };
 
     try {
