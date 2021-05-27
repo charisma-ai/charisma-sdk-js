@@ -8,49 +8,56 @@ export type MediaType =
   | "vimeo"
   | "unknown";
 
-export interface Mood {
-  happiness: number;
-  anger: number;
-  trust: number;
-  patience: number;
-  fearlessness: number;
-}
+export type ActiveEmotionEffect = {
+  emotion: string;
+  intensity: number;
+  duration: number;
+  durationRemaining: number;
+};
 
-export interface MessagePathItem {
+export type Feeling = {
+  id: number;
+  name: string;
+  avatar: string | null;
+  moodPositivity: number;
+  moodEnergy: number;
+  playerRelationship: number;
+  activeEffects: ActiveEmotionEffect[];
+};
+
+export type Memory = {
+  id: number;
+  recallValue: string;
+  saveValue: string | null;
+};
+
+export type MessagePathItem = {
   id: number;
   type: "node" | "edge";
-}
+};
 export type MessagePath = MessagePathItem[];
 
-export interface Impact {
+export type Impact = {
   id: number;
   impact: string;
   isImpactShareable: boolean;
   impactImageUrl: string | null;
-}
+};
 
-export interface CharacterMoodChange {
-  characterId: number;
-  characterName: string | null;
-  characterAvatar: string | null;
-  moodChange: Partial<Mood>;
-}
-export type CharacterMoodChanges = CharacterMoodChange[];
-
-export interface Metadata {
+export type Metadata = {
   [key: string]: string | undefined;
-}
+};
 
-export interface Character {
+export type Character = {
   id: number;
   name: string;
   avatar: string | null;
-}
+};
 
-export interface Speech {
+export type Speech = {
   audio: ArrayBuffer | string;
   duration: number;
-}
+};
 
 export type BubblePoints = [number, number, number];
 export type BubbleTailPosition = string;
@@ -61,25 +68,25 @@ export enum ImageLayerResizeMode {
   Contain = "contain",
   Cover = "cover",
 }
-export interface ImageLayer {
+export type ImageLayer = {
   url: string | null;
   points: ImageLayerPoints;
   resizeMode: ImageLayerResizeMode;
-}
+};
 
 export enum AudioTrackBehaviour {
-  Continue = "contine",
+  Continue = "continue",
   Restart = "restart",
 }
-export interface AudioTrack {
+export type AudioTrack = {
   url: string | null;
   behaviour: AudioTrackBehaviour;
   loop: boolean;
   volume: number;
   stopPlaying: boolean;
-}
+};
 
-export interface Media {
+export type Media = {
   animationIn: string | null;
   animationOut: string | null;
   bubblePoints: BubblePoints | null;
@@ -88,44 +95,31 @@ export interface Media {
   imageLayers: ImageLayer[];
   audioTracks: AudioTrack[];
   stopAllAudio: boolean;
-}
+};
 
 // Message types
 
-export interface MessageCharacter {
+export type MessageCharacter = {
   text: string;
   character: Character | null;
   metadata: Metadata;
   speech: Speech | null;
   media: Media;
   impact: Impact | null;
-}
+};
 
-export interface MessagePanel {
+export type MessagePanel = {
   metadata: Metadata;
   media: Media;
   impact: Impact | null;
-}
+};
 
-export interface MessageMedia {
+export type MessageMedia = {
   url: string;
   mediaType: MediaType;
-}
+};
 
-export interface CharacterMood {
-  id: number;
-  name: string;
-  avatar: string | null;
-  mood: Mood;
-}
-
-export interface Memory {
-  id: number;
-  recallValue: string;
-  saveValue: string | null;
-}
-
-interface GenericMessage<T extends string, S> {
+type GenericMessage<T extends string, S> = {
   type: T;
   message: S;
   eventId: string;
@@ -133,9 +127,9 @@ interface GenericMessage<T extends string, S> {
   endStory: boolean;
   tapToContinue: boolean;
   path: MessagePath;
-  characterMoods: CharacterMood[];
+  feelings: Feeling[];
   memories: Memory[];
-}
+};
 
 export type Message =
   | GenericMessage<"character", MessageCharacter>
@@ -175,6 +169,14 @@ export interface StopTypingEvent {
 export type MessageEvent = {
   conversationId: number;
 } & Message;
+
+export type CharacterMoodChange = {
+  characterId: number;
+  characterName: string | null;
+  characterAvatar: string | null;
+  // moodChange: Partial<Mood>;
+};
+export type CharacterMoodChanges = CharacterMoodChange[];
 
 export interface EpisodeCompleteEvent {
   conversationId: number;

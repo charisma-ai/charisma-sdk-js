@@ -1,5 +1,12 @@
 # Changelog
 
+### Next
+
+There is a new feelings engine in Charisma! As a result...
+
+- `message.characterMoods` has been removed and replaced with `message.feelings`. This contains each character's current mood and relationship with the player, and any active emotional effects.
+- `setMood` has been removed.
+
 ### v2.3.0
 
 - `Microphone.stopListening()` now accepts an `options` parameter with a single option `waitForLastResult`. If set to `true`, then the `recognise` will be called a final time with the result of the audio captured so far. If `false`, the operation will be aborted, so no additional `recognise` event will occur.

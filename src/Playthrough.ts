@@ -9,7 +9,6 @@ import {
   StopTypingEvent,
   MessageEvent,
   EpisodeCompleteEvent,
-  Mood,
 } from "./types";
 // eslint-disable-next-line import/no-named-as-default
 import Conversation, { ConversationOptions } from "./Conversation";
@@ -88,14 +87,14 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
     });
   }
 
-  public setMood(
-    characterIdOrName: number | string,
-    modifier: Mood,
-  ): ReturnType<typeof api.setMood> {
-    return api.setMood(this.token, characterIdOrName, modifier, {
-      baseUrl: this.baseUrl,
-    });
-  }
+  // public setMood(
+  //   characterIdOrName: number | string,
+  //   modifier: Mood,
+  // ): ReturnType<typeof api.setMood> {
+  //   return api.setMood(this.token, characterIdOrName, modifier, {
+  //     baseUrl: this.baseUrl,
+  //   });
+  // }
 
   public restartFromEpisodeId(
     episodeId: number,

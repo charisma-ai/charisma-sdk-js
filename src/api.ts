@@ -1,7 +1,7 @@
 import fetch from "isomorphic-unfetch";
 import querystring from "query-string";
 
-import { Message, Mood } from "./types";
+import { Feeling, Impact, Memory, Message } from "./types";
 
 const fetchHelper = async <T>(
   endpoint: string,
@@ -163,20 +163,9 @@ export async function getMessageHistory(
 }
 
 export interface GetPlaythroughInfoResult {
-  characterMoods: {
-    id: number;
-    name: string;
-    mood: Mood;
-  }[];
-  memories: {
-    id: number;
-    recallValue: string;
-    saveValue: string | null;
-  }[];
-  impacts: {
-    id: number;
-    impact: string;
-  }[];
+  feelings: Feeling[];
+  memories: Memory[];
+  impacts: Impact[];
 }
 
 export async function getPlaythroughInfo(
@@ -193,32 +182,32 @@ export async function getPlaythroughInfo(
   return result;
 }
 
-export interface SetMoodResult {
-  characterId: number;
-  mood: Mood;
-}
+// export interface SetMoodResult {
+//   characterId: number;
+//   mood: Mood;
+// }
 
-export async function setMood(
-  token: string,
-  characterIdOrName: number | string,
-  modifier: Partial<Mood>,
-  apiOptions?: CommonApiOptions,
-): Promise<SetMoodResult> {
-  const result = await fetchHelper<SetMoodResult>(
-    `${apiOptions?.baseUrl || globalBaseUrl}/play/set-mood`,
-    {
-      body: JSON.stringify({
-        ...(typeof characterIdOrName === "number"
-          ? { characterId: characterIdOrName }
-          : { characterName: characterIdOrName }),
-        modifier,
-      }),
-      headers: { Authorization: `Bearer ${token}` },
-      method: "POST",
-    },
-  );
-  return result;
-}
+// export async function setMood(
+//   token: string,
+//   characterIdOrName: number | string,
+//   modifier: Partial<Mood>,
+//   apiOptions?: CommonApiOptions,
+// ): Promise<SetMoodResult> {
+//   const result = await fetchHelper<SetMoodResult>(
+//     `${apiOptions?.baseUrl || globalBaseUrl}/play/set-mood`,
+//     {
+//       body: JSON.stringify({
+//         ...(typeof characterIdOrName === "number"
+//           ? { characterId: characterIdOrName }
+//           : { characterName: characterIdOrName }),
+//         modifier,
+//       }),
+//       headers: { Authorization: `Bearer ${token}` },
+//       method: "POST",
+//     },
+//   );
+//   return result;
+// }
 
 export async function setMemory(
   token: string,
