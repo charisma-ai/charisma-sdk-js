@@ -30,7 +30,7 @@
     "eventemitter3": "^4.0.7",
     "isomorphic-unfetch": "^3.1.0",
     "jwt-decode": "^3.1.2",
-    "p-queue": "^7.1.0",
+    "p-queue": "^6.6.2",
     "query-string": "^7.0.0"
   },
   "devDependencies": {

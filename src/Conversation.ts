@@ -1,5 +1,4 @@
 import EventEmitter from "eventemitter3";
-// eslint-disable-next-line import/no-unresolved
 import PQueue from "p-queue";
 
 import Playthrough from "./Playthrough";
