@@ -8,21 +8,21 @@ export type MediaType =
   | "vimeo"
   | "unknown";
 
-export type ActiveEmotionEffect = {
-  emotion: string;
+export type ActiveFeelingEffect = {
+  feeling: string;
   intensity: number;
   duration: number;
   durationRemaining: number;
 };
 
-export type Feeling = {
+export type Emotion = {
   id: number;
   name: string;
   avatar: string | null;
   moodPositivity: number;
   moodEnergy: number;
   playerRelationship: number;
-  activeEffects: ActiveEmotionEffect[];
+  activeEffects: ActiveFeelingEffect[];
 };
 
 export type Memory = {
@@ -127,7 +127,7 @@ type GenericMessage<T extends string, S> = {
   endStory: boolean;
   tapToContinue: boolean;
   path: MessagePath;
-  feelings: Feeling[];
+  emotions: Emotion[];
   memories: Memory[];
 };
 

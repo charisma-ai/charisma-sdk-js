@@ -1,7 +1,7 @@
 import fetch from "isomorphic-unfetch";
 import querystring from "query-string";
 
-import { Feeling, Impact, Memory, Message } from "./types";
+import { Emotion, Impact, Memory, Message } from "./types";
 
 const fetchHelper = async <T>(
   endpoint: string,
@@ -163,7 +163,7 @@ export async function getMessageHistory(
 }
 
 export interface GetPlaythroughInfoResult {
-  feelings: Feeling[];
+  emotions: Emotion[];
   memories: Memory[];
   impacts: Impact[];
 }
