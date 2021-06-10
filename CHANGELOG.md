@@ -1,11 +1,11 @@
 # Changelog
 
-### Next
+### v3.0.0
 
 There is a new emotion engine in Charisma! As a result...
 
 - `message.characterMoods` has been removed and replaced with `message.emotions`. This contains each character's current mood and relationship with the player, and any active feeling effects.
-- `setMood` has been removed.
+- `setMood` has been removed. We may add an equivalent API for the new emotion engine in the future. Let us know about your use case if this interests you!
 
 ### v2.3.0
 
