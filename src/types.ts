@@ -156,6 +156,10 @@ export interface ReplyEvent {
   text: string;
 }
 
+export interface ActionEvent {
+  text: string;
+}
+
 // Events sent to client
 
 export interface StartTypingEvent {

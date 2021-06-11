@@ -5,6 +5,7 @@ import Playthrough from "./Playthrough";
 import {
   StartEvent,
   ReplyEvent,
+  ActionEvent,
   SpeechConfig,
   MessageEvent,
   StartTypingEvent,
@@ -84,6 +85,14 @@ export class Conversation extends EventEmitter<ConversationEvents> {
   public tap = (): void => {
     return this.playthroughInstance.addOutgoingEvent("tap", {
       ...this.options,
+      conversationId: this.id,
+    });
+  };
+
+  public action = (event: ActionEvent): void => {
+    return this.playthroughInstance.addOutgoingEvent("action", {
+      ...this.options,
+      ...event,
       conversationId: this.id,
     });
   };

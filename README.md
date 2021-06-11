@@ -167,6 +167,15 @@ To interact with the story, events are sent to and from the server that the WebS
 }
 ```
 
+#### conversation.action({ ... })
+
+```js
+{
+  "action": "pick-up-book",
+  "speech": true // Optional, default false
+}
+```
+
 ### Events received by client
 
 #### conversation.on('reply', (data) => { ... })

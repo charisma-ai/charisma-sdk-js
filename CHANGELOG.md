@@ -2,6 +2,7 @@
 
 ### vNext
 
+- Support for action node/event.
 - `SpeechRecognitionStopOptions` is now exported.
 
 ### v3.0.0
