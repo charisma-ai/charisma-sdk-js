@@ -5,6 +5,7 @@
   <body>
     <button onclick="start()">Start!</button>
     <button onclick="tap()">Tap!</button>
+    <button onclick="action()">Action!</button>
     <button onclick="disconnect()">Disconnect</button>
     <div id="messages"></div>
     <input onkeypress="onKeyPress(event)" placeholder="Type a message..." />
@@ -47,7 +48,9 @@
 
         const div = document.createElement("div");
         div.classList.add("message", "character");
-        div.innerHTML = `<b>${message.message.character.name}</b>: ${message.message.text}`;
+        div.innerHTML = `<b>${message.message.character?.name || "???"}</b>: ${
+          message.message.text
+        }`;
         messagesDiv.appendChild(div);
       });
       conversation.on("playback-start", () => console.log("playback start"));
@@ -99,6 +102,10 @@
 
     function tap() {
       conversation.tap();
+    }
+
+    function action() {
+      conversation.action({ action: "pick-up-book" });
     }
 
     function disconnect() {

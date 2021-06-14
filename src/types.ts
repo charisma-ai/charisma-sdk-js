@@ -157,7 +157,7 @@ export interface ReplyEvent {
 }
 
 export interface ActionEvent {
-  text: string;
+  action: string;
 }
 
 // Events sent to client
