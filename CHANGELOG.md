@@ -3,6 +3,7 @@
 ### v3.2.0
 
 - Added `startGraphId` and `startGraphReferenceId` to `StartEvent` to start from a specific graph ID.
+- Added experimental `pause` and `play` methods to `Playthrough`.
 
 ### v3.1.0
 

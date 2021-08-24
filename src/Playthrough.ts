@@ -147,7 +147,7 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
     return this.activeConversations.get(conversationId);
   };
 
-  public addOutgoingEvent = (eventName: string, eventData: unknown): void => {
+  public addOutgoingEvent = (eventName: string, eventData?: unknown): void => {
     if (this.room) {
       if (this.connectionStatus === "connected") {
         this.room.send(eventName, eventData);
@@ -178,6 +178,14 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
     this.attachRoomHandlers(this.room);
 
     this.shouldReconnect = true;
+  };
+
+  public pause = (): void => {
+    this.addOutgoingEvent("pause");
+  };
+
+  public play = (): void => {
+    this.addOutgoingEvent("play");
   };
 
   private attachRoomHandlers = (room: Colyseus.Room) => {

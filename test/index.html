@@ -7,6 +7,8 @@
     <button onclick="tap()">Tap!</button>
     <button onclick="action()">Action!</button>
     <button onclick="disconnect()">Disconnect</button>
+    <button onclick="pause()">Pause</button>
+    <button onclick="play()">Play</button>
     <div id="messages"></div>
     <input onkeypress="onKeyPress(event)" placeholder="Type a message..." />
   </body>
@@ -81,7 +83,7 @@
 
       playthrough.connect();
 
-      microphone.startListening(timeout);
+      // microphone.startListening(timeout);
     }
 
     function onKeyPress(event) {
@@ -110,6 +112,14 @@
 
     function disconnect() {
       playthrough.disconnect();
+    }
+
+    function pause() {
+      playthrough.pause();
+    }
+
+    function play() {
+      playthrough.play();
     }
   </script>
 </html>
