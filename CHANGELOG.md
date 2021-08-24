@@ -1,5 +1,9 @@
 # Changelog
 
+### v3.2.0
+
+- Added `startGraphId` and `startGraphReferenceId` to `StartEvent` to start from a specific graph ID.
+
 ### v3.1.0
 
 - Support for action node/event.

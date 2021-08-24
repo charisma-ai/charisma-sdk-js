@@ -149,6 +149,8 @@ export interface SpeechConfig {
 
 export interface StartEvent {
   sceneIndex?: number;
+  startGraphId?: number;
+  startGraphReferenceId?: string;
   startNodeId?: number;
 }
 
