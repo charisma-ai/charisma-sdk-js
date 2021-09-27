@@ -36,7 +36,9 @@
 
     async function start() {
       const token = await createPlaythroughToken({ storyId: 27 });
+      console.log("New playthrough token:", token);
       const conversationId = await createConversation(token);
+      console.log("New conversation ID:", conversationId);
 
       playthrough = new Playthrough(token);
 
@@ -57,6 +59,12 @@
       });
       conversation.on("playback-start", () => console.log("playback start"));
       conversation.on("playback-stop", () => console.log("playback stop"));
+      conversation.on("reply", (event) => {
+        const div = document.createElement("div");
+        div.classList.add("message", "player");
+        div.innerHTML = `<b>You</b>: ${event.text}`;
+        messagesDiv.appendChild(div);
+      });
       conversation.setSpeechConfig({
         encoding: "mp3",
         output: "buffer",
@@ -92,6 +100,7 @@
           const text = event.currentTarget.value;
           conversation.reply({ text });
           event.currentTarget.value = "";
+
           const div = document.createElement("div");
           div.classList.add("message", "player");
           div.innerHTML = `<b>You</b>: ${text}`;

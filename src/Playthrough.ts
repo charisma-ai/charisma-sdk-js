@@ -9,6 +9,11 @@ import {
   StopTypingEvent,
   MessageEvent,
   EpisodeCompleteEvent,
+  ConfirmActionEvent,
+  ConfirmReplyEvent,
+  ConfirmResumeEvent,
+  ConfirmStartEvent,
+  ConfirmTapEvent,
 } from "./types";
 // eslint-disable-next-line import/no-named-as-default
 import Conversation, { ConversationOptions } from "./Conversation";
@@ -196,6 +201,12 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
     room.onMessage("message", this.onMessage);
     room.onMessage("episode-complete", this.onEpisodeComplete);
 
+    room.onMessage("action", this.onAction);
+    room.onMessage("reply", this.onReply);
+    room.onMessage("resume", this.onResume);
+    room.onMessage("start", this.onStart);
+    room.onMessage("tap", this.onTap);
+
     room.onError(this.onError);
 
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
@@ -340,6 +351,41 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
     const conversation = this.activeConversations.get(event.conversationId);
     if (conversation) {
       conversation.addIncomingEvent("episode-complete", event);
+    }
+  };
+
+  private onAction = (event: ConfirmActionEvent): void => {
+    const conversation = this.activeConversations.get(event.conversationId);
+    if (conversation) {
+      conversation.addIncomingEvent("action", event);
+    }
+  };
+
+  private onResume = (event: ConfirmResumeEvent): void => {
+    const conversation = this.activeConversations.get(event.conversationId);
+    if (conversation) {
+      conversation.addIncomingEvent("resume", event);
+    }
+  };
+
+  private onReply = (event: ConfirmReplyEvent): void => {
+    const conversation = this.activeConversations.get(event.conversationId);
+    if (conversation) {
+      conversation.addIncomingEvent("reply", event);
+    }
+  };
+
+  private onStart = (event: ConfirmStartEvent): void => {
+    const conversation = this.activeConversations.get(event.conversationId);
+    if (conversation) {
+      conversation.addIncomingEvent("start", event);
+    }
+  };
+
+  private onTap = (event: ConfirmTapEvent): void => {
+    const conversation = this.activeConversations.get(event.conversationId);
+    if (conversation) {
+      conversation.addIncomingEvent("tap", event);
     }
   };
 }

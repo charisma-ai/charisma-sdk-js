@@ -191,3 +191,44 @@ export interface EpisodeCompleteEvent {
   nextEpisodeId: number | null;
   characterMoodChanges: CharacterMoodChanges;
 }
+
+// Confirmation events sent from server
+
+export type ConfirmActionEventPayload = {
+  conversationId: number;
+  action: string;
+};
+
+export type ConfirmReplyEventPayload = {
+  conversationId: number;
+  text: string;
+};
+
+export type ConfirmResumeEventPayload = {
+  conversationId: number;
+};
+
+export type ConfirmStartEventPayload = {
+  conversationId: number;
+  startGraphId?: number;
+  startGraphReferenceId?: string;
+  startNodeId?: number;
+  sceneIndex?: number;
+  resetEmotions?: boolean;
+};
+
+export type ConfirmTapEventPayload = {
+  conversationId: number;
+};
+
+type ConfirmEvent<S = Record<string, never>> = {
+  eventId: string;
+  timestamp: number;
+  playerId: string | null;
+} & S;
+
+export type ConfirmActionEvent = ConfirmEvent<ConfirmActionEventPayload>;
+export type ConfirmReplyEvent = ConfirmEvent<ConfirmReplyEventPayload>;
+export type ConfirmResumeEvent = ConfirmEvent<ConfirmResumeEventPayload>;
+export type ConfirmStartEvent = ConfirmEvent<ConfirmStartEventPayload>;
+export type ConfirmTapEvent = ConfirmEvent<ConfirmTapEventPayload>;

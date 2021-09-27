@@ -11,6 +11,11 @@ import {
   StartTypingEvent,
   StopTypingEvent,
   EpisodeCompleteEvent,
+  ConfirmActionEvent,
+  ConfirmReplyEvent,
+  ConfirmResumeEvent,
+  ConfirmStartEvent,
+  ConfirmTapEvent,
 } from "./types";
 
 export interface ConversationOptions {
@@ -18,10 +23,18 @@ export interface ConversationOptions {
 }
 
 export type ConversationEvents = {
+  // Events sent from server
   message: [MessageEvent];
   "start-typing": [StartTypingEvent];
   "stop-typing": [StopTypingEvent];
   "episode-complete": [EpisodeCompleteEvent];
+  // Confirmation events sent from server
+  action: [ConfirmActionEvent];
+  reply: [ConfirmReplyEvent];
+  resume: [ConfirmResumeEvent];
+  start: [ConfirmStartEvent];
+  tap: [ConfirmTapEvent];
+  // Local events
   "playback-start": [];
   "playback-stop": [];
 };

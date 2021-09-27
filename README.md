@@ -176,9 +176,17 @@ To interact with the story, events are sent to and from the server that the WebS
 }
 ```
 
+#### conversation.resume({ ... })
+
+```js
+{
+  "speech": true // Optional, default false
+}
+```
+
 ### Events received by client
 
-#### conversation.on('reply', (data) => { ... })
+#### conversation.on('message', (event) => { ... })
 
 ```js
 {
@@ -210,6 +218,24 @@ This event has no additional data.
 #### conversation.on('stop-typing', () => { ... })
 
 This event has no additional data.
+
+#### conversation.on('action', (event) => { ... })
+
+#### conversation.on('reply', (event) => { ... })
+
+#### conversation.on('resume', (event) => { ... })
+
+#### conversation.on('start', (event) => { ... })
+
+#### conversation.on('tap', (event) => { ... })
+
+When another player sends specific events to a Charisma playthrough, they are sent back to all other connected players, so that other players can perform actions based on the events, such as displaying their messages in UI.
+
+The events that are currently echoed to all clients are `action`, `reply`, `resume`, `start` and `tap`.
+
+**Important:** These events are **not** emitted for the player that sent the original corresponding event!
+
+Each event includes its committed `eventId` and `timestamp` as well as the original payload (excluding the `speechConfig`).
 
 ### Conversation helpers
 
