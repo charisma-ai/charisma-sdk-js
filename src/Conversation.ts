@@ -59,12 +59,22 @@ export class Conversation extends EventEmitter<ConversationEvents> {
       this.lastEventId = message.eventId;
       this.lastTimestamp = message.timestamp;
     });
+
+    // Please excuse this ghastly hack, but Babel complains about
+    // transforming a function class property with an arrow function inside
+    // (only on non-"modern" builds)
+    this.addIncomingEvent = this.addIncomingEvent.bind(this);
   }
 
-  public addIncomingEvent: Conversation["emit"] = (eventName, ...eventArgs) => {
+  public addIncomingEvent<
+    T extends EventEmitter.EventNames<ConversationEvents>,
+  >(
+    eventName: T,
+    ...eventArgs: EventEmitter.EventArgs<ConversationEvents, T>
+  ): true {
     this.eventQueue.add(() => this.emit(eventName, ...eventArgs));
     return true;
-  };
+  }
 
   public start = (event: StartEvent = {}): void => {
     return this.playthroughInstance.addOutgoingEvent("start", {

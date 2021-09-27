@@ -1,5 +1,11 @@
 import EventEmitter from "eventemitter3";
 
+import type {
+  SpeechRecognition,
+  SpeechRecognitionErrorCode,
+  SpeechRecognitionEvent,
+} from "./speech-types";
+
 interface Constructable<T> {
   new (): T;
 }

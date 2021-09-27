@@ -1,5 +1,9 @@
 # Changelog
 
+### vNext
+
+- Updated dependencies.
+
 ### v3.2.0
 
 - Added `startGraphId` and `startGraphReferenceId` to `StartEvent` to start from a specific graph ID.
