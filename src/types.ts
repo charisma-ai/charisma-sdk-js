@@ -34,6 +34,7 @@ export type Memory = {
 export type MessagePathItem = {
   id: number;
   type: "node" | "edge";
+  graphId: number;
 };
 export type MessagePath = MessagePathItem[];
 
