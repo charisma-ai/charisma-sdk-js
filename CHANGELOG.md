@@ -1,6 +1,6 @@
 # Changelog
 
-### vNext
+### v3.3.0
 
 - It's now possible to subscribe to events that are sent from other players, such as other players' messages. This can be done by adding a subscriber to a conversation to listen for the corresponding event, e.g. `conversation.on("reply", () => { /* remote player's reply */ })`. These handlers will _not_ be fired for messages sent from the local connected client, only for remote clients.
 - Add missing `graphId: number` to `MessagePathItem` type.
