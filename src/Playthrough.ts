@@ -2,6 +2,8 @@ import EventEmitter from "eventemitter3";
 import * as Colyseus from "colyseus.js";
 import jwtDecode from "jwt-decode";
 
+import { version as pkgVersion } from "../package.json";
+
 import * as api from "./api";
 
 import {
@@ -178,6 +180,7 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
     this.room = await this.client.joinOrCreate("chat", {
       playthroughId: this.playthroughId,
       token: this.token,
+      sdkInfo: { sdkId: "js", sdkVersion: pkgVersion, protocolVersion: 1 },
     });
 
     this.attachRoomHandlers(this.room);
@@ -270,9 +273,9 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
         }
 
         // eslint-disable-next-line no-await-in-loop
-        await new Promise<void>((resolve) =>
-          setTimeout(() => resolve(), 5000 + Math.floor(Math.random() * 1000)),
-        );
+        await new Promise<void>((resolve) => {
+          setTimeout(() => resolve(), 5000 + Math.floor(Math.random() * 1000));
+        });
       }
 
       // We failed to both reconnect into the same room, and a new room, so disconnect.
