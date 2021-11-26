@@ -80,6 +80,7 @@ Use this to set up a new playthrough.
 - `storyId` (`number`): The `id` of the story that you want to create a new playthrough for. The story must be published, unless a Charisma.ai user token has been passed and the user matches the owner of the story.
 - `version` (`number`, optional): The `version` of the story that you want to create a new playthrough for. If omitted, it will default to the most recent published version. To get the draft version of a story, pass `-1` and an `apiKey`.
 - `apiKey` (`string`, optional): To access draft, test or unpublished versions of your story, pass an `apiKey`. The API key can be found on the story overview page.
+- `languageCode` (`string`, optional): To play a story in a language other than English (`en`, the default), pass a BCP-47 `languageCode`. For example, to play in Italian, use `it`.
 
 Returns a promise that resolves with the token.
 
@@ -88,6 +89,7 @@ const token = await createPlaythroughToken({
   storyId: 12,
   version: 4,
   apiKey: "...",
+  languageCode: "en",
 });
 ```
 
@@ -367,4 +369,4 @@ Emitted when the speaker finishes playing all audio.
 
 ### Questions
 
-For further details or any questions, feel free to get in touch with [ben@charisma.ai](mailto:ben@charisma.ai)
+For further details or any questions, feel free to get in touch at [hello@charisma.ai](mailto:hello@charisma.ai), or head to the [Charisma docs](https://charisma.ai/docs)!

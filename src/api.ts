@@ -69,6 +69,10 @@ export type CreatePlaythroughTokenOptions = {
    * To access draft, test or unpublished versions of your story, pass an `apiKey`. The API key can be found on the story overview page.
    */
   apiKey?: string;
+  /**
+   * To play a story in a language other than English (`en`, the default), pass a BCP-47 `languageCode`. For example, to play in Italian, use `it`.
+   */
+  languageCode?: string;
 };
 
 export type CreatePlaythroughTokenResult = string;
@@ -101,6 +105,7 @@ export async function createPlaythroughToken(
         body: JSON.stringify({
           storyId: options.storyId,
           version: options.version,
+          languageCode: options.languageCode,
         }),
         headers: authHeader ? { Authorization: authHeader } : undefined,
         method: "POST",
