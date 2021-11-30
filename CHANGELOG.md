@@ -1,6 +1,6 @@
 # Changelog
 
-### vNext
+### v3.4.0
 
 - Added `languageCode` option to `createPlaythroughToken`, to play Charisma stories in languages other than English.
 - Added SDK info to joining a room, for Charisma to track which SDK versions are in use.
