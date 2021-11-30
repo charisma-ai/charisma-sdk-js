@@ -1,5 +1,9 @@
 # Changelog
 
+### v3.4.1
+
+- `package.json` now references correct emitted types location.
+
 ### v3.4.0
 
 - Added `languageCode` option to `createPlaythroughToken`, to play Charisma stories in languages other than English.
