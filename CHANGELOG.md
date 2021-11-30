@@ -1,5 +1,9 @@
 # Changelog
 
+### v3.4.2
+
+- SDK info is now also sent upon reconnection to the room.
+
 ### v3.4.1
 
 - `package.json` now references correct emitted types location.
