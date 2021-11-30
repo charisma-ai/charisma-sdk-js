@@ -22,6 +22,8 @@ import Conversation, { ConversationOptions } from "./Conversation";
 
 export type ConnectionStatus = "disconnected" | "connecting" | "connected";
 
+const sdkInfo = { sdkId: "js", sdkVersion: pkgVersion, protocolVersion: 1 };
+
 type PlaythroughEvents = {
   "connection-status": [ConnectionStatus];
   error: [any];
@@ -180,7 +182,7 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
     this.room = await this.client.joinOrCreate("chat", {
       playthroughId: this.playthroughId,
       token: this.token,
-      sdkInfo: { sdkId: "js", sdkVersion: pkgVersion, protocolVersion: 1 },
+      sdkInfo,
     });
 
     this.attachRoomHandlers(this.room);
@@ -256,6 +258,7 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
             const newRoom = await this.client?.joinOrCreate("chat", {
               playthroughId: this.playthroughId,
               token: this.token,
+              sdkInfo,
             });
             if (newRoom) {
               this.attachRoomHandlers(newRoom);
