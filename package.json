@@ -6,7 +6,7 @@
   "main": "dist/index.js",
   "umd:main": "dist/index.umd.js",
   "module": "dist/index.module.js",
-  "types": "dist/index.d.ts",
+  "types": "dist/src/index.d.ts",
   "sideEffects": false,
   "repository": "https://github.com/charisma-ai/charisma-sdk-js",
   "author": "Charisma Entertainment Ltd <hello@charisma.ai> (https://charisma.ai)",
