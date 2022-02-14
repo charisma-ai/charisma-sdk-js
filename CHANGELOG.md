@@ -1,5 +1,9 @@
 # Changelog
 
+### v3.5.0
+
+- Added support for Decentraland.
+
 ### v3.4.2
 
 - SDK info is now also sent upon reconnection to the room.

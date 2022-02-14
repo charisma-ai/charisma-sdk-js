@@ -6,7 +6,7 @@
   "main": "dist/index.js",
   "umd:main": "dist/index.umd.js",
   "module": "dist/index.module.js",
-  "types": "dist/src/index.d.ts",
+  "typings": "dist/src/index.d.ts",
   "sideEffects": false,
   "repository": "https://github.com/charisma-ai/charisma-sdk-js",
   "author": "Charisma Entertainment Ltd <hello@charisma.ai> (https://charisma.ai)",
@@ -16,12 +16,13 @@
   ],
   "scripts": {
     "build:non-umd": "microbundle --format modern,es,cjs --compress false",
-    "build:umd": "microbundle --format umd --name CharismaSDK --external none --alias httpie=./node_modules/httpie/xhr/index.js",
+    "build:umd": "microbundle --format umd --name CharismaSDK --external none --alias httpie=./node_modules/httpie/xhr/index.js --amd-name '@charisma-ai/sdk'",
     "build": "yarn run build:non-umd && yarn run build:umd",
     "cm": "git-cz",
     "lint": "eslint --fix --ext js,ts,tsx .",
     "prebuild": "rimraf dist",
     "prepublish": "yarn run build",
+    "postinstall": "patch-package",
     "semantic-release": "semantic-release"
   },
   "dependencies": {
@@ -48,6 +49,8 @@
     "husky": "^7.0.4",
     "lint-staged": "^12.1.2",
     "microbundle": "^0.14.2",
+    "patch-package": "^6.4.7",
+    "postinstall-postinstall": "^2.1.0",
     "prettier": "^2.5.0",
     "rimraf": "^3.0.2",
     "semantic-release": "^18.0.1",
@@ -57,5 +60,8 @@
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
+  },
+  "decentralandLibrary": {
+    "main": "dist/index.umd.js"
   }
 }
