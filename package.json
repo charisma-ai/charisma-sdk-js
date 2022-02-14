@@ -32,6 +32,8 @@
     "isomorphic-unfetch": "^3.1.0",
     "jwt-decode": "^3.1.2",
     "p-queue": "^6.6.2",
+    "patch-package": "^6.4.7",
+    "postinstall-postinstall": "^2.1.0",
     "query-string": "^7.0.1"
   },
   "devDependencies": {
@@ -49,8 +51,6 @@
     "husky": "^7.0.4",
     "lint-staged": "^12.1.2",
     "microbundle": "^0.14.2",
-    "patch-package": "^6.4.7",
-    "postinstall-postinstall": "^2.1.0",
     "prettier": "^2.5.0",
     "rimraf": "^3.0.2",
     "semantic-release": "^18.0.1",
