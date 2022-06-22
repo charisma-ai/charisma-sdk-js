@@ -42,7 +42,7 @@ async function run() {
     }
   });
   conversation.setSpeechConfig({
-    encoding: "mp3",
+    encoding: ["ogg", "mp3"],
     output: "buffer",
   });
 
@@ -247,12 +247,12 @@ This sets the speech configuration to use for all events in the conversation unt
 
 ```json
 {
-  "encoding": "mp3",
+  "encoding": ["ogg", "mp3"],
   "output": "buffer"
 }
 ```
 
-`encoding` is the file format of the resulting speech: `mp3`, `ogg` or `pcm`.
+`encoding` is the file format of the resulting speech: `mp3`, `ogg`, `wav` or `pcm`. If an array, Charisma will use the first encoding that the voice supports, useful for cases where a voice synthesis service of a particular voice does not support the "default" encoding you wish to use.
 
 `output` determines whether the speech received back is a `buffer` (a byte array) or whether it should instead be a `url` pointing to the audio file.
 

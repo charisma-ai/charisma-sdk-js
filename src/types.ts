@@ -142,7 +142,7 @@ export type Message =
 export type SpeechEncoding = "mp3" | "ogg" | "pcm";
 export type SpeechOutput = "url" | "buffer";
 export interface SpeechConfig {
-  encoding?: SpeechEncoding;
+  encoding?: SpeechEncoding | SpeechEncoding[];
   output?: SpeechOutput;
 }
 
