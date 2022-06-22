@@ -1,5 +1,9 @@
 # Changelog
 
+### vNext
+
+- Added experimental support for intermediate client events. These events can be sent to Charisma to prevent characters from talking if the player is still speaking or typing. This can only be enabled for a story by getting in touch at [hello@charisma.ai](mailto:hello@charisma.ai).
+
 ### v3.5.0
 
 - Added support for Decentraland.

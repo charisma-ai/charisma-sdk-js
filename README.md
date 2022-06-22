@@ -359,11 +359,11 @@ conversation.on("message", async (data) => {
 });
 ```
 
-#### speaker.on('start', () => { ... })
+#### speaker.on('start', () => { ... })
 
 Emitted when the speaker starts playing any audio.
 
-#### speaker.on('stop', () => { ... })
+#### speaker.on('stop', () => { ... })
 
 Emitted when the speaker finishes playing all audio.
 

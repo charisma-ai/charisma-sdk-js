@@ -16,6 +16,7 @@ import {
   ConfirmResumeEvent,
   ConfirmStartEvent,
   ConfirmTapEvent,
+  ReplyIntermediateEvent,
 } from "./types";
 
 export interface ConversationOptions {
@@ -99,6 +100,14 @@ export class Conversation extends EventEmitter<ConversationEvents> {
 
   public reply = (event: ReplyEvent): void => {
     return this.playthroughInstance.addOutgoingEvent("reply", {
+      ...this.options,
+      ...event,
+      conversationId: this.id,
+    });
+  };
+
+  public replyIntermediate = (event: ReplyIntermediateEvent): void => {
+    return this.playthroughInstance.addOutgoingEvent("reply-intermediate", {
       ...this.options,
       ...event,
       conversationId: this.id,

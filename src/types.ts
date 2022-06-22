@@ -155,8 +155,21 @@ export interface StartEvent {
   startNodeId?: number;
 }
 
+export type InputType = "keyboard" | "microphone";
+
 export interface ReplyEvent {
   text: string;
+  inputType: InputType;
+}
+
+export interface ReplyIntermediateEvent {
+  text: string;
+  inputType: InputType;
+}
+
+export interface StartInputEvent {
+  inputType: InputType;
+  timeout: number;
 }
 
 export interface ActionEvent {
