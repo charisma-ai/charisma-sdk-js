@@ -139,7 +139,7 @@ export type Message =
 
 // Speech config (set on Conversation)
 
-export type SpeechEncoding = "mp3" | "ogg" | "pcm";
+export type SpeechEncoding = "mp3" | "ogg" | "pcm" | "wav";
 export type SpeechOutput = "url" | "buffer";
 export interface SpeechConfig {
   encoding?: SpeechEncoding | SpeechEncoding[];

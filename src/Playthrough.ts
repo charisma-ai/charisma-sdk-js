@@ -27,7 +27,7 @@ const sdkInfo = { sdkId: "js", sdkVersion: pkgVersion, protocolVersion: 1 };
 type PlaythroughEvents = {
   "connection-status": [ConnectionStatus];
   error: [any];
-  problem: [{ type: string; error: string }];
+  problem: [{ code: string; error: string }];
 };
 
 class Playthrough extends EventEmitter<PlaythroughEvents> {
@@ -328,7 +328,7 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
     this.emit("error", { message, code });
   };
 
-  private onProblem = (problem: { type: string; error: string }): void => {
+  private onProblem = (problem: { code: string; error: string }): void => {
     this.emit("problem", problem);
   };
 
