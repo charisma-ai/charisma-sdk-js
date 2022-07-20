@@ -17,6 +17,7 @@ import {
   ConfirmStartEvent,
   ConfirmTapEvent,
   ReplyIntermediateEvent,
+  ProblemEvent,
 } from "./types";
 
 export interface ConversationOptions {
@@ -29,6 +30,7 @@ export type ConversationEvents = {
   "start-typing": [StartTypingEvent];
   "stop-typing": [StopTypingEvent];
   "episode-complete": [EpisodeCompleteEvent];
+  problem: [ProblemEvent];
   // Confirmation events sent from server
   action: [ConfirmActionEvent];
   reply: [ConfirmReplyEvent];

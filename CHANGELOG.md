@@ -1,5 +1,9 @@
 # Changelog
 
+### v3.6.1
+
+- `problem` events scoped to a conversation can now be listened to via `conversation.on("problem", ...)`
+
 ### v3.6.0
 
 - It's now possible to specify multiple supported speech encodings in `speechConfig` by passing an array instead of a string. Charisma will use the first encoding that the voice synthesis service supports.

@@ -159,17 +159,12 @@ export type InputType = "keyboard" | "microphone";
 
 export interface ReplyEvent {
   text: string;
-  inputType: InputType;
+  inputType?: InputType;
 }
 
 export interface ReplyIntermediateEvent {
   text: string;
   inputType: InputType;
-}
-
-export interface StartInputEvent {
-  inputType: InputType;
-  timeout: number;
 }
 
 export interface ActionEvent {
@@ -205,6 +200,12 @@ export interface EpisodeCompleteEvent {
   nextEpisodeId: number | null;
   characterMoodChanges: CharacterMoodChanges;
 }
+
+export type ProblemEvent = {
+  code: string;
+  error: string;
+  conversationId?: number;
+};
 
 // Confirmation events sent from server
 

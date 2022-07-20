@@ -16,6 +16,7 @@ import {
   ConfirmResumeEvent,
   ConfirmStartEvent,
   ConfirmTapEvent,
+  ProblemEvent,
 } from "./types";
 // eslint-disable-next-line import/no-named-as-default
 import Conversation, { ConversationOptions } from "./Conversation";
@@ -328,8 +329,14 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
     this.emit("error", { message, code });
   };
 
-  private onProblem = (problem: { code: string; error: string }): void => {
-    this.emit("problem", problem);
+  private onProblem = (event: ProblemEvent): void => {
+    this.emit("problem", event);
+    if (event.conversationId) {
+      const conversation = this.activeConversations.get(event.conversationId);
+      if (conversation) {
+        conversation.addIncomingEvent("problem", event);
+      }
+    }
   };
 
   private onStartTyping = (event: StartTypingEvent): void => {
