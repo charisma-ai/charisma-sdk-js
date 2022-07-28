@@ -255,3 +255,8 @@ export type ConfirmReplyEvent = ConfirmEvent<ConfirmReplyEventPayload>;
 export type ConfirmResumeEvent = ConfirmEvent<ConfirmResumeEventPayload>;
 export type ConfirmStartEvent = ConfirmEvent<ConfirmStartEventPayload>;
 export type ConfirmTapEvent = ConfirmEvent<ConfirmTapEventPayload>;
+
+export type SpeechRecognitionStartEvent = {
+  service: string;
+  serviceOptions: any;
+};
