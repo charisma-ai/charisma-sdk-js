@@ -1,6 +1,6 @@
 # Changelog
 
-### vNext
+### v3.7.0
 
 - Add support for `forkPlaythrough` API. This enables a player to upgrade to the latest published version from their old playthrough, copying across memories and emotions into the new playthrough, and returning the new token. Note that conversations are not carried across.
 
