@@ -279,3 +279,25 @@ export async function restartFromEventId(
     },
   );
 }
+
+export type ForkPlaythroughTokenResult = {
+  token: string;
+  /** @deprecated */
+  playthroughId: number;
+  playthroughUuid: string;
+};
+
+export async function forkPlaythroughToken(
+  token: string,
+  apiOptions?: CommonApiOptions,
+): Promise<ForkPlaythroughTokenResult> {
+  const result = await fetchHelper<ForkPlaythroughTokenResult>(
+    `${apiOptions?.baseUrl || globalBaseUrl}/play/fork-playthrough`,
+    {
+      body: JSON.stringify({}),
+      headers: { Authorization: `Bearer ${token}` },
+      method: "POST",
+    },
+  );
+  return result;
+}

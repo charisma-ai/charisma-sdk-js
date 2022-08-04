@@ -1,5 +1,9 @@
 # Changelog
 
+### vNext
+
+- Add support for `forkPlaythrough` API. This enables a player to upgrade to the latest published version from their old playthrough, copying across memories and emotions into the new playthrough, and returning the new token. Note that conversations are not carried across.
+
 ### v3.6.1
 
 - `problem` events scoped to a conversation can now be listened to via `conversation.on("problem", ...)`
