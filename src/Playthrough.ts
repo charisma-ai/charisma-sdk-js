@@ -89,10 +89,31 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
   }
 
   public setMemory(
-    memoryIdOrRecallValue: number | string,
+    recallValue: string,
     saveValue: string | null,
+  ): ReturnType<typeof api.setMemory>;
+
+  public setMemory(
+    memories: api.MemoryToSet[],
+  ): ReturnType<typeof api.setMemory>;
+
+  public setMemory(
+    memoryRecallValueOrMemories: string | api.MemoryToSet[],
+    saveValue?: string | null,
   ): ReturnType<typeof api.setMemory> {
-    return api.setMemory(this.token, memoryIdOrRecallValue, saveValue, {
+    let memories: api.MemoryToSet[] = [];
+    if (Array.isArray(memoryRecallValueOrMemories)) {
+      memories = memoryRecallValueOrMemories;
+    } else {
+      memories = [
+        {
+          recallValue: memoryRecallValueOrMemories,
+          saveValue: saveValue as string | null,
+        },
+      ];
+    }
+
+    return api.setMemory(this.token, memories, {
       baseUrl: this.baseUrl,
     });
   }

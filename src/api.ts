@@ -214,20 +214,45 @@ export async function getPlaythroughInfo(
 //   return result;
 // }
 
+export type MemoryToSet = { recallValue: string; saveValue: string | null };
+
 export async function setMemory(
   token: string,
-  memoryIdOrRecallValue: number | string,
+  memoryRecallValue: string,
   saveValue: string | null,
   apiOptions?: CommonApiOptions,
+): Promise<void>;
+export async function setMemory(
+  token: string,
+  memoriesToSet: MemoryToSet[],
+  apiOptions?: CommonApiOptions,
+): Promise<void>;
+export async function setMemory(
+  token: string,
+  memoryRecallValueOrMemories: string | MemoryToSet[],
+  saveValueOrApiOptions?: string | null | CommonApiOptions,
+  apiOptions?: CommonApiOptions,
 ): Promise<void> {
+  let resolvedApiOptions = apiOptions;
+
+  let memories: MemoryToSet[] = [];
+  if (Array.isArray(memoryRecallValueOrMemories)) {
+    memories = memoryRecallValueOrMemories;
+    resolvedApiOptions = saveValueOrApiOptions as CommonApiOptions | undefined;
+  } else {
+    memories = [
+      {
+        recallValue: memoryRecallValueOrMemories,
+        saveValue: saveValueOrApiOptions as string | null,
+      },
+    ];
+  }
+
   await fetchHelper<void>(
-    `${apiOptions?.baseUrl || globalBaseUrl}/play/set-memory`,
+    `${resolvedApiOptions?.baseUrl || globalBaseUrl}/play/set-memory`,
     {
       body: JSON.stringify({
-        ...(typeof memoryIdOrRecallValue === "number"
-          ? { memoryId: memoryIdOrRecallValue }
-          : { memoryRecallValue: memoryIdOrRecallValue }),
-        saveValue,
+        memories,
       }),
       headers: { Authorization: `Bearer ${token}` },
       method: "POST",

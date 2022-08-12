@@ -42,6 +42,8 @@
 
       playthrough = new Playthrough(token);
 
+      await playthrough.setMemory("winston_name_guess", "Bob");
+
       const timeout = 10000;
 
       conversation = playthrough.joinConversation(conversationId);
