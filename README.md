@@ -258,7 +258,7 @@ This sets the speech configuration to use for all events in the conversation unt
 
 ## Microphone
 
-The microphone can be used to provide speech-to-text functionality. **This is only available in browsers that support `SpeechRecognition`, currently Google Chrome only.**
+The microphone can be used to provide speech-to-text functionality. **This is only available in browsers that support `SpeechRecognition`. Please refer to [this browser compatibility table](https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition#browser_compatibility) for more details.**
 
 ```js
 import { Microphone } from "@charisma-ai/sdk";
