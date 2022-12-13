@@ -34,6 +34,7 @@ export interface SpeechRecognitionStopOptions {
 }
 
 type MicrophoneEvents = {
+  result: [SpeechRecognitionEvent];
   recognise: [string];
   "recognise-interim": [string];
   error: [SpeechRecognitionErrorCode];
@@ -134,13 +135,18 @@ class Microphone extends EventEmitter<MicrophoneEvents> {
   };
 
   private onRecognitionResult = (event: SpeechRecognitionEvent): void => {
-    if (event.results && event.results[0] && event.results[0][0]) {
-      const message = event.results[0][0].transcript.trim();
-      if (event.results[0].isFinal === false) {
-        this.emit("recognise-interim", message);
-      } else {
-        this.emit("recognise", message);
-      }
+    this.emit("result", event);
+
+    if (event.results.length === 0) {
+      return;
+    }
+
+    const lastResult = event.results[event.results.length - 1];
+    const message = lastResult[0].transcript.trim();
+    if (lastResult.isFinal) {
+      this.emit("recognise", message);
+    } else {
+      this.emit("recognise-interim", message);
     }
   };
 }

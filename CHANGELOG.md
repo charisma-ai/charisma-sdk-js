@@ -1,5 +1,10 @@
 # Changelog
 
+### vNext
+
+- Added `result` event to `Microphone` so clients can subscribe to raw `SpeechRecognition` events.
+- `recognise` and `recognise-interim` now emit the text of the _last_ result instead of the _first_ result in the `SpeechRecognition` event if `continuous` is `true`.
+
 ### v3.8.0
 
 - Multiple memories can now be set at once using the `setMemory` call.
