@@ -24,44 +24,42 @@
   "scripts": {
     "build:non-umd": "microbundle --format modern,es,cjs --compress false",
     "build:umd": "microbundle --format umd --name CharismaSDK --external none --alias httpie=./node_modules/httpie/xhr/index.js --amd-name '@charisma-ai/sdk'",
-    "build": "yarn run build:non-umd && yarn run build:umd",
+    "build": "pnpm run build:non-umd && pnpm run build:umd",
     "cm": "git-cz",
     "lint": "eslint --fix --ext js,ts,tsx .",
     "prebuild": "rimraf dist",
-    "prepublish": "yarn run build",
-    "postinstall": "patch-package",
+    "prepublish": "pnpm run build",
     "semantic-release": "semantic-release"
   },
   "dependencies": {
     "@types/node-fetch": "^2.6.2",
     "colyseus.js": "^0.14.13",
-    "eventemitter3": "^4.0.7",
+    "eventemitter3": "^5.0.0",
     "isomorphic-unfetch": "^3.1.0",
     "jwt-decode": "^3.1.2",
     "p-queue": "^6.6.2",
-    "patch-package": "^6.4.7",
     "postinstall-postinstall": "^2.1.0",
     "query-string": "^7.1.1"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.30.7",
-    "@typescript-eslint/parser": "^5.30.7",
-    "commitizen": "^4.2.5",
+    "@typescript-eslint/eslint-plugin": "^5.46.1",
+    "@typescript-eslint/parser": "^5.46.1",
+    "commitizen": "^4.2.6",
     "cross-env": "^7.0.3",
     "cz-conventional-changelog": "^3.3.0",
-    "eslint": "^8.20.0",
+    "eslint": "^8.29.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-import": "^2.26.0",
-    "eslint-plugin-jsx-a11y": "^6.6.0",
+    "eslint-plugin-jsx-a11y": "^6.6.1",
     "eslint-plugin-prettier": "^4.2.1",
-    "husky": "^8.0.1",
-    "lint-staged": "^13.0.3",
-    "microbundle": "^0.15.0",
-    "prettier": "^2.7.1",
+    "husky": "^8.0.2",
+    "lint-staged": "^13.1.0",
+    "microbundle": "^0.15.1",
+    "prettier": "^2.8.1",
     "rimraf": "^3.0.2",
-    "semantic-release": "^19.0.3",
-    "typescript": "^4.7.4"
+    "semantic-release": "^19.0.5",
+    "typescript": "^4.9.4"
   },
   "config": {
     "commitizen": {
@@ -70,5 +68,10 @@
   },
   "decentralandLibrary": {
     "main": "dist/index.umd.js"
+  },
+  "pnpm": {
+    "patchedDependencies": {
+      "microbundle@0.15.1": "patches/microbundle@0.15.1.patch"
+    }
   }
 }
