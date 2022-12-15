@@ -2,6 +2,11 @@
 
 ### vNext
 
+- **BREAKING:** `playthroughId`s and `conversationId`s have been changed from `number` to `string` type everywhere in this SDK, and renamed to `playthroughUuid` and `conversationUuid`.
+- **BREAKING:** `api.createPlaythroughToken`, `api.createConversation` and `api.createCharacterConversation` all now return an object instead of a scalar, to facilitate any future changes to these methods.
+
+### v3.9.0
+
 - Added `result` event to `Microphone` so clients can subscribe to raw `SpeechRecognition` events.
 - `recognise` and `recognise-interim` now emit the text of the _last_ result instead of the _first_ result in the `SpeechRecognition` event if `continuous` is `true`.
 

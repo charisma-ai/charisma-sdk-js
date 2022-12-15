@@ -43,7 +43,7 @@ export type ConversationEvents = {
 };
 
 export class Conversation extends EventEmitter<ConversationEvents> {
-  private id: number;
+  private uuid: string;
 
   private eventQueue: PQueue = new PQueue();
 
@@ -56,13 +56,13 @@ export class Conversation extends EventEmitter<ConversationEvents> {
   private options: ConversationOptions = {};
 
   public constructor(
-    conversationId: number,
+    conversationUuid: string,
     playthroughInstance: Playthrough,
     options?: ConversationOptions,
   ) {
     super();
 
-    this.id = conversationId;
+    this.uuid = conversationUuid;
     this.playthroughInstance = playthroughInstance;
 
     if (options) {
@@ -96,7 +96,7 @@ export class Conversation extends EventEmitter<ConversationEvents> {
     return this.playthroughInstance.addOutgoingEvent("start", {
       ...this.options,
       ...event,
-      conversationId: this.id,
+      conversationUuid: this.uuid,
     });
   };
 
@@ -104,7 +104,7 @@ export class Conversation extends EventEmitter<ConversationEvents> {
     return this.playthroughInstance.addOutgoingEvent("reply", {
       ...this.options,
       ...event,
-      conversationId: this.id,
+      conversationUuid: this.uuid,
     });
   };
 
@@ -112,14 +112,14 @@ export class Conversation extends EventEmitter<ConversationEvents> {
     return this.playthroughInstance.addOutgoingEvent("reply-intermediate", {
       ...this.options,
       ...event,
-      conversationId: this.id,
+      conversationUuid: this.uuid,
     });
   };
 
   public tap = (): void => {
     return this.playthroughInstance.addOutgoingEvent("tap", {
       ...this.options,
-      conversationId: this.id,
+      conversationUuid: this.uuid,
     });
   };
 
@@ -127,14 +127,14 @@ export class Conversation extends EventEmitter<ConversationEvents> {
     return this.playthroughInstance.addOutgoingEvent("action", {
       ...this.options,
       ...event,
-      conversationId: this.id,
+      conversationUuid: this.uuid,
     });
   };
 
   public resume = (): void => {
     return this.playthroughInstance.addOutgoingEvent("resume", {
       ...this.options,
-      conversationId: this.id,
+      conversationUuid: this.uuid,
     });
   };
 
@@ -149,7 +149,7 @@ export class Conversation extends EventEmitter<ConversationEvents> {
       this.eventQueue.pause();
       try {
         const { messages } = await this.playthroughInstance.getMessageHistory(
-          this.id,
+          this.uuid,
           this.lastEventId,
         );
         if (messages.length > 0) {
@@ -159,12 +159,15 @@ export class Conversation extends EventEmitter<ConversationEvents> {
             // TODO: Remove this when Safari supports `bigint`s!
             if (typeof BigInt === "undefined") {
               if (message.timestamp > (this.lastTimestamp as number)) {
-                this.emit("message", { ...message, conversationId: this.id });
+                this.emit("message", {
+                  ...message,
+                  conversationUuid: this.uuid,
+                });
               }
             } else if (
               BigInt(message.eventId) > BigInt(this.lastEventId as string)
             ) {
-              this.emit("message", { ...message, conversationId: this.id });
+              this.emit("message", { ...message, conversationUuid: this.uuid });
             }
           });
           this.emit("playback-stop");

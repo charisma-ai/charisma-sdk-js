@@ -35,10 +35,10 @@
     const messagesDiv = document.getElementById("messages");
 
     async function start() {
-      const token = await createPlaythroughToken({ storyId: 27 });
+      const { token } = await createPlaythroughToken({ storyId: 27 });
       console.log("New playthrough token:", token);
-      const conversationId = await createConversation(token);
-      console.log("New conversation ID:", conversationId);
+      const { conversationUuid } = await createConversation(token);
+      console.log("New conversation ID:", conversationUuid);
 
       playthrough = new Playthrough(token);
 
@@ -46,7 +46,7 @@
 
       const timeout = 10000;
 
-      conversation = playthrough.joinConversation(conversationId);
+      conversation = playthrough.joinConversation(conversationUuid);
       conversation.on("start-typing", () => console.log("started typing"));
       conversation.on("stop-typing", () => console.log("stopped typing"));
       conversation.on("message", (message) => {

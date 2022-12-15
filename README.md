@@ -16,14 +16,14 @@ import {
 } from "@charisma-ai/sdk";
 
 async function run() {
-  const token = await createPlaythroughToken({ storyId: 4 });
-  const conversationId = await createConversation(token);
+  const { token } = await createPlaythroughToken({ storyId: 4 });
+  const { conversationUuid } = await createConversation(token);
 
   const playthrough = new Playthrough(token);
   const speaker = new Speaker();
   const microphone = new Microphone();
 
-  const conversation = playthrough.joinConversation(conversationId);
+  const conversation = playthrough.joinConversation(conversationUuid);
   conversation.on("start-typing", () =>
     console.log("Character started typing..."),
   );
@@ -85,7 +85,7 @@ Use this to set up a new playthrough.
 Returns a promise that resolves with the token.
 
 ```js
-const token = await createPlaythroughToken({
+const { token } = await createPlaythroughToken({
   storyId: 12,
   version: 4,
   apiKey: "...",
@@ -100,7 +100,7 @@ A playthrough can have many simultaneous conversations. In order to start intera
 - `playthroughToken` (`string`): The token generated with `createPlaythroughToken`.
 
 ```js
-const conversationId = await createConversation(token);
+const { conversationUuid } = await createConversation(token);
 ```
 
 ## Playthrough
@@ -113,12 +113,12 @@ Create a new `Playthrough` instance to connect to a playthrough and interact wit
 
 This makes the `Playthrough` instance listen out for events for a particular conversation, and returns a `Conversation` that events can be called on and event listeners attached.
 
-- `conversationId` (`string`): The conversation id generated with `createConversation`.
+- `conversationUuid` (`string`): The conversation UUID generated with `createConversation`.
 
 Returns a `Conversation`, which can be used to send and receive events bound to that conversation.
 
 ```js
-playthrough.joinConversation(conversationId);
+playthrough.joinConversation(conversationUuid);
 ```
 
 #### Playthrough.connect

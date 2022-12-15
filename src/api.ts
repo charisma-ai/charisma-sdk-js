@@ -75,7 +75,20 @@ export type CreatePlaythroughTokenOptions = {
   languageCode?: string;
 };
 
-export type CreatePlaythroughTokenResult = string;
+export type CreatePlaythroughTokenResult = {
+  /**
+   * The playthrough token, used for connecting to this playthrough. It never expires,
+   * so can be saved in a secure place for players to continue playing between sessions.
+   *
+   * To create a playthrough with the token, use `new Playthrough(token)`.
+   */
+  token: string;
+  /**
+   * The unique identifier of the playthrough, encoded inside the token. It can be useful
+   * as a debugging tool.
+   */
+  playthroughUuid: string;
+};
 
 export async function createPlaythroughToken(
   options: CreatePlaythroughTokenOptions,
@@ -99,51 +112,67 @@ export async function createPlaythroughToken(
   }
 
   try {
-    const { token } = await fetchHelper<{ token: string }>(
-      `${apiOptions?.baseUrl || globalBaseUrl}/play/token`,
-      {
-        body: JSON.stringify({
-          storyId: options.storyId,
-          version: options.version,
-          languageCode: options.languageCode,
-        }),
-        headers: authHeader ? { Authorization: authHeader } : undefined,
-        method: "POST",
-      },
-    );
-    return token;
+    const result = await fetchHelper<{
+      token: string;
+      playthroughUuid: string;
+    }>(`${apiOptions?.baseUrl || globalBaseUrl}/play/token`, {
+      body: JSON.stringify({
+        storyId: options.storyId,
+        version: options.version,
+        languageCode: options.languageCode,
+      }),
+      headers: authHeader ? { Authorization: authHeader } : undefined,
+      method: "POST",
+    });
+    return result;
   } catch (err) {
     throw new Error(`A playthrough token could not be generated: ${err}`);
   }
 }
 
+export type CreateConversationResult = {
+  /**
+   * The unique identifier of the created conversation. Pass this into `playthrough.joinConversation`
+   * to get a scoped `Conversation` instance.
+   */
+  conversationUuid: string;
+};
+
 export async function createConversation(
   token: string,
   apiOptions?: CommonApiOptions,
-): Promise<number> {
-  const { conversationId } = await fetchHelper<{
-    conversationId: number;
+): Promise<CreateConversationResult> {
+  const result = await fetchHelper<{
+    conversationUuid: string;
   }>(`${apiOptions?.baseUrl || globalBaseUrl}/play/conversation`, {
     body: JSON.stringify({}),
     headers: { Authorization: `Bearer ${token}` },
     method: "POST",
   });
-  return conversationId;
+  return result;
 }
+
+export type CreateCharacterConversationResult = {
+  /**
+   * The unique identifier of the created conversation. Pass this into `playthrough.joinConversation`
+   * to get a scoped `Conversation` instance.
+   */
+  conversationUuid: string;
+};
 
 export async function createCharacterConversation(
   token: string,
   characterId: number,
   apiOptions?: CommonApiOptions,
-): Promise<number> {
-  const { conversationId } = await fetchHelper<{
-    conversationId: number;
+): Promise<CreateCharacterConversationResult> {
+  const result = await fetchHelper<{
+    conversationUuid: string;
   }>(`${apiOptions?.baseUrl || globalBaseUrl}/play/conversation/character`, {
     body: JSON.stringify({ characterId }),
     headers: { Authorization: `Bearer ${token}` },
     method: "POST",
   });
-  return conversationId;
+  return result;
 }
 
 export interface GetMessageHistoryResult {
@@ -152,11 +181,11 @@ export interface GetMessageHistoryResult {
 
 export async function getMessageHistory(
   token: string,
-  conversationId?: number | undefined,
+  conversationUuid?: string | undefined,
   minEventId?: string | undefined,
   apiOptions?: CommonApiOptions,
 ): Promise<GetMessageHistoryResult> {
-  const query = querystring.stringify({ conversationId, minEventId });
+  const query = querystring.stringify({ conversationUuid, minEventId });
   const result = await fetchHelper<GetMessageHistoryResult>(
     `${apiOptions?.baseUrl || globalBaseUrl}/play/message-history?${query}`,
     {
@@ -186,33 +215,6 @@ export async function getPlaythroughInfo(
   );
   return result;
 }
-
-// export interface SetMoodResult {
-//   characterId: number;
-//   mood: Mood;
-// }
-
-// export async function setMood(
-//   token: string,
-//   characterIdOrName: number | string,
-//   modifier: Partial<Mood>,
-//   apiOptions?: CommonApiOptions,
-// ): Promise<SetMoodResult> {
-//   const result = await fetchHelper<SetMoodResult>(
-//     `${apiOptions?.baseUrl || globalBaseUrl}/play/set-mood`,
-//     {
-//       body: JSON.stringify({
-//         ...(typeof characterIdOrName === "number"
-//           ? { characterId: characterIdOrName }
-//           : { characterName: characterIdOrName }),
-//         modifier,
-//       }),
-//       headers: { Authorization: `Bearer ${token}` },
-//       method: "POST",
-//     },
-//   );
-//   return result;
-// }
 
 export type MemoryToSet = { recallValue: string; saveValue: string | null };
 
@@ -306,9 +308,17 @@ export async function restartFromEventId(
 }
 
 export type ForkPlaythroughTokenResult = {
+  /**
+   * The playthrough token, used for connecting to this playthrough. It never expires,
+   * so can be saved in a secure place for players to continue playing between sessions.
+   *
+   * To create a playthrough with the token, use `new Playthrough(token)`.
+   */
   token: string;
-  /** @deprecated */
-  playthroughId: number;
+  /**
+   * The unique identifier of the playthrough, encoded inside the token. It can be useful
+   * as a debugging tool.
+   */
   playthroughUuid: string;
 };
 
@@ -316,13 +326,13 @@ export async function forkPlaythroughToken(
   token: string,
   apiOptions?: CommonApiOptions,
 ): Promise<ForkPlaythroughTokenResult> {
-  const result = await fetchHelper<ForkPlaythroughTokenResult>(
-    `${apiOptions?.baseUrl || globalBaseUrl}/play/fork-playthrough`,
-    {
-      body: JSON.stringify({}),
-      headers: { Authorization: `Bearer ${token}` },
-      method: "POST",
-    },
-  );
+  const result = await fetchHelper<{
+    token: string;
+    playthroughUuid: string;
+  }>(`${apiOptions?.baseUrl || globalBaseUrl}/play/fork-playthrough`, {
+    body: JSON.stringify({}),
+    headers: { Authorization: `Bearer ${token}` },
+    method: "POST",
+  });
   return result;
 }

@@ -34,7 +34,7 @@ type PlaythroughEvents = {
 class Playthrough extends EventEmitter<PlaythroughEvents> {
   private token: string;
 
-  private playthroughId: number;
+  private uuid: string;
 
   private baseUrl?: string;
 
@@ -46,19 +46,19 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
 
   private shouldReconnect = true;
 
-  private activeConversations = new Map<number, Conversation>();
+  private activeConversations = new Map<string, Conversation>();
 
   public constructor(token: string, baseUrl?: string) {
     super();
 
     this.token = token;
 
-    const { playthrough_id: playthroughId } = jwtDecode<{
+    const { playthrough_uuid: playthroughUuid } = jwtDecode<{
       // eslint-disable-next-line camelcase
-      playthrough_id: number;
+      playthrough_uuid: string;
     }>(this.token);
 
-    this.playthroughId = playthroughId;
+    this.uuid = playthroughUuid;
 
     this.baseUrl = baseUrl;
   }
@@ -76,10 +76,10 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
   }
 
   public getMessageHistory(
-    conversationId?: number | undefined,
+    conversationUuid?: string | undefined,
     minEventId?: string | undefined,
   ): ReturnType<typeof api.getMessageHistory> {
-    return api.getMessageHistory(this.token, conversationId, minEventId, {
+    return api.getMessageHistory(this.token, conversationUuid, minEventId, {
       baseUrl: this.baseUrl,
     });
   }
@@ -118,15 +118,6 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
     });
   }
 
-  // public setMood(
-  //   characterIdOrName: number | string,
-  //   modifier: Mood,
-  // ): ReturnType<typeof api.setMood> {
-  //   return api.setMood(this.token, characterIdOrName, modifier, {
-  //     baseUrl: this.baseUrl,
-  //   });
-  // }
-
   public restartFromEpisodeId(
     episodeId: number,
   ): ReturnType<typeof api.restartFromEpisodeId> {
@@ -152,30 +143,30 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
   }
 
   public joinConversation = (
-    conversationId: number,
+    conversationUuid: string,
     options?: ConversationOptions,
   ): Conversation => {
-    const conversation = new Conversation(conversationId, this, options);
-    if (this.activeConversations.has(conversationId)) {
-      return this.activeConversations.get(conversationId) as Conversation;
+    const conversation = new Conversation(conversationUuid, this, options);
+    if (this.activeConversations.has(conversationUuid)) {
+      return this.activeConversations.get(conversationUuid) as Conversation;
     }
-    this.activeConversations.set(conversationId, conversation);
+    this.activeConversations.set(conversationUuid, conversation);
     return conversation;
   };
 
-  public leaveConversation = (conversationId: number): void => {
-    if (!this.activeConversations.has(conversationId)) {
+  public leaveConversation = (conversationUuid: string): void => {
+    if (!this.activeConversations.has(conversationUuid)) {
       throw new Error(
-        `The conversation with id \`${conversationId}\` has not been joined, so cannot be left.`,
+        `The conversation with id \`${conversationUuid}\` has not been joined, so cannot be left.`,
       );
     }
-    this.activeConversations.delete(conversationId);
+    this.activeConversations.delete(conversationUuid);
   };
 
   public getConversation = (
-    conversationId: number,
+    conversationUuid: string,
   ): Conversation | undefined => {
-    return this.activeConversations.get(conversationId);
+    return this.activeConversations.get(conversationUuid);
   };
 
   public addOutgoingEvent = (eventName: string, eventData?: unknown): void => {
@@ -202,7 +193,7 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
     }
 
     this.room = await this.client.joinOrCreate("chat", {
-      playthroughId: this.playthroughId,
+      playthroughId: this.uuid,
       token: this.token,
       sdkInfo,
     });
@@ -278,7 +269,7 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
           try {
             // eslint-disable-next-line no-await-in-loop
             const newRoom = await this.client?.joinOrCreate("chat", {
-              playthroughId: this.playthroughId,
+              playthroughId: this.uuid,
               token: this.token,
               sdkInfo,
             });
@@ -352,8 +343,8 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
 
   private onProblem = (event: ProblemEvent): void => {
     this.emit("problem", event);
-    if (event.conversationId) {
-      const conversation = this.activeConversations.get(event.conversationId);
+    if (event.conversationUuid) {
+      const conversation = this.activeConversations.get(event.conversationUuid);
       if (conversation) {
         conversation.addIncomingEvent("problem", event);
       }
@@ -361,63 +352,63 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
   };
 
   private onStartTyping = (event: StartTypingEvent): void => {
-    const conversation = this.activeConversations.get(event.conversationId);
+    const conversation = this.activeConversations.get(event.conversationUuid);
     if (conversation) {
       conversation.addIncomingEvent("start-typing", event);
     }
   };
 
   private onStopTyping = (event: StopTypingEvent): void => {
-    const conversation = this.activeConversations.get(event.conversationId);
+    const conversation = this.activeConversations.get(event.conversationUuid);
     if (conversation) {
       conversation.addIncomingEvent("stop-typing", event);
     }
   };
 
   private onMessage = (event: MessageEvent): void => {
-    const conversation = this.activeConversations.get(event.conversationId);
+    const conversation = this.activeConversations.get(event.conversationUuid);
     if (conversation) {
       conversation.addIncomingEvent("message", event);
     }
   };
 
   private onEpisodeComplete = (event: EpisodeCompleteEvent): void => {
-    const conversation = this.activeConversations.get(event.conversationId);
+    const conversation = this.activeConversations.get(event.conversationUuid);
     if (conversation) {
       conversation.addIncomingEvent("episode-complete", event);
     }
   };
 
   private onAction = (event: ConfirmActionEvent): void => {
-    const conversation = this.activeConversations.get(event.conversationId);
+    const conversation = this.activeConversations.get(event.conversationUuid);
     if (conversation) {
       conversation.addIncomingEvent("action", event);
     }
   };
 
   private onResume = (event: ConfirmResumeEvent): void => {
-    const conversation = this.activeConversations.get(event.conversationId);
+    const conversation = this.activeConversations.get(event.conversationUuid);
     if (conversation) {
       conversation.addIncomingEvent("resume", event);
     }
   };
 
   private onReply = (event: ConfirmReplyEvent): void => {
-    const conversation = this.activeConversations.get(event.conversationId);
+    const conversation = this.activeConversations.get(event.conversationUuid);
     if (conversation) {
       conversation.addIncomingEvent("reply", event);
     }
   };
 
   private onStart = (event: ConfirmStartEvent): void => {
-    const conversation = this.activeConversations.get(event.conversationId);
+    const conversation = this.activeConversations.get(event.conversationUuid);
     if (conversation) {
       conversation.addIncomingEvent("start", event);
     }
   };
 
   private onTap = (event: ConfirmTapEvent): void => {
-    const conversation = this.activeConversations.get(event.conversationId);
+    const conversation = this.activeConversations.get(event.conversationUuid);
     if (conversation) {
       conversation.addIncomingEvent("tap", event);
     }

@@ -174,15 +174,15 @@ export interface ActionEvent {
 // Events sent to client
 
 export interface StartTypingEvent {
-  conversationId: number;
+  conversationUuid: string;
 }
 
 export interface StopTypingEvent {
-  conversationId: number;
+  conversationUuid: string;
 }
 
 export type MessageEvent = {
-  conversationId: number;
+  conversationUuid: string;
 } & Message;
 
 export type CharacterMoodChange = {
@@ -194,7 +194,7 @@ export type CharacterMoodChange = {
 export type CharacterMoodChanges = CharacterMoodChange[];
 
 export interface EpisodeCompleteEvent {
-  conversationId: number;
+  conversationUuid: string;
   impacts: Impact[];
   completedEpisodeId: number;
   nextEpisodeId: number | null;
@@ -204,27 +204,27 @@ export interface EpisodeCompleteEvent {
 export type ProblemEvent = {
   code: string;
   error: string;
-  conversationId?: number;
+  conversationUuid?: string;
 };
 
 // Confirmation events sent from server
 
 export type ConfirmActionEventPayload = {
-  conversationId: number;
+  conversationUuid: string;
   action: string;
 };
 
 export type ConfirmReplyEventPayload = {
-  conversationId: number;
+  conversationUuid: string;
   text: string;
 };
 
 export type ConfirmResumeEventPayload = {
-  conversationId: number;
+  conversationUuid: string;
 };
 
 export type ConfirmStartEventPayload = {
-  conversationId: number;
+  conversationUuid: string;
   startGraphId?: number;
   startGraphReferenceId?: string;
   startNodeId?: number;
@@ -233,7 +233,7 @@ export type ConfirmStartEventPayload = {
 };
 
 export type ConfirmTapEventPayload = {
-  conversationId: number;
+  conversationUuid: string;
 };
 
 type ConfirmEvent<S = Record<string, never>> = {
