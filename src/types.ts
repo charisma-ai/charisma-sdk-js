@@ -1,3 +1,11 @@
+export type JSONValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JSONValue[]
+  | { [key: string]: JSONValue };
+
 // Message field types
 
 export type MediaType =
@@ -28,7 +36,7 @@ export type Emotion = {
 export type Memory = {
   id: number;
   recallValue: string;
-  saveValue: string | null;
+  saveValue: JSONValue | null;
 };
 
 export type MessagePathItem = {

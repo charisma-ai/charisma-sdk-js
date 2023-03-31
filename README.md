@@ -1,7 +1,7 @@
 # Charisma.ai SDK for JavaScript
 
 ```
-yarn add @charisma-ai/sdk
+pnpm i @charisma-ai/sdk
 ```
 
 ## Usage

@@ -17,13 +17,14 @@ import {
   ConfirmStartEvent,
   ConfirmTapEvent,
   ProblemEvent,
+  JSONValue,
 } from "./types";
 // eslint-disable-next-line import/no-named-as-default
 import Conversation, { ConversationOptions } from "./Conversation";
 
 export type ConnectionStatus = "disconnected" | "connecting" | "connected";
 
-const sdkInfo = { sdkId: "js", sdkVersion: pkgVersion, protocolVersion: 1 };
+const sdkInfo = { sdkId: "js", sdkVersion: pkgVersion, protocolVersion: 2 };
 
 type PlaythroughEvents = {
   "connection-status": [ConnectionStatus];
@@ -90,7 +91,7 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
 
   public setMemory(
     recallValue: string,
-    saveValue: string | null,
+    saveValue: JSONValue | null,
   ): ReturnType<typeof api.setMemory>;
 
   public setMemory(
@@ -99,7 +100,7 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
 
   public setMemory(
     memoryRecallValueOrMemories: string | api.MemoryToSet[],
-    saveValue?: string | null,
+    saveValue?: JSONValue | null,
   ): ReturnType<typeof api.setMemory> {
     let memories: api.MemoryToSet[] = [];
     if (Array.isArray(memoryRecallValueOrMemories)) {
@@ -108,7 +109,7 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
       memories = [
         {
           recallValue: memoryRecallValueOrMemories,
-          saveValue: saveValue as string | null,
+          saveValue: saveValue as JSONValue | null,
         },
       ];
     }

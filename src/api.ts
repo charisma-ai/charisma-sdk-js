@@ -1,7 +1,7 @@
 import fetch from "isomorphic-unfetch";
 import querystring from "query-string";
 
-import { Emotion, Impact, Memory, Message } from "./types";
+import { Emotion, Impact, JSONValue, Memory, Message } from "./types";
 
 const fetchHelper = async <T>(
   endpoint: string,
@@ -207,7 +207,9 @@ export async function getPlaythroughInfo(
   apiOptions?: CommonApiOptions,
 ): Promise<GetPlaythroughInfoResult> {
   const result = await fetchHelper<GetPlaythroughInfoResult>(
-    `${apiOptions?.baseUrl || globalBaseUrl}/play/playthrough-info`,
+    `${
+      apiOptions?.baseUrl || globalBaseUrl
+    }/play/playthrough-info?use_typed_memories=1`,
     {
       headers: { Authorization: `Bearer ${token}` },
       method: "GET",
@@ -216,7 +218,7 @@ export async function getPlaythroughInfo(
   return result;
 }
 
-export type MemoryToSet = { recallValue: string; saveValue: string | null };
+export type MemoryToSet = { recallValue: string; saveValue: JSONValue | null };
 
 export async function setMemory(
   token: string,
@@ -245,7 +247,7 @@ export async function setMemory(
     memories = [
       {
         recallValue: memoryRecallValueOrMemories,
-        saveValue: saveValueOrApiOptions as string | null,
+        saveValue: saveValueOrApiOptions as JSONValue | null,
       },
     ];
   }
