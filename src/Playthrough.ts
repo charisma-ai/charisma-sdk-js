@@ -2,7 +2,7 @@ import EventEmitter from "eventemitter3";
 import * as Colyseus from "colyseus.js";
 import jwtDecode from "jwt-decode";
 
-import { version as pkgVersion } from "../package.json";
+import pkg from "../package.json";
 
 import * as api from "./api.js";
 
@@ -18,12 +18,13 @@ import {
   ConfirmTapEvent,
   ProblemEvent,
   JSONValue,
-} from "./types";
+} from "./types.js";
 // eslint-disable-next-line import/no-named-as-default
-import Conversation, { ConversationOptions } from "./Conversation";
+import Conversation, { ConversationOptions } from "./Conversation.js";
 
 export type ConnectionStatus = "disconnected" | "connecting" | "connected";
 
+const pkgVersion = pkg.version;
 const sdkInfo = { sdkId: "js", sdkVersion: pkgVersion, protocolVersion: 2 };
 
 type PlaythroughEvents = {
