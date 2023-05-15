@@ -22,6 +22,7 @@
     "@typescript-eslint/restrict-template-expressions": "off",
     "import/extensions": ["error", "never"],
     "import/no-cycle": "off",
+    "import/no-unresolved": "off",
     "no-console": "off",
     "no-shadow": "off"
   }

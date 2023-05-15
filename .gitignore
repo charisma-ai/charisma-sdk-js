@@ -6,6 +6,7 @@ yarn-error.log
 # Build-related
 dist/*
 test/dist/*
+.parcel-cache
 
 # IDE
 .vscode/*

@@ -12,16 +12,15 @@
     <div id="messages"></div>
     <input onkeypress="onKeyPress(event)" placeholder="Type a message..." />
   </body>
-  <script src="../dist/index.umd.js"></script>
-  <script>
-    const {
+  <script type="module">
+    import {
       Playthrough,
       Speaker,
       Microphone,
       createPlaythroughToken,
       createConversation,
       setGlobalBaseUrl,
-    } = CharismaSDK;
+    } from "../dist/index.js";
 
     const charismaUrl = "https://charisma-server-play.meh";
     setGlobalBaseUrl(charismaUrl);
@@ -34,7 +33,7 @@
 
     const messagesDiv = document.getElementById("messages");
 
-    async function start() {
+    window.start = async function start() {
       const { token } = await createPlaythroughToken({ storyId: 27 });
       console.log("New playthrough token:", token);
       const { conversationUuid } = await createConversation(token);
@@ -94,9 +93,9 @@
       playthrough.connect();
 
       // microphone.startListening(timeout);
-    }
+    };
 
-    function onKeyPress(event) {
+    window.onKeyPress = function onKeyPress(event) {
       if (event.key === "Enter") {
         if (playthrough && conversation) {
           const text = event.currentTarget.value;
@@ -111,26 +110,26 @@
           speaker.play(new ArrayBuffer(0), { interrupt: "all" });
         }
       }
-    }
+    };
 
-    function tap() {
+    window.tap = function tap() {
       conversation.tap();
-    }
+    };
 
-    function action() {
+    window.action = function action() {
       conversation.action({ action: "pick-up-book" });
-    }
+    };
 
-    function disconnect() {
+    window.disconnect = function disconnect() {
       playthrough.disconnect();
-    }
+    };
 
-    function pause() {
+    window.pause = function pause() {
       playthrough.pause();
-    }
+    };
 
-    function play() {
+    window.play = function play() {
       playthrough.play();
-    }
+    };
   </script>
 </html>

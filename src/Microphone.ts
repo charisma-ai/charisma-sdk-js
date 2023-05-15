@@ -4,7 +4,7 @@ import type {
   SpeechRecognition,
   SpeechRecognitionErrorCode,
   SpeechRecognitionEvent,
-} from "./speech-types";
+} from "./speech-types.js";
 
 interface Constructable<T> {
   new (): T;

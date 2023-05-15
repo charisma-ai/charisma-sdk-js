@@ -1,7 +1,7 @@
 import EventEmitter from "eventemitter3";
 import PQueue from "p-queue";
 
-import Playthrough from "./Playthrough";
+import Playthrough from "./Playthrough.js";
 import {
   StartEvent,
   ReplyEvent,
@@ -18,7 +18,7 @@ import {
   ConfirmTapEvent,
   ReplyIntermediateEvent,
   ProblemEvent,
-} from "./types";
+} from "./types.js";
 
 export interface ConversationOptions {
   speechConfig?: SpeechConfig;

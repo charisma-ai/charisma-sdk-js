@@ -1,18 +1,18 @@
-export * as api from "./api";
-export * from "./api";
+export * as api from "./api.js";
+export * from "./api.js";
 
-export { default as Playthrough, ConnectionStatus } from "./Playthrough";
+export { default as Playthrough, ConnectionStatus } from "./Playthrough.js";
 export {
   default as Microphone,
   SpeechRecognitionOptions,
   SpeechRecognitionStopOptions,
-} from "./Microphone";
-export { default as Speaker } from "./Speaker";
+} from "./Microphone.js";
+export { default as Speaker } from "./Speaker.js";
 
 export {
   Conversation,
   ConversationOptions,
   ConversationEvents,
-} from "./Conversation";
+} from "./Conversation.js";
 
-export * from "./types";
+export * from "./types.js";

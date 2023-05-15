@@ -1,7 +1,4 @@
-import fetch from "isomorphic-unfetch";
-import querystring from "query-string";
-
-import { Emotion, Impact, JSONValue, Memory, Message } from "./types";
+import type { Emotion, Impact, JSONValue, Memory, Message } from "./types.js";
 
 const fetchHelper = async <T>(
   endpoint: string,
@@ -185,9 +182,17 @@ export async function getMessageHistory(
   minEventId?: string | undefined,
   apiOptions?: CommonApiOptions,
 ): Promise<GetMessageHistoryResult> {
-  const query = querystring.stringify({ conversationUuid, minEventId });
+  const query = new URLSearchParams();
+  if (typeof conversationUuid === "string") {
+    query.append("conversationUuid", conversationUuid);
+  }
+  if (typeof minEventId === "string") {
+    query.append("minEventId", minEventId);
+  }
   const result = await fetchHelper<GetMessageHistoryResult>(
-    `${apiOptions?.baseUrl || globalBaseUrl}/play/message-history?${query}`,
+    `${
+      apiOptions?.baseUrl || globalBaseUrl
+    }/play/message-history?${query.toString()}`,
     {
       headers: { Authorization: `Bearer ${token}` },
       method: "GET",

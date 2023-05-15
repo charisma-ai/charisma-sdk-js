@@ -2,11 +2,10 @@
   <body>
     <button onclick="start()">Test!</button>
   </body>
-  <script src="../dist/index.umd.js"></script>
-  <script>
-    async function start() {
-      const { Speaker } = CharismaSDK;
+  <script type="module">
+    import { Speaker } from "../dist/index.js";
 
+    window.start = async function start() {
       const speaker = new Speaker();
       speaker.on("start", () => {
         console.log("started");
@@ -49,6 +48,6 @@
           interrupt: "none",
         });
       }, 2500);
-    }
+    };
   </script>
 </html>

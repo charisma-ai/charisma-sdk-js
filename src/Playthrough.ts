@@ -4,7 +4,7 @@ import jwtDecode from "jwt-decode";
 
 import { version as pkgVersion } from "../package.json";
 
-import * as api from "./api";
+import * as api from "./api.js";
 
 import {
   StartTypingEvent,

@@ -3,10 +3,11 @@
   "version": "4.0.0-alpha.3",
   "description": "Charisma.ai SDK for Javascript (browser)",
   "source": "src/index.ts",
-  "main": "dist/index.js",
-  "umd:main": "dist/index.umd.js",
-  "module": "dist/index.module.js",
-  "typings": "dist/src/index.d.ts",
+  "type": "module",
+  "exports": {
+    "types": "./dist/src/index.d.ts",
+    "default": "./dist/index.js"
+  },
   "sideEffects": false,
   "repository": "https://github.com/charisma-ai/charisma-sdk-js",
   "author": "Charisma Entertainment Ltd <hello@charisma.ai> (https://charisma.ai)",
@@ -22,9 +23,7 @@
     "dist/*"
   ],
   "scripts": {
-    "build:non-umd": "microbundle --format modern,es,cjs --compress false",
-    "build:umd": "microbundle --format umd --name CharismaSDK --external none --alias httpie=./node_modules/httpie/xhr/index.js --amd-name '@charisma-ai/sdk'",
-    "build": "pnpm run build:non-umd && pnpm run build:umd",
+    "build": "tsc && swc src -d dist",
     "cm": "git-cz",
     "lint": "eslint --fix --ext js,ts,tsx .",
     "prebuild": "rimraf dist",
@@ -32,46 +31,38 @@
     "semantic-release": "semantic-release"
   },
   "dependencies": {
-    "@types/node-fetch": "^2.6.2",
     "colyseus.js": "^0.14.13",
-    "eventemitter3": "^5.0.0",
-    "isomorphic-unfetch": "^3.1.0",
+    "eventemitter3": "^5.0.1",
     "jwt-decode": "^3.1.2",
-    "p-queue": "^6.6.2",
-    "postinstall-postinstall": "^2.1.0",
-    "query-string": "^7.1.1"
+    "p-queue": "^7.3.4"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.46.1",
-    "@typescript-eslint/parser": "^5.46.1",
-    "commitizen": "^4.2.6",
-    "cross-env": "^7.0.3",
+    "@swc/cli": "^0.1.62",
+    "@swc/core": "^1.3.57",
+    "@typescript-eslint/eslint-plugin": "^5.59.5",
+    "@typescript-eslint/parser": "^5.59.5",
+    "commitizen": "^4.3.0",
     "cz-conventional-changelog": "^3.3.0",
-    "eslint": "^8.29.0",
+    "eslint": "^8.40.0",
     "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-config-prettier": "^8.5.0",
-    "eslint-plugin-import": "^2.26.0",
-    "eslint-plugin-jsx-a11y": "^6.6.1",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-jsx-a11y": "^6.7.1",
     "eslint-plugin-prettier": "^4.2.1",
-    "husky": "^8.0.2",
-    "lint-staged": "^13.1.0",
-    "microbundle": "^0.15.1",
-    "prettier": "^2.8.1",
-    "rimraf": "^3.0.2",
-    "semantic-release": "^19.0.5",
-    "typescript": "^4.9.4"
+    "husky": "^8.0.3",
+    "lint-staged": "^13.2.2",
+    "parcel": "2.0.0-nightly.1296",
+    "prettier": "^2.8.8",
+    "rimraf": "^5.0.0",
+    "semantic-release": "^21.0.2",
+    "typescript": "^5.0.4"
   },
   "config": {
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
   },
-  "decentralandLibrary": {
-    "main": "dist/index.umd.js"
-  },
-  "pnpm": {
-    "patchedDependencies": {
-      "microbundle@0.15.1": "patches/microbundle@0.15.1.patch"
-    }
+  "@parcel/resolver-default": {
+    "packageExports": true
   }
 }
