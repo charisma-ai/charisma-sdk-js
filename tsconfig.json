@@ -4,6 +4,7 @@
     "declarationDir": "dist",
     "emitDeclarationOnly": true,
     "esModuleInterop": true,
+    "isolatedModules": true,
     "lib": ["ES2022", "dom"],
     "module": "esnext",
     "moduleResolution": "node",
