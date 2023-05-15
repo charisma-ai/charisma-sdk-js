@@ -9,6 +9,7 @@
     <button onclick="disconnect()">Disconnect</button>
     <button onclick="pause()">Pause</button>
     <button onclick="play()">Play</button>
+    <button onclick="getEventHistory()">Get event history</button>
     <div id="messages"></div>
     <input onkeypress="onKeyPress(event)" placeholder="Type a message..." />
   </body>
@@ -20,6 +21,7 @@
       createPlaythroughToken,
       createConversation,
       setGlobalBaseUrl,
+      getEventHistory,
     } from "../dist/index.js";
 
     const charismaUrl = "https://charisma-server-play.meh";
@@ -130,6 +132,13 @@
 
     window.play = function play() {
       playthrough.play();
+    };
+
+    window.getEventHistory = async function getEventHistory() {
+      const { events } = await playthrough.getEventHistory({
+        limit: 1000,
+      });
+      console.log(events);
     };
   </script>
 </html>

@@ -1,4 +1,20 @@
-import type { Emotion, Impact, JSONValue, Memory, Message } from "./types.js";
+import type { Emotion, Impact, JSONValue, Memory } from "./types.js";
+
+const createSearchParams = <
+  Params extends Record<string, number | string | string[]>,
+>(
+  params: Params,
+) => {
+  const query = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (typeof value === "string" || typeof value === "number") {
+      query.append(key, value.toString());
+    } else if (Array.isArray(value)) {
+      value.forEach((valueInner) => query.append(key, valueInner));
+    }
+  });
+  return query;
+};
 
 const fetchHelper = async <T>(
   endpoint: string,
@@ -172,27 +188,54 @@ export async function createCharacterConversation(
   return result;
 }
 
-export interface GetMessageHistoryResult {
-  messages: Message[];
-}
+export type EventType =
+  | "start"
+  | "message_player"
+  | "message_character"
+  | "set_mood"
+  | "resume"
+  | "set_memory"
+  | "tap"
+  | "restart"
+  | "episode_complete"
+  | "fork";
 
-export async function getMessageHistory(
+export type Event = {
+  id: string;
+  type: EventType;
+  timestamp: string;
+  conversationUuid: string | null;
+  playthroughUuid: string;
+  payload: unknown;
+};
+
+export type GetEventHistoryOptions = {
+  conversationUuid?: string;
+  eventTypes?: EventType[];
+  minEventId?: string;
+  maxEventId?: string;
+  limit: number;
+  sort?: "asc" | "desc";
+};
+
+export type GetEventHistoryResult = {
+  events: Event[];
+};
+
+/**
+ * Gets the events that have happened in the playthrough, such as character and player messages amongst others. The returned events can be filtered by using options.
+ */
+export async function getEventHistory(
   token: string,
-  conversationUuid?: string | undefined,
-  minEventId?: string | undefined,
+  // eslint-disable-next-line default-param-last
+  options: GetEventHistoryOptions = { limit: 1000 },
   apiOptions?: CommonApiOptions,
-): Promise<GetMessageHistoryResult> {
-  const query = new URLSearchParams();
-  if (typeof conversationUuid === "string") {
-    query.append("conversationUuid", conversationUuid);
-  }
-  if (typeof minEventId === "string") {
-    query.append("minEventId", minEventId);
-  }
-  const result = await fetchHelper<GetMessageHistoryResult>(
+): Promise<GetEventHistoryResult> {
+  const query = createSearchParams(options);
+  const result = await fetchHelper<GetEventHistoryResult>(
     `${
       apiOptions?.baseUrl || globalBaseUrl
-    }/play/message-history?${query.toString()}`,
+    }/play/event-history?${query.toString()}`,
     {
       headers: { Authorization: `Bearer ${token}` },
       method: "GET",
@@ -201,12 +244,15 @@ export async function getMessageHistory(
   return result;
 }
 
-export interface GetPlaythroughInfoResult {
+export type GetPlaythroughInfoResult = {
   emotions: Emotion[];
   memories: Memory[];
   impacts: Impact[];
-}
+};
 
+/**
+ * Returns current information about the playthrough, such as character emotions and memories.
+ */
 export async function getPlaythroughInfo(
   token: string,
   apiOptions?: CommonApiOptions,
@@ -225,6 +271,11 @@ export async function getPlaythroughInfo(
 
 export type MemoryToSet = { recallValue: string; saveValue: JSONValue | null };
 
+/**
+ * Directly sets a memory in Charisma. The promise resolves when the memory has been committed so is guaranteed to be set, but it may take a short amount of time (usually < 1s) for the updated value to propagate to any active playthrough instances.
+ *
+ * It is highly recommended to call `setMemory` with an array instead of calling `setMemory` multiple times, to only cause one refetch of the current memory values in the chat engine.
+ */
 export async function setMemory(
   token: string,
   memoryRecallValue: string,
@@ -329,6 +380,11 @@ export type ForkPlaythroughTokenResult = {
   playthroughUuid: string;
 };
 
+/**
+ * Creates a clone of the playthrough, including memories and emotions, and returns a new playthrough linked to the latest promoted story version.
+ *
+ * This is useful when you've published a new story version. Since playthroughs are bound to a particular story version, you need to "fork" the playthrough in order to move a player over to the newly published version.
+ */
 export async function forkPlaythroughToken(
   token: string,
   apiOptions?: CommonApiOptions,
@@ -342,4 +398,29 @@ export async function forkPlaythroughToken(
     method: "POST",
   });
   return result;
+}
+
+export type ResetPlaythroughOptions = {
+  /**
+   * The event ID to reset the playthrough to.
+   */
+  eventId: string;
+};
+
+/**
+ * Resets a playthrough's state to a particular event ID. If this playthrough has been forked, the event ID can be from any of this playthrough's ancestors. This resets memories and emotions **ONLY**.
+ */
+export async function resetPlaythrough(
+  token: string,
+  options: ResetPlaythroughOptions,
+  apiOptions?: CommonApiOptions,
+): Promise<void> {
+  await fetchHelper<void>(
+    `${apiOptions?.baseUrl || globalBaseUrl}/play/reset-playthrough`,
+    {
+      body: JSON.stringify(options),
+      headers: { Authorization: `Bearer ${token}` },
+      method: "POST",
+    },
+  );
 }

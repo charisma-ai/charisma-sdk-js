@@ -5,9 +5,11 @@
 - **BREAKING:** This packages now exports ES Module only.
 - **BREAKING:** An implementation of `fetch` is no longer included with this library. Consumers of this library should ensure their environment supports `fetch`.
 - **BREAKING:** This library now relies on having `URLSearchParams` available in the environment.
+- **BREAKING:** This library now relies on having `BigInt` available in the environment.
 - **BREAKING:** `playthroughId`s and `conversationId`s have been changed from `number` to `string` type everywhere in this SDK, and renamed to `playthroughUuid` and `conversationUuid`.
 - **BREAKING:** `api.createPlaythroughToken`, `api.createConversation` and `api.createCharacterConversation` all now return an object instead of a scalar, to facilitate any future changes to these methods.
 - **BREAKING:** `memories` in `getPlaythroughInfo` and in the `message` event now return `saveValue`s as JSON instead of only as strings. For example, counter memories are now actually `number`s and boolean memories are now actually `boolean`s.
+- **BREAKING:** `getMessageHistory` has been removed, and `getEventHistory` added as a more fully-featured alternative with much greater support for filtering, and can return all event types.
 
 - `setMemory` now accepts any JSON values instead of only strings.
 

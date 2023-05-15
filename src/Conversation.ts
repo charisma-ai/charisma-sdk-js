@@ -18,6 +18,7 @@ import {
   ConfirmTapEvent,
   ReplyIntermediateEvent,
   ProblemEvent,
+  Message,
 } from "./types.js";
 
 export interface ConversationOptions {
@@ -49,8 +50,6 @@ export class Conversation extends EventEmitter<ConversationEvents> {
 
   private lastEventId?: string;
 
-  private lastTimestamp?: number;
-
   private playthroughInstance: Playthrough;
 
   private options: ConversationOptions = {};
@@ -73,7 +72,6 @@ export class Conversation extends EventEmitter<ConversationEvents> {
     // restore from if a disconnection occurs.
     this.on("message", (message) => {
       this.lastEventId = message.eventId;
-      this.lastTimestamp = message.timestamp;
     });
 
     // Please excuse this ghastly hack, but Babel complains about
@@ -148,26 +146,21 @@ export class Conversation extends EventEmitter<ConversationEvents> {
       // Receiving new events when trying to playback is confusing, so pause the event queue.
       this.eventQueue.pause();
       try {
-        const { messages } = await this.playthroughInstance.getMessageHistory(
-          this.uuid,
-          this.lastEventId,
-        );
-        if (messages.length > 0) {
+        const { events } = await this.playthroughInstance.getEventHistory({
+          conversationUuid: this.uuid,
+          minEventId: this.lastEventId,
+          limit: 1000,
+          eventTypes: ["message_character"],
+        });
+        if (events.length > 0) {
           this.emit("playback-start");
-          messages.forEach((message) => {
+          events.forEach((event) => {
             // If we've emitted a new message since playback started, let's ignore playback ones.
-            // TODO: Remove this when Safari supports `bigint`s!
-            if (typeof BigInt === "undefined") {
-              if (message.timestamp > (this.lastTimestamp as number)) {
-                this.emit("message", {
-                  ...message,
-                  conversationUuid: this.uuid,
-                });
-              }
-            } else if (
-              BigInt(message.eventId) > BigInt(this.lastEventId as string)
-            ) {
-              this.emit("message", { ...message, conversationUuid: this.uuid });
+            if (BigInt(event.id) > BigInt(this.lastEventId as string)) {
+              this.emit("message", {
+                ...(event.payload as Message),
+                conversationUuid: this.uuid,
+              });
             }
           });
           this.emit("playback-stop");

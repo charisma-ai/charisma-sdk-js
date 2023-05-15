@@ -77,11 +77,10 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
     });
   }
 
-  public getMessageHistory(
-    conversationUuid?: string | undefined,
-    minEventId?: string | undefined,
-  ): ReturnType<typeof api.getMessageHistory> {
-    return api.getMessageHistory(this.token, conversationUuid, minEventId, {
+  public getEventHistory(
+    options: api.GetEventHistoryOptions,
+  ): ReturnType<typeof api.getEventHistory> {
+    return api.getEventHistory(this.token, options, {
       baseUrl: this.baseUrl,
     });
   }
