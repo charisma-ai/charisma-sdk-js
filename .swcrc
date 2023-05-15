@@ -3,6 +3,9 @@
     "parser": {
       "syntax": "typescript"
     },
+    "experimental": {
+      "keepImportAssertions": true
+    },
     "target": "es2022"
   }
 }

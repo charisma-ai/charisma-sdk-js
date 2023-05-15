@@ -2,7 +2,7 @@ import EventEmitter from "eventemitter3";
 import * as Colyseus from "colyseus.js";
 import jwtDecode from "jwt-decode";
 
-import pkg from "../package.json" assert { type: "module" };
+import pkg from "../package.json" assert { type: "json" };
 
 import * as api from "./api.js";
 
