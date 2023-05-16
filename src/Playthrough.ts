@@ -427,11 +427,10 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
   public async startSpeechRecognition(event?: SpeechRecognitionStartEvent) {
     if (!this.microphone) {
       this.microphone = new MicrophoneRecorder();
+      this.microphone.addListener("data", (data) => {
+        this.addOutgoingEvent("speech-recognition-chunk", data);
+      });
     }
-
-    this.microphone.addListener("data", (data) => {
-      this.addOutgoingEvent("speech-recognition-chunk", data);
-    });
 
     await this.microphone.start();
 

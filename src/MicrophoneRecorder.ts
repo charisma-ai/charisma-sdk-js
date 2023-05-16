@@ -16,6 +16,8 @@ class MicrophoneRecorder extends EventEmitter<MicrophoneRecorderEvents> {
 
   private source?: MediaStreamAudioSourceNode;
 
+  private pcmWorker?: AudioWorkletNode;
+
   private sampleRate = 16000;
 
   constructor(opts?: { sampleRate?: number }) {
@@ -53,24 +55,23 @@ class MicrophoneRecorder extends EventEmitter<MicrophoneRecorderEvents> {
     }
 
     this.source = this.audioContext.createMediaStreamSource(stream);
-    const pcmWorker = new AudioWorkletNode(this.audioContext, "pcm-worker", {
+    this.pcmWorker = new AudioWorkletNode(this.audioContext, "pcm-worker", {
       outputChannelCount: [1],
     });
-    this.source.connect(pcmWorker);
-    pcmWorker.port.onmessage = (event) => {
+    this.source.connect(this.pcmWorker);
+    this.pcmWorker.port.onmessage = (event) => {
       const data = event.data as Int16Array;
       this.emit("data", data.buffer);
     };
-    pcmWorker.port.start();
+    this.pcmWorker.port.start();
 
     this.emit("start");
   }
 
   stop() {
-    if (this.source) {
-      this.source.disconnect();
-      this.emit("end");
-    }
+    this.pcmWorker?.port.close();
+    this.source?.disconnect();
+    this.emit("end");
   }
 }
 

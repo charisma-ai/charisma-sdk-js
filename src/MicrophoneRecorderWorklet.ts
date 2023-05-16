@@ -11,6 +11,9 @@ class PcmWorker extends AudioWorkletProcessor {
   }
 
   process(inputs) {
+    if (!inputs[0][0]) {
+      return false;
+    }
     const offset = quantumSize * this.quantaCount;
     inputs[0][0].forEach((sample, idx) => {
       this.frame[offset + idx] = Math.floor(sample * 0x7fff);
