@@ -1,7 +1,7 @@
 /* eslint-disable max-classes-per-file */
-import EventEmitter from "eventemitter3";
+import { EventEmitter } from "eventemitter3";
 
-import pcmProcessor from "./MicrophoneRecorderWorklet";
+import pcmProcessor from "./MicrophoneRecorderWorklet.js";
 
 type MicrophoneRecorderEvents = {
   start: void;

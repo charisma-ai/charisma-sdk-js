@@ -1,4 +1,4 @@
-import EventEmitter from "eventemitter3";
+import { EventEmitter } from "eventemitter3";
 import * as Colyseus from "colyseus.js";
 import jwtDecode from "jwt-decode";
 
