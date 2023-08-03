@@ -1,0 +1,122 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <button onclick="start()">Start!</button>
+    <div id="messages"></div>
+    🎤
+    <button onclick="recordingStart()">⏺</button>
+    <button onclick="recordingStop()">⏹</button>
+  </body>
+  <script type="module">
+    import {
+      Playthrough,
+      Speaker,
+      Microphone,
+      createPlaythroughToken,
+      createConversation,
+    } from "../dist/index.js";
+
+    import {
+      setGlobalBaseUrl,
+    } from "../dist/api.js";
+
+    const charismaUrl = "http://localhost:5050";
+    setGlobalBaseUrl(charismaUrl);
+
+    console.log();
+    const speaker = new Speaker();
+    const microphone = new Microphone();
+
+    let playthrough;
+    let conversation;
+
+    const messagesDiv = document.getElementById("messages");
+
+    window.start = async function start() {
+      const { token } = await createPlaythroughToken({ storyId: 2, version: -1, userToken: "" });
+      console.log("New playthrough token:", token);
+      const { conversationUuid } = await createConversation(token);
+      console.log("New conversation ID:", conversationUuid);
+
+      playthrough = new Playthrough(token);
+
+      const timeout = 10000;
+
+      conversation = playthrough.joinConversation(conversationUuid);
+      conversation.on("message", (message) => {
+        microphone.resetTimeout(timeout);
+
+        const div = document.createElement("div");
+        div.classList.add("message", "character");
+        div.innerHTML = `<b>${message.message.character?.name || "???"}</b>: ${
+          message.message.text
+        }`;
+        messagesDiv.appendChild(div);
+      });
+
+      playthrough.on('speech-recognition-result', (speechResult) => {
+        if(speechResult.isFinal) {
+          microphone.stopListening();
+          // console.log('speech-recognition-result TEXT FINAL', speechResult.text);
+          const { text } = speechResult;
+          console.log("speechResult", speechResult)
+          conversation.reply({ text });
+          const div = document.createElement("div");
+          div.classList.add("message", "player");
+          div.innerHTML = `<b>You</b>: ${text}`;
+          messagesDiv.appendChild(div);
+        }
+      })
+
+      conversation.on("reply", (event) => {
+        const div = document.createElement("div");
+        div.classList.add("message", "player");
+        div.innerHTML = `<b>You</b>: ${event.text}`;
+        messagesDiv.appendChild(div);
+      });
+      conversation.setSpeechConfig({
+        encoding: ["ogg", "mp3"],
+        output: "buffer",
+      });
+
+      microphone.on("timeout", () => console.log("Timed out!"));
+      microphone.on("recognise", (text) => {
+        console.log("recognise", text);
+        conversation.reply({ text });
+      });
+      microphone.on("recognise-interim", (text) => {
+        console.log("recognise-interim", text);
+        microphone.resetTimeout(timeout);
+      });
+
+      let started = false;
+      playthrough.on("connection-status", (status) => {
+        console.log("connection status", status);
+        if (status === "connected" && !started) {
+          conversation.start({startGraphReferenceId: "55f6a2ae-f526-4e50-b6ca-cfbf8cea4ffa"});
+          started = true;
+        }
+      });
+
+      playthrough.connect();
+    };
+
+    window.recordingStart = async function recordingStart() {
+      console.log("startSpeechRecognition");
+      await playthrough.startSpeechRecognition({
+        service: "unified",
+        languageCode: "en-US",
+        returnRaw: false,
+        customServiceParameters: {}
+      })
+      console.log("after")
+    };
+
+    window.recordingStop = function recordingStop() {
+      console.log("stopSpeechRecognition");
+      playthrough.stopSpeechRecognition({})
+    };
+  </script>
+</html>

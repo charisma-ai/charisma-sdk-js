@@ -257,6 +257,18 @@ export type ConfirmStartEvent = ConfirmEvent<ConfirmStartEventPayload>;
 export type ConfirmTapEvent = ConfirmEvent<ConfirmTapEventPayload>;
 
 export type SpeechRecognitionStartEvent = {
-  service: string;
-  serviceOptions: any;
+  service: "unified" | "unified:google" | "unified:aws" | "unified:deepgram";
+  sampleRate?: number;
+  languageCode?: string;
+  encoding?: string;
+  customServiceParameters?: object;
+  returnRaw?: boolean;
+};
+
+export type SpeechRecognitionResponse = {
+  channelIndex?: string;
+  confidence?: number;
+  durationInSeconds?: number;
+  isFinal?: boolean;
+  text: string;
 };
