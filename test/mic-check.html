@@ -22,7 +22,20 @@
       setGlobalBaseUrl,
     } from "../dist/api.js";
 
+    // TEST PARAMETERS
+    const storyId = 2;
+    const version = -1;
+    const userToken = "eyXXX9.eyXXX.XX";
+    const startGraphReferenceId = "55f6a2ae-f526-4e50-b6ca-cfbf8cea4ffa";
+    const speechRecognitionStartEvent = {
+      service: "unified",
+      languageCode: "en-US",
+      returnRaw: false,
+      customServiceParameters: {}
+    };
     const charismaUrl = "http://localhost:5050";
+    //
+
     setGlobalBaseUrl(charismaUrl);
 
     console.log();
@@ -35,7 +48,7 @@
     const messagesDiv = document.getElementById("messages");
 
     window.start = async function start() {
-      const { token } = await createPlaythroughToken({ storyId: 2, version: -1, userToken: "" });
+      const { token } = await createPlaythroughToken({ storyId, version, userToken });
       console.log("New playthrough token:", token);
       const { conversationUuid } = await createConversation(token);
       console.log("New conversation ID:", conversationUuid);
@@ -95,7 +108,7 @@
       playthrough.on("connection-status", (status) => {
         console.log("connection status", status);
         if (status === "connected" && !started) {
-          conversation.start({startGraphReferenceId: "55f6a2ae-f526-4e50-b6ca-cfbf8cea4ffa"});
+          conversation.start({ startGraphReferenceId });
           started = true;
         }
       });
@@ -105,12 +118,7 @@
 
     window.recordingStart = async function recordingStart() {
       console.log("startSpeechRecognition");
-      await playthrough.startSpeechRecognition({
-        service: "unified",
-        languageCode: "en-US",
-        returnRaw: false,
-        customServiceParameters: {}
-      })
+      await playthrough.startSpeechRecognition(speechRecognitionStartEvent)
       console.log("after")
     };
 

@@ -266,9 +266,9 @@ export type SpeechRecognitionStartEvent = {
 };
 
 export type SpeechRecognitionResponse = {
-  channelIndex?: string;
   confidence?: number;
   durationInSeconds?: number;
-  isFinal?: boolean;
+  speechFinal: boolean | undefined;
+  isFinal: boolean | undefined;
   text: string;
 };
