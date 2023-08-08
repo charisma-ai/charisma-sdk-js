@@ -268,7 +268,7 @@ export type SpeechRecognitionStartEvent = {
 export type SpeechRecognitionResponse = {
   confidence?: number;
   durationInSeconds?: number;
-  speechFinal: boolean | undefined;
-  isFinal: boolean | undefined;
+  speechFinal: boolean;
+  isFinal: boolean;
   text: string;
 };
