@@ -261,7 +261,7 @@ export type SpeechRecognitionStartEvent = {
   sampleRate?: number;
   languageCode?: string;
   encoding?: string;
-  customServiceParameters?: object;
+  customServiceParameters?: Record<string, unknown>;
   returnRaw?: boolean;
 };
 

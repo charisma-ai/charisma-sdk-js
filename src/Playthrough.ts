@@ -34,7 +34,7 @@ type PlaythroughEvents = {
   "connection-status": [ConnectionStatus];
   error: [any];
   problem: [{ code: string; error: string }];
-  "speech-recognition-result": any;
+  "speech-recognition-result": SpeechRecognitionResponse;
   "speech-recognition-error": any;
 };
 
