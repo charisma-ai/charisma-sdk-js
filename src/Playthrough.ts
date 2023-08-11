@@ -19,6 +19,7 @@ import {
   ProblemEvent,
   JSONValue,
   SpeechRecognitionStartEvent,
+  SpeechRecognitionResponse,
 } from "./types.js";
 // eslint-disable-next-line import/no-named-as-default
 import Conversation, { ConversationOptions } from "./Conversation.js";
@@ -33,7 +34,7 @@ type PlaythroughEvents = {
   "connection-status": [ConnectionStatus];
   error: [any];
   problem: [{ code: string; error: string }];
-  "speech-recognition-result": any;
+  "speech-recognition-result": SpeechRecognitionResponse;
   "speech-recognition-error": any;
 };
 
@@ -449,7 +450,9 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
     }
   }
 
-  private onSpeechRecognitionResult = (event: any): void => {
+  private onSpeechRecognitionResult = (
+    event: SpeechRecognitionResponse,
+  ): void => {
     this.emit("speech-recognition-result", event);
   };
 
