@@ -20,8 +20,8 @@ import {
   JSONValue,
   SpeechRecognitionStartEvent,
   SpeechRecognitionResponse,
-  SpeechRecognitionStart,
-  SpeechRecognitionStop,
+  SpeechRecognitionStarted,
+  SpeechRecognitionStopped,
 } from "./types.js";
 // eslint-disable-next-line import/no-named-as-default
 import Conversation, { ConversationOptions } from "./Conversation.js";
@@ -38,8 +38,8 @@ type PlaythroughEvents = {
   problem: [{ code: string; error: string }];
   "speech-recognition-result": SpeechRecognitionResponse;
   "speech-recognition-error": any;
-  "speech-recognition-started": SpeechRecognitionStart;
-  "speech-recognition-stopped": SpeechRecognitionStop;
+  "speech-recognition-started": SpeechRecognitionStarted;
+  "speech-recognition-stopped": SpeechRecognitionStopped;
 };
 
 class Playthrough extends EventEmitter<PlaythroughEvents> {
@@ -473,12 +473,14 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
   };
 
   private onSpeechRecognitionStarted = (
-    event: SpeechRecognitionStart,
+    event: SpeechRecognitionStarted,
   ): void => {
     this.emit("speech-recognition-started", event);
   };
 
-  private onSpeechRecognitionStopped = (event: SpeechRecognitionStop): void => {
+  private onSpeechRecognitionStopped = (
+    event: SpeechRecognitionStopped,
+  ): void => {
     this.emit("speech-recognition-stopped", event);
   };
 }

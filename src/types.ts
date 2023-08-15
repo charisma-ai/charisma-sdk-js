@@ -281,14 +281,14 @@ type SpeechRecognitionParameters = {
   returnRaw: boolean;
 };
 
-export type SpeechRecognitionStart = {
+export type SpeechRecognitionStarted = {
   playerSessionId: string;
   service: string;
   parameters: SpeechRecognitionParameters;
   startedAt: Date;
 };
 
-export type SpeechRecognitionStop = {
+export type SpeechRecognitionStopped = {
   id: string;
   playerSessionId: string;
   service: string;
