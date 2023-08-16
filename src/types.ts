@@ -282,6 +282,7 @@ type SpeechRecognitionParameters = {
 };
 
 export type SpeechRecognitionStarted = {
+  id: string;
   playerSessionId: string;
   service: string;
   parameters: SpeechRecognitionParameters;
