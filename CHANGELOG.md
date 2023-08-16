@@ -10,8 +10,9 @@
 - **BREAKING:** `api.createPlaythroughToken`, `api.createConversation` and `api.createCharacterConversation` all now return an object instead of a scalar, to facilitate any future changes to these methods.
 - **BREAKING:** `memories` in `getPlaythroughInfo` and in the `message` event now return `saveValue`s as JSON instead of only as strings. For example, counter memories are now actually `number`s and boolean memories are now actually `boolean`s.
 - **BREAKING:** `getMessageHistory` has been removed, and `getEventHistory` added as a more fully-featured alternative with much greater support for filtering, and can return all event types.
-
 - `setMemory` now accepts any JSON values instead of only strings.
+- **BREAKING:** Speech recognition stream now uses common objects to start up, deliver results and stop, regardless of which downstream service is selected.
+- Add start and stop events to the speech recognition stream.
 
 ### v3.9.0
 
