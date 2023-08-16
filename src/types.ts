@@ -255,3 +255,46 @@ export type ConfirmReplyEvent = ConfirmEvent<ConfirmReplyEventPayload>;
 export type ConfirmResumeEvent = ConfirmEvent<ConfirmResumeEventPayload>;
 export type ConfirmStartEvent = ConfirmEvent<ConfirmStartEventPayload>;
 export type ConfirmTapEvent = ConfirmEvent<ConfirmTapEventPayload>;
+
+export type SpeechRecognitionStartEvent = {
+  service: "unified" | "unified:google" | "unified:aws" | "unified:deepgram";
+  sampleRate?: number;
+  languageCode?: string;
+  encoding?: string;
+  customServiceParameters?: Record<string, unknown>;
+  returnRaw?: boolean;
+};
+
+export type SpeechRecognitionResponse = {
+  confidence?: number;
+  durationInSeconds?: number;
+  speechFinal: boolean;
+  isFinal: boolean;
+  text: string;
+};
+
+type SpeechRecognitionParameters = {
+  sampleRate: number;
+  languageCode: string;
+  encoding: string;
+  customServiceParameters: unknown;
+  returnRaw: boolean;
+};
+
+export type SpeechRecognitionStarted = {
+  id: string;
+  playerSessionId: string;
+  service: string;
+  parameters: SpeechRecognitionParameters;
+  startedAt: Date;
+};
+
+export type SpeechRecognitionStopped = {
+  id: string;
+  playerSessionId: string;
+  service: string;
+  parameters: SpeechRecognitionParameters;
+  startedAt: Date;
+  endedAt: Date;
+  creditCount: number;
+};

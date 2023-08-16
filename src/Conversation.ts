@@ -1,4 +1,4 @@
-import EventEmitter from "eventemitter3";
+import { EventEmitter } from "eventemitter3";
 import PQueue from "p-queue";
 
 import Playthrough from "./Playthrough.js";
