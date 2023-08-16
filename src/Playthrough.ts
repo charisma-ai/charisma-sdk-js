@@ -20,6 +20,8 @@ import {
   JSONValue,
   SpeechRecognitionStartEvent,
   SpeechRecognitionResponse,
+  SpeechRecognitionStarted,
+  SpeechRecognitionStopped,
 } from "./types.js";
 // eslint-disable-next-line import/no-named-as-default
 import Conversation, { ConversationOptions } from "./Conversation.js";
@@ -36,6 +38,8 @@ type PlaythroughEvents = {
   problem: [{ code: string; error: string }];
   "speech-recognition-result": SpeechRecognitionResponse;
   "speech-recognition-error": any;
+  "speech-recognition-started": SpeechRecognitionStarted;
+  "speech-recognition-stopped": SpeechRecognitionStopped;
 };
 
 class Playthrough extends EventEmitter<PlaythroughEvents> {
@@ -231,6 +235,14 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
     room.onMessage("start", this.onStart);
     room.onMessage("tap", this.onTap);
 
+    room.onMessage(
+      "speech-recognition-started",
+      this.onSpeechRecognitionStarted,
+    );
+    room.onMessage(
+      "speech-recognition-stopped",
+      this.onSpeechRecognitionStopped,
+    );
     room.onMessage("speech-recognition-result", this.onSpeechRecognitionResult);
     room.onMessage("speech-recognition-error", this.onSpeechRecognitionError);
 
@@ -458,6 +470,18 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
 
   private onSpeechRecognitionError = (event: any): void => {
     this.emit("speech-recognition-error", event);
+  };
+
+  private onSpeechRecognitionStarted = (
+    event: SpeechRecognitionStarted,
+  ): void => {
+    this.emit("speech-recognition-started", event);
+  };
+
+  private onSpeechRecognitionStopped = (
+    event: SpeechRecognitionStopped,
+  ): void => {
+    this.emit("speech-recognition-stopped", event);
   };
 }
 

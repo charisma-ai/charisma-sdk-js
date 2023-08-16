@@ -272,3 +272,29 @@ export type SpeechRecognitionResponse = {
   isFinal: boolean;
   text: string;
 };
+
+type SpeechRecognitionParameters = {
+  sampleRate: number;
+  languageCode: string;
+  encoding: string;
+  customServiceParameters: unknown;
+  returnRaw: boolean;
+};
+
+export type SpeechRecognitionStarted = {
+  id: string;
+  playerSessionId: string;
+  service: string;
+  parameters: SpeechRecognitionParameters;
+  startedAt: Date;
+};
+
+export type SpeechRecognitionStopped = {
+  id: string;
+  playerSessionId: string;
+  service: string;
+  parameters: SpeechRecognitionParameters;
+  startedAt: Date;
+  endedAt: Date;
+  creditCount: number;
+};
