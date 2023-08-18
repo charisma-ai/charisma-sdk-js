@@ -5,7 +5,7 @@
   "source": "src/index.ts",
   "type": "module",
   "exports": "./dist/index.js",
-  "types": "./dist/src/index.d.ts",
+  "types": "./dist/index.d.ts",
   "sideEffects": false,
   "repository": "https://github.com/charisma-ai/charisma-sdk-js",
   "author": "Charisma Entertainment Ltd <hello@charisma.ai> (https://charisma.ai)",
