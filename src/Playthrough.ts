@@ -2,8 +2,6 @@ import { EventEmitter } from "eventemitter3";
 import * as Colyseus from "colyseus.js";
 import jwtDecode from "jwt-decode";
 
-import pkg from "../package.json" assert { type: "json" };
-
 import * as api from "./api.js";
 
 import {
@@ -29,8 +27,11 @@ import MicrophoneRecorder from "./MicrophoneRecorder.js";
 
 export type ConnectionStatus = "disconnected" | "connecting" | "connected";
 
-const pkgVersion = pkg.version;
-const sdkInfo = { sdkId: "js", sdkVersion: pkgVersion, protocolVersion: 2 };
+const sdkInfo = {
+  sdkId: "js",
+  sdkVersion: "4.0.0-alpha.11",
+  protocolVersion: 2,
+};
 
 type PlaythroughEvents = {
   "connection-status": [ConnectionStatus];
