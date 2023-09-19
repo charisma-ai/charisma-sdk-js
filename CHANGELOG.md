@@ -2,6 +2,8 @@
 
 ### vNext
 
+### v4.0.0
+
 - **BREAKING:** This packages now exports ES Module only.
 - **BREAKING:** An implementation of `fetch` is no longer included with this library. Consumers of this library should ensure their environment supports `fetch`.
 - **BREAKING:** This library now relies on having `URLSearchParams` available in the environment.
