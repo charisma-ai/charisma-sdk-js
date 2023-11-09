@@ -1,0 +1,110 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <button onclick="chunky()">Chunky!</button>
+  </body>
+  <script type="module">
+    const never = new Promise(() => {});
+
+    const mergeStreams = (streams) => {
+      const readers = streams.map((s) => s.getReader());
+      const reads = streams.map(() => null);
+      const dones = [];
+      const allDone = Promise.all(
+        streams.map(
+          (s) =>
+            new Promise((resolve) => {
+              dones.push(resolve);
+            }),
+        ),
+      );
+
+      return new ReadableStream({
+        start: (controller) => {
+          allDone.then(() => {
+            controller.close();
+          });
+        },
+        pull: (controller) =>
+          Promise.race(
+            readers.map(
+              (r, i) =>
+                (reads[i] ??= r.read().then(({ value, done }) => {
+                  if (done) {
+                    dones[i]();
+                    return never;
+                  }
+
+                  controller.enqueue(value);
+                  reads[i] = null;
+                })),
+            ),
+          ),
+        cancel: (reason) => {
+          for (const reader of readers) {
+            reader.cancel(reason);
+          }
+        },
+      });
+    };
+
+    // async function* streamAsyncIterator(stream) {
+    //   // Get a lock on the stream
+    //   const reader = stream.getReader();
+
+    //   try {
+    //     while (true) {
+    //       // Read from the stream
+    //       const { done, value } = await reader.read();
+    //       // Exit if we're done
+    //       if (done) return;
+    //       // Else yield the chunk
+    //       yield value;
+    //     }
+    //   } finally {
+    //     reader.releaseLock();
+    //   }
+    // }
+
+    window.chunky = function chunky() {
+      fetch("/alloy1.wav").then((response1) => {
+        fetch("/alloy2.wav").then((response2) => {
+          process(mergeStreams([response1.body, response2.body]));
+        });
+      });
+
+      async function process(stream) {
+        // for await (const chunk of streamAsyncIterator(stream)) {
+        //   console.log(chunk);
+        // }
+
+        let audioContext = new (window.AudioContext ||
+          window.webkitAudioContext)();
+
+        let totalDuration = 0;
+
+        async function playAudioData(audioData) {
+          let arrayBuffer = audioData.buffer;
+          let audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+          let source = audioContext.createBufferSource();
+          source.buffer = audioBuffer;
+          source.connect(audioContext.destination);
+          source.start(totalDuration);
+          totalDuration += audioBuffer.duration;
+        }
+
+        async function playStream(readableStream) {
+          let reader = readableStream.getReader();
+          let chunk;
+          while (!(chunk = await reader.read()).done) {
+            await playAudioData(chunk.value);
+          }
+        }
+
+        playStream(stream);
+      }
+    };
+  </script>
+</html>
