@@ -12,34 +12,22 @@ type MicrophoneRecorderEvents = {
 class MicrophoneRecorder extends EventEmitter<MicrophoneRecorderEvents> {
   private static hasRegisteredProcessor = false;
 
-  private audioContext: AudioContext;
+  private audioContext?: AudioContext;
 
   private source?: MediaStreamAudioSourceNode;
 
   private pcmWorker?: AudioWorkletNode;
 
-  private sampleRate = 16000;
+  public sampleRate = 16000;
 
   constructor(opts?: { sampleRate?: number }) {
     super();
-    this.audioContext = new AudioContext({
-      sampleRate: this.sampleRate,
-      latencyHint: "interactive",
-    });
     if (opts && opts.sampleRate) {
       this.sampleRate = opts.sampleRate;
     }
   }
 
   async start() {
-    if (!MicrophoneRecorder.hasRegisteredProcessor) {
-      const blob = new Blob([pcmProcessor], { type: "text/javascript" });
-      const blobURL = window.URL.createObjectURL(blob);
-      await this.audioContext.audioWorklet.addModule(blobURL);
-
-      MicrophoneRecorder.hasRegisteredProcessor = true;
-    }
-
     const stream = await navigator.mediaDevices.getUserMedia({
       audio: {
         deviceId: "default",
@@ -49,6 +37,32 @@ class MicrophoneRecorder extends EventEmitter<MicrophoneRecorderEvents> {
       },
       video: false,
     });
+
+    const audioTrack = stream.getAudioTracks().at(0);
+    if (!audioTrack) {
+      throw new Error(
+        "Could not get an audio track to use for speech recognition",
+      );
+    }
+    const trackSampleRate = audioTrack.getSettings().sampleRate;
+    if (trackSampleRate) {
+      this.sampleRate = trackSampleRate;
+    }
+
+    if (!this.audioContext) {
+      this.audioContext = new AudioContext({
+        sampleRate: this.sampleRate,
+        latencyHint: "interactive",
+      });
+    }
+
+    if (!MicrophoneRecorder.hasRegisteredProcessor) {
+      const blob = new Blob([pcmProcessor], { type: "text/javascript" });
+      const blobURL = window.URL.createObjectURL(blob);
+      await this.audioContext.audioWorklet.addModule(blobURL);
+
+      MicrophoneRecorder.hasRegisteredProcessor = true;
+    }
 
     if (this.audioContext.state !== "running") {
       await this.audioContext.resume();
