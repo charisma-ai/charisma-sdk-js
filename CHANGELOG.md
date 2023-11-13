@@ -1,6 +1,6 @@
 # Changelog
 
-### vNext
+### v4.0.1
 
 - Fixed an issue where speech recognition was using an incorrect sample rate.
 
