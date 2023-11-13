@@ -440,7 +440,10 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
 
   public async startSpeechRecognition(event?: SpeechRecognitionStartEvent) {
     if (!this.microphone) {
-      this.microphone = new MicrophoneRecorder();
+      // if the user supplied a `sampleRate`, try and create a recorder that matches it
+      this.microphone = new MicrophoneRecorder({
+        sampleRate: event?.sampleRate,
+      });
       this.microphone.addListener("data", (data) => {
         this.addOutgoingEvent("speech-recognition-chunk", data);
       });
@@ -450,6 +453,9 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
 
     this.addOutgoingEvent("speech-recognition-start", {
       ...event,
+      // the recorder is NOT GUARANTEED to have the `sampleRate` the user specified.
+      // override the event with the actual `sampleRate`.
+      sampleRate: this.microphone.sampleRate,
     });
   }
 

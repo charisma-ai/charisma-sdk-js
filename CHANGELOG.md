@@ -2,6 +2,8 @@
 
 ### vNext
 
+- Fixed an issue where speech recognition was using an incorrect sample rate.
+
 ### v4.0.0
 
 - **BREAKING:** This packages now exports ES Module only.
