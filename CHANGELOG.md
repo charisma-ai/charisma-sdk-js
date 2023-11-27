@@ -1,6 +1,6 @@
 # Changelog
 
-### vNext
+### v4.0.2
 
 - Stopping the microphone now stops the underlying `MediaStreamTrack`, removing the red 'listening' icon.
 
