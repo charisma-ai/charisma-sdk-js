@@ -18,6 +18,8 @@ class MicrophoneRecorder extends EventEmitter<MicrophoneRecorderEvents> {
 
   private pcmWorker?: AudioWorkletNode;
 
+  private audioTrack?: MediaStreamTrack;
+
   public sampleRate = 16000;
 
   constructor(opts?: { sampleRate?: number }) {
@@ -38,13 +40,13 @@ class MicrophoneRecorder extends EventEmitter<MicrophoneRecorderEvents> {
       video: false,
     });
 
-    const audioTrack = stream.getAudioTracks().at(0);
-    if (!audioTrack) {
+    this.audioTrack = stream.getAudioTracks().at(0);
+    if (!this.audioTrack) {
       throw new Error(
         "Could not get an audio track to use for speech recognition",
       );
     }
-    const trackSampleRate = audioTrack.getSettings().sampleRate;
+    const trackSampleRate = this.audioTrack.getSettings().sampleRate;
     if (trackSampleRate) {
       this.sampleRate = trackSampleRate;
     }
@@ -85,6 +87,7 @@ class MicrophoneRecorder extends EventEmitter<MicrophoneRecorderEvents> {
   stop() {
     this.pcmWorker?.port.close();
     this.source?.disconnect();
+    this.audioTrack?.stop();
     this.emit("end");
   }
 }
