@@ -71,6 +71,16 @@ class MicrophoneRecorder extends EventEmitter<MicrophoneRecorderEvents> {
     }
 
     this.source = this.audioContext.createMediaStreamSource(stream);
+
+    // Firefox does not currently support `sampleRate` on `MediaTrackSettings` which we use above.
+    // Instead we have to wait until the stream is connected to the `AudioContext`, then
+    // get `sampleRate` from there.
+    // Ref: https://developer.mozilla.org/en-US/docs/Web/API/MediaTrackSettings/sampleRate
+    // Ref: https://stackoverflow.com/a/76926243
+    if (!trackSampleRate) {
+      this.sampleRate = this.audioContext.sampleRate;
+    }
+
     this.pcmWorker = new AudioWorkletNode(this.audioContext, "pcm-worker", {
       outputChannelCount: [1],
     });
