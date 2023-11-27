@@ -1,5 +1,9 @@
 # Changelog
 
+### vNext
+
+- Stopping the microphone now stops the underlying `MediaStreamTrack`, removing the red 'listening' icon.
+
 ### v4.0.1
 
 - Fixed an issue where speech recognition was using an incorrect sample rate.
