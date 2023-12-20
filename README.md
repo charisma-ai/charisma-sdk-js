@@ -41,13 +41,17 @@ async function run() {
       microphone.startListening();
     }
   });
+  conversation.on("problem", console.warn);
   conversation.setSpeechConfig({
     encoding: ["ogg", "mp3"],
     output: "buffer",
   });
 
   playthrough.connect();
-  conversation.start();
+  conversation.start({
+    // Found under '...' -> 'Edit details' next to the subplot in the sidebar.
+    startGraphReferenceId: "my-id",
+  });
 
   microphone.startListening();
   microphone.on("recognise", (text) => conversation.reply({ text }));
@@ -147,8 +151,10 @@ To interact with the story, events are sent to and from the server that the WebS
 
 ```js
 {
-  "startNodeId": 12, // Optional, default undefined
-  "speech": true // Optional, default false
+  // To choose a subplot to start, provide `startGraphReferenceId`.
+  // It can be found by clicking '...' next to the subplot in the sidebar,
+  // and clicking 'Edit details'.
+  "startGraphReferenceId": "my-id", // Optional, default undefined
 }
 ```
 
@@ -156,35 +162,25 @@ To interact with the story, events are sent to and from the server that the WebS
 
 ```js
 {
-  "text": "Please reply to this!",
-  "speech": true // Optional, default false
+  "text": "Please reply to this!"
 }
 ```
 
 #### conversation.tap({ ... })
 
-```js
-{
-  "speech": true // Optional, default false
-}
-```
+This event has no fields.
 
 #### conversation.action({ ... })
 
 ```js
 {
-  "action": "pick-up-book",
-  "speech": true // Optional, default false
+  "action": "pick-up-book"
 }
 ```
 
 #### conversation.resume({ ... })
 
-```js
-{
-  "speech": true // Optional, default false
-}
-```
+This event has no fields.
 
 ### Events received by client
 
@@ -238,6 +234,10 @@ The events that are currently echoed to all clients are `action`, `reply`, `resu
 **Important:** These events are **not** emitted for the player that sent the original corresponding event!
 
 Each event includes its committed `eventId` and `timestamp` as well as the original payload (excluding the `speechConfig`).
+
+#### conversation.on('problem', (event) => { ... })
+
+If a problem occurs during a conversation, such as a pathway not being found after submitting a player message, `problem` will be emitted.
 
 ### Conversation helpers
 
