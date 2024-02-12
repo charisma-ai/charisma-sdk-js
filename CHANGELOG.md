@@ -1,5 +1,9 @@
 # Changelog
 
+### vNext
+
+- Add orientation type to ImageLayer.
+
 ### v4.0.3
 
 - Speech recognition now uses the correct sample rate in Firefox.
