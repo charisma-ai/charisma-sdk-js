@@ -2,6 +2,7 @@
 
 ### vNext
 
+- Updated types SpeechRecognitionStartEvent, SpeechRecognitionResponse, SpeechRecognitionParameters with traceId.
 - Add orientation type to ImageLayer.
 
 ### v4.0.3

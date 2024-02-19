@@ -77,12 +77,10 @@ export enum ImageLayerResizeMode {
   Contain = "contain",
   Cover = "cover",
 }
-export type ImageLayerOrientation = "portrait" | "landscape";
 export type ImageLayer = {
   url: string | null;
   points: ImageLayerPoints;
   resizeMode: ImageLayerResizeMode;
-  orientation: ImageLayerOrientation;
 };
 
 export enum AudioTrackBehaviour {
@@ -265,6 +263,7 @@ export type SpeechRecognitionStartEvent = {
   encoding?: string;
   customServiceParameters?: Record<string, unknown>;
   returnRaw?: boolean;
+  traceId?: number;
 };
 
 export type SpeechRecognitionResponse = {
@@ -273,6 +272,7 @@ export type SpeechRecognitionResponse = {
   speechFinal: boolean;
   isFinal: boolean;
   text: string;
+  traceId?: number;
 };
 
 type SpeechRecognitionParameters = {
@@ -281,6 +281,7 @@ type SpeechRecognitionParameters = {
   encoding: string;
   customServiceParameters: unknown;
   returnRaw: boolean;
+  traceId?: number;
 };
 
 export type SpeechRecognitionStarted = {
