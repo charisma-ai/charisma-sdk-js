@@ -1,6 +1,6 @@
 # Changelog
 
-### vNext
+### v4.0.5
 
 - Updated types SpeechRecognitionStartEvent, SpeechRecognitionResponse, SpeechRecognitionParameters with traceId.
 - Add orientation type to ImageLayer.
