@@ -77,10 +77,12 @@ export enum ImageLayerResizeMode {
   Contain = "contain",
   Cover = "cover",
 }
+export type ImageLayerOrientation = "portrait" | "landscape";
 export type ImageLayer = {
   url: string | null;
   points: ImageLayerPoints;
   resizeMode: ImageLayerResizeMode;
+  orientation: ImageLayerOrientation;
 };
 
 export enum AudioTrackBehaviour {
