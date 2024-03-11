@@ -49,7 +49,8 @@ async function run() {
 
   playthrough.connect();
   conversation.start({
-    // Found under '...' -> 'Edit details' next to the subplot in the sidebar.
+    // required for pro stories so they know where to start. Find the uuid at '...' -> 'Edit details' next to the subplot in the sidebar.
+    // do not provide it for web comic stories as they will start automatically from the first scene
     startGraphReferenceId: "my-id",
   });
 
@@ -151,9 +152,9 @@ To interact with the story, events are sent to and from the server that the WebS
 
 ```js
 {
-  // To choose a subplot to start, provide `startGraphReferenceId`.
-  // It can be found by clicking '...' next to the subplot in the sidebar,
-  // and clicking 'Edit details'.
+  // For Pro stories, start the story at a particular subplot with the `startGraphReferenceId`.
+  // It can be found by clicking '...' next to the subplot in the sidebar, and clicking 'Edit details'.
+  // For Web Comic stories do not provide `startGraphReferenceId`, the story will start automatically from the first scene
   "startGraphReferenceId": "my-id", // Optional, default undefined
 }
 ```
