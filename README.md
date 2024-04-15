@@ -142,6 +142,38 @@ If you want to end the connection to the playthrough, you can call `playthrough.
 playthrough.disconnect();
 ```
 
+#### Playthrough.startSpeechRecognition({ ... })
+
+Opens a stream of audio chunks from the user's microphone to the server. Charisma provides a single interface to make it easy to switch between Speech To Text (STT) providers, and returns results in a simplified format, assuming input from one speaker.
+See [speech-recognition-start in the Charisma docs](https://charisma.ai/docs/sdk-integration/speech-recognition) for more details.
+If the service is started successfully, a "speech-recognition-started" event will be returned from from the server, and [speech-recognition-result](https://charisma.ai/docs/sdk-integration/speech-recognition#speech-recognition-result) events.
+Otherwise look for a [speech-recognition-error](https://charisma.ai/docs/sdk-integration/speech-recognition#speech-recognition-error) on the websockets stream.
+
+```js
+playthrough.startSpeechRecognition();
+```
+
+```js
+playthrough.startSpeechRecognition({
+  service: "unified:deepgram",
+  language: "es",
+  customServiceParameters: {
+    endpointing: 1200,
+    utterance_end_ms: 2000,
+  },
+  // Many further optional parameters,
+  // see docs for speech-recognition-start
+});
+```
+
+#### Playthrough.stopSpeechRecognition
+
+Sends a request to stop a speech recognition stream, which will be confirmed by a speech-recognition-stopped event on the stream.
+
+```js
+playthrough.stopSpeechRecognition();
+```
+
 ## Events
 
 To interact with the story, events are sent to and from the server that the WebSocket is connected to.
@@ -289,7 +321,8 @@ Emitted when the microphone is automatically stopped after a timeout.
 
 #### microphone.startListening(listeningOptions?: SpeechRecognitionOptions)
 
-Starts browser speech recognition. The microphone will then emit `recognise-interim` (player hasn't finished speaking, this is the current best guess) and `recognise` (player has finished speaking and we're confident about the result) events.
+Starts browser speech recognition. The built in browser [SpeechRecognition](https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition) is free, but not available in every browser (such as Firefox). For premium results with better recognition and wider browser support, please use `playthrough.startSpeechRecognition()`.
+The microphone will then emit `recognise-interim` (player hasn't finished speaking, this is the current best guess) and `recognise` (player has finished speaking and we're confident about the result) events.
 
 The speech recognition will _NOT_ automatically pause when a character is speaking via `speaker.play`, but this could be set up by subscribing to the `start` and `stop` events on `speaker`, and calling `startListening` and `stopListening` on `microphone`.
 
