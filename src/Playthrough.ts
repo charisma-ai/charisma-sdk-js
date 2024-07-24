@@ -16,14 +16,9 @@ import {
   ConfirmTapEvent,
   ProblemEvent,
   JSONValue,
-  SpeechRecognitionStartEvent,
-  SpeechRecognitionResponse,
-  SpeechRecognitionStarted,
-  SpeechRecognitionStopped,
 } from "./types.js";
 // eslint-disable-next-line import/no-named-as-default
 import Conversation, { ConversationOptions } from "./Conversation.js";
-import MicrophoneRecorder from "./MicrophoneRecorder.js";
 
 export type ConnectionStatus = "disconnected" | "connecting" | "connected";
 
@@ -37,10 +32,6 @@ type PlaythroughEvents = {
   "connection-status": [ConnectionStatus];
   error: [any];
   problem: [{ code: string; error: string }];
-  "speech-recognition-result": SpeechRecognitionResponse;
-  "speech-recognition-error": any;
-  "speech-recognition-started": SpeechRecognitionStarted;
-  "speech-recognition-stopped": SpeechRecognitionStopped;
 };
 
 class Playthrough extends EventEmitter<PlaythroughEvents> {
@@ -236,17 +227,6 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
     room.onMessage("start", this.onStart);
     room.onMessage("tap", this.onTap);
 
-    room.onMessage(
-      "speech-recognition-started",
-      this.onSpeechRecognitionStarted,
-    );
-    room.onMessage(
-      "speech-recognition-stopped",
-      this.onSpeechRecognitionStopped,
-    );
-    room.onMessage("speech-recognition-result", this.onSpeechRecognitionResult);
-    room.onMessage("speech-recognition-error", this.onSpeechRecognitionError);
-
     room.onError(this.onError);
 
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
@@ -434,61 +414,6 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
     if (conversation) {
       conversation.addIncomingEvent("tap", event);
     }
-  };
-
-  private microphone?: MicrophoneRecorder;
-
-  public async startSpeechRecognition(event?: SpeechRecognitionStartEvent) {
-    if (!this.microphone) {
-      // if the user supplied a `sampleRate`, try and create a recorder that matches it
-      this.microphone = new MicrophoneRecorder({
-        sampleRate: event?.sampleRate,
-      });
-      this.microphone.addListener("data", (data) => {
-        this.addOutgoingEvent("speech-recognition-chunk", data);
-      });
-    }
-
-    await this.microphone.start();
-
-    this.addOutgoingEvent("speech-recognition-start", {
-      ...event,
-      // the recorder is NOT GUARANTEED to have the `sampleRate` the user specified.
-      // override the event with the actual `sampleRate`.
-      sampleRate: this.microphone.sampleRate,
-    });
-  }
-
-  public stopSpeechRecognition(event?: any) {
-    if (this.microphone) {
-      this.microphone.stop();
-
-      this.addOutgoingEvent("speech-recognition-stop", {
-        ...event,
-      });
-    }
-  }
-
-  private onSpeechRecognitionResult = (
-    event: SpeechRecognitionResponse,
-  ): void => {
-    this.emit("speech-recognition-result", event);
-  };
-
-  private onSpeechRecognitionError = (event: any): void => {
-    this.emit("speech-recognition-error", event);
-  };
-
-  private onSpeechRecognitionStarted = (
-    event: SpeechRecognitionStarted,
-  ): void => {
-    this.emit("speech-recognition-started", event);
-  };
-
-  private onSpeechRecognitionStopped = (
-    event: SpeechRecognitionStopped,
-  ): void => {
-    this.emit("speech-recognition-stopped", event);
   };
 }
 
