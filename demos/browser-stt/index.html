@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Charisma JS SDK Demo</title>
+  </head>
+  <body>
+    <div id="app">
+      <button onclick="start()">Start</button>
+      <div id="messages"></div>
+      <input
+        onkeypress="onKeyPress(event)"
+        placeholder="Type a message..."
+        id="reply-input"
+      />
+      <button onclick="reply()">Send</button>
+      Record:
+      <input
+        type="checkbox"
+        id="record"
+        class="mic-checkbox"
+        onclick="toggleMicrophone(event)"
+      />
+      <br />
+      <div id="transcript"></div>
+    </div>
+    <div>
+      <button onclick="toggleMuteBackgroundAudio()">
+        Mute Background Audio
+      </button>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
