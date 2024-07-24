@@ -25,18 +25,16 @@ class Microphone extends EventEmitter<MicrophoneEvents> {
 
   private socket: Socket | undefined;
 
-  public getMicrophone = async () => {
-    const userMedia = await navigator.mediaDevices.getUserMedia({
-      audio: true,
-    });
-
-    this.microphone = new MediaRecorder(userMedia);
-  };
-
-  public startListening = ({
+  public startListening = async ({
     timeout = 10000,
-  }: SpeechRecognitionOptions = {}): void => {
-    if (!this.microphone) return;
+  }: SpeechRecognitionOptions = {}): Promise<void> => {
+    if (!this.microphone) {
+      const userMedia = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+      });
+
+      this.microphone = new MediaRecorder(userMedia);
+    }
 
     this.microphone.start(500);
 
