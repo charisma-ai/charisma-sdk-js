@@ -35,7 +35,7 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
       this.microphone = new MediaRecorder(userMedia);
     }
 
-    this.microphone.start(500);
+    this.microphone.start(100);
 
     if (this.timeoutId !== undefined) {
       clearTimeout(this.timeoutId);
