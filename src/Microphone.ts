@@ -1,123 +1,97 @@
 import { EventEmitter } from "eventemitter3";
+import { io, type Socket } from "socket.io-client";
+import type { SpeechRecognitionEvent } from "./speech-types.js";
 
-import type {
-  SpeechRecognition,
-  SpeechRecognitionErrorCode,
-  SpeechRecognitionEvent,
-} from "./speech-types.js";
-
-interface Constructable<T> {
-  new (): T;
-}
-
-interface WindowWithSpeechRecognition extends Window {
-  SpeechRecognition?: Constructable<SpeechRecognition>;
-  webkitSpeechRecognition?: Constructable<SpeechRecognition>;
-}
-
-declare const window: WindowWithSpeechRecognition;
-
-const SpeechRecognitionClass =
-  typeof window !== "undefined"
-    ? window.SpeechRecognition || window.webkitSpeechRecognition
-    : undefined;
+// const  STT_URL = "https://stt-staging.charisma.ai";
+const STT_URL = "http://127.0.0.1:5001"; // Running the STT server locally
 
 export interface SpeechRecognitionOptions {
-  continuous?: boolean;
-  interimResults?: boolean;
-  lang?: string;
   timeout?: number;
-}
-
-export interface SpeechRecognitionStopOptions {
-  waitForLastResult?: boolean;
 }
 
 type MicrophoneEvents = {
   result: [SpeechRecognitionEvent];
-  recognise: [string];
-  "recognise-interim": [string];
-  error: [SpeechRecognitionErrorCode];
+  transcript: [string];
+  error: [string];
   timeout: [];
   start: [];
   stop: [];
 };
 
 class Microphone extends EventEmitter<MicrophoneEvents> {
-  private recognition = SpeechRecognitionClass
-    ? new SpeechRecognitionClass()
-    : undefined;
-
   private timeoutId: number | undefined;
 
-  public isSupported = SpeechRecognitionClass !== undefined;
+  private microphone: MediaRecorder | undefined;
+
+  private socket: Socket | undefined;
+
+  public getMicrophone = async () => {
+    const userMedia = await navigator.mediaDevices.getUserMedia({
+      audio: true,
+    });
+
+    this.microphone = new MediaRecorder(userMedia);
+  };
 
   public startListening = ({
-    continuous = false,
-    interimResults = true,
-    lang = "en-GB",
-    timeout,
+    timeout = 10000,
   }: SpeechRecognitionOptions = {}): void => {
-    if (!this.recognition) {
-      return;
-    }
+    if (!this.microphone) return;
+
+    this.microphone.start(500);
 
     if (this.timeoutId !== undefined) {
       clearTimeout(this.timeoutId);
     }
 
-    const { recognition } = this;
-    recognition.continuous = continuous;
-    recognition.interimResults = interimResults;
-    recognition.lang = lang;
-    recognition.onresult = this.onRecognitionResult;
-    recognition.onstart = (): void => {
+    this.microphone.onstart = () => {
       this.emit("start");
     };
-    recognition.onend = (): void => {
-      this.emit("stop");
-      recognition.start();
-    };
-    recognition.onerror = (event): void => {
-      this.emit("error", event.error);
-    };
 
-    try {
-      recognition.start();
-    } catch (err) {
-      // this is fine, it just means we tried to start/stop a stream when it was already started/stopped
-    }
+    this.microphone.ondataavailable = (event) => {
+      if (!this.socket) return;
+      this.socket.emit("packet-sent", event.data);
+    };
 
     if (timeout !== undefined) {
       this.timeoutId = window.setTimeout(this.onTimeout, timeout);
     }
   };
 
-  public stopListening = ({
-    waitForLastResult = false,
-  }: SpeechRecognitionStopOptions = {}): void => {
+  public stopListening = (): void => {
     if (this.timeoutId !== undefined) {
       clearTimeout(this.timeoutId);
     }
 
-    const { recognition } = this;
-    if (recognition) {
-      if (!waitForLastResult) {
-        recognition.onresult = (): void => undefined;
+    if (!this.microphone) return;
+
+    this.microphone.onstop = () => {
+      this.emit("stop");
+    };
+
+    this.microphone.stop();
+  };
+
+  public connect = (token: string) => {
+    this.socket = io(STT_URL, {
+      transports: ["websocket"],
+      query: { token },
+    });
+
+    this.socket.on("connect", () => {
+      console.log("Speech to Text Connected");
+    });
+
+    this.socket.on("transcript", (transcript: string) => {
+      if (transcript !== "") {
+        this.emit("transcript", transcript);
       }
-      recognition.onend = (): void => {
-        this.emit("stop");
-      };
-      try {
-        if (waitForLastResult) {
-          recognition.stop();
-        } else {
-          recognition.abort();
-        }
-      } catch (err) {
-        // this is fine, it just means we tried to start/stop a stream when it was already started/stopped
-      }
-    }
+    });
+
+    this.socket.on("error", (error: string) => {
+      console.error(error);
+      this.emit("error", error);
+    });
   };
 
   public resetTimeout = (timeout: number): void => {
@@ -132,22 +106,6 @@ class Microphone extends EventEmitter<MicrophoneEvents> {
     this.timeoutId = undefined;
     this.emit("timeout");
     this.stopListening();
-  };
-
-  private onRecognitionResult = (event: SpeechRecognitionEvent): void => {
-    this.emit("result", event);
-
-    if (event.results.length === 0) {
-      return;
-    }
-
-    const lastResult = event.results[event.results.length - 1];
-    const message = lastResult[0].transcript.trim();
-    if (lastResult.isFinal) {
-      this.emit("recognise", message);
-    } else {
-      this.emit("recognise-interim", message);
-    }
   };
 }
 
