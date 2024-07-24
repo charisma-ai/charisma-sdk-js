@@ -2,8 +2,7 @@ import { EventEmitter } from "eventemitter3";
 import { io, type Socket } from "socket.io-client";
 import type { SpeechRecognitionEvent } from "./speech-types.js";
 
-// const  STT_URL = "https://stt-staging.charisma.ai";
-const STT_URL = "http://127.0.0.1:5001"; // Running the STT server locally
+const STT_URL = "https://stt-staging.charisma.ai";
 
 export interface SpeechRecognitionOptions {
   timeout?: number;
