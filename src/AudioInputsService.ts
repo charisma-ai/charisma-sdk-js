@@ -8,7 +8,7 @@ export interface SpeechRecognitionOptions {
   timeout?: number;
 }
 
-type MicrophoneEvents = {
+type AudioInputsServiceEvents = {
   result: [SpeechRecognitionEvent];
   transcript: [string];
   error: [string];
@@ -17,7 +17,7 @@ type MicrophoneEvents = {
   stop: [];
 };
 
-class Microphone extends EventEmitter<MicrophoneEvents> {
+class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
   private timeoutId: number | undefined;
 
   private microphone: MediaRecorder | undefined;
@@ -106,4 +106,4 @@ class Microphone extends EventEmitter<MicrophoneEvents> {
   };
 }
 
-export default Microphone;
+export default AudioInputsService;

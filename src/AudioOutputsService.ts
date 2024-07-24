@@ -11,12 +11,12 @@ interface WindowWithAudioContext extends Window {
 
 declare const window: WindowWithAudioContext;
 
-type SpeakerEvents = {
+type AudioOutputsServiceEvents = {
   start: [];
   stop: [];
 };
 
-export type SpeakerPlayOptions = {
+export type AudioOutputsServicePlayOptions = {
   /**
    * Whether to interrupt the same track as the `trackId` passed (`track`), all currently playing audio (`all`), or not to interrupt anything (`none`). Default is `none`.
    */
@@ -27,15 +27,15 @@ export type SpeakerPlayOptions = {
   trackId?: string;
 };
 
-type SpeakerSource = {
+type AudioOutputsServiceSource = {
   sourceNode: AudioBufferSourceNode;
   trackId?: string;
 };
 
-class Speaker extends EventEmitter<SpeakerEvents> {
+class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
   private audioContext: AudioContext | undefined;
 
-  private currentSources: SpeakerSource[] = [];
+  private currentSources: AudioOutputsServiceSource[] = [];
 
   public getAudioContext = (): AudioContext => {
     if (this.audioContext) {
@@ -55,7 +55,7 @@ class Speaker extends EventEmitter<SpeakerEvents> {
 
   public play = async (
     audio: ArrayBuffer,
-    options: boolean | SpeakerPlayOptions = {},
+    options: boolean | AudioOutputsServicePlayOptions = {},
   ): Promise<void> => {
     // Backwards-compatible with the old boolean `interrupt` parameter
     if (typeof options === "boolean") {
@@ -111,4 +111,4 @@ class Speaker extends EventEmitter<SpeakerEvents> {
   };
 }
 
-export default Speaker;
+export default AudioOutputsService;

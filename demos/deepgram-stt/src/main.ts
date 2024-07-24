@@ -2,8 +2,8 @@
 import "./style.css";
 import {
   Playthrough,
-  Microphone,
-  Speaker,
+  AudioInputsService,
+  AudioOutputsService,
   createPlaythroughToken,
   createConversation,
   Conversation,
@@ -22,9 +22,9 @@ declare global {
 
 const STORY_ID = 17221;
 
-const speaker = new Speaker(); // For character speech
+const speaker = new AudioOutputsService(); // For character speech
 const backgroundAudio = new Audio(); // For background audio
-const microphone = new Microphone(); // For player speech
+const microphone = new AudioInputsService(); // For player speech
 
 let playthrough: Playthrough;
 let conversation: Conversation;
