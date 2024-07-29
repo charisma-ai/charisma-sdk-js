@@ -5,7 +5,7 @@ import AudioOutputsService, {
 } from "./AudioOutputsService";
 import BrowserSttService from "./BrowserSttService";
 
-interface AudioManagerOptions {
+export interface AudioManagerOptions {
   duckVolumeLevel: number;
   normalVolumeLevel: number;
   sttService: "browser" | "deepgram";
@@ -40,85 +40,85 @@ class AudioManager {
   // **
   // ** Audio Input Service ** //
   // **
-  public inputServiceStartListening() {
+  public inputServiceStartListening = () => {
     this.audioInputsService.startListening();
 
     if (this.mediaAudio.isPlaying) {
       this.mediaAudio.volume = this.options.duckVolumeLevel;
     }
-  }
+  };
 
-  public inputServiceStopListening() {
+  public inputServiceStopListening = () => {
     this.audioInputsService.stopListening();
 
     if (this.mediaAudio.isPlaying) {
       this.mediaAudio.volume = this.options.normalVolumeLevel;
     }
-  }
+  };
 
-  public inputServiceConnect(token: string) {
+  public inputServiceConnect = (token: string) => {
     this.audioInputsService.connect(token);
-  }
+  };
 
-  public inputServiceResetTimeout(timeout: number) {
+  public inputServiceResetTimeout = (timeout: number) => {
     this.audioInputsService.resetTimeout(timeout);
-  }
+  };
 
   // **
   // ** Browser STT Service ** //
   // **
-  public browserIsSupported() {
+  public browserIsSupported = () => {
     return this.audioInputsBrowser.isSupported;
-  }
+  };
 
-  public browserStartListening() {
+  public browserStartListening = () => {
     this.audioInputsBrowser.startListening();
 
     if (this.mediaAudio.isPlaying) {
       this.mediaAudio.volume = this.options.duckVolumeLevel;
     }
-  }
+  };
 
-  public browserStopListening() {
+  public browserStopListening = () => {
     this.audioInputsBrowser.stopListening();
 
     if (this.mediaAudio.isPlaying) {
       this.mediaAudio.volume = this.options.normalVolumeLevel;
     }
-  }
+  };
 
-  public browserResetTimeout(timeout: number) {
+  public browserResetTimeout = (timeout: number) => {
     this.audioInputsBrowser.resetTimeout(timeout);
-  }
+  };
 
   // **
   // ** Audio Outputs Service ** //
   // **
-  public outputServiceGetAudioContext() {
+  public outputServiceGetAudioContext = () => {
     return this.audioOutputsService.getAudioContext();
-  }
+  };
 
-  public outputServicePlay(
+  public outputServicePlay = (
     audio: ArrayBuffer,
     options: boolean | AudioOutputsServicePlayOptions,
-  ): Promise<void> {
+  ): Promise<void> => {
     return this.audioOutputsService.play(audio, options);
-  }
+  };
 
   // **
   // ** Media Audio ** //
   // **
-  public mediaAudioPlay() {
+  public mediaAudioPlay = () => {
     this.mediaAudio.play();
-  }
+  };
 
-  public mediaAudioPause() {
+  public mediaAudioPause = () => {
     this.mediaAudio.pause();
-  }
+  };
 
-  public mediaAudioFastSeek(time: number) {
+  public mediaAudioFastSeek = (time: number) => {
     this.mediaAudio.fastSeek(time);
-  }
+  };
 }
 
 export default AudioManager;
