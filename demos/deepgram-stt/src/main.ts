@@ -85,7 +85,7 @@ window.start = async function start() {
   });
 
   await playthrough.connect();
-  // audio.inputServiceConnect(token);
+  audio.inputServiceConnect(token);
 };
 
 const reply = () => {

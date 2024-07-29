@@ -1,15 +1,7 @@
-// AudioManager.test.js
-
 import MediaAudio from "./MediaAudio";
-// import AudioInputsService from "./AudioInputsService";
-// import AudioOutputsService, {
-//   AudioOutputsServicePlayOptions,
-// } from "./AudioOutputsService";
-// import BrowserSttService from "./BrowserSttService";
 import AudioManager, { AudioManagerOptions } from "./AudioManager";
 import { AudioOutputsServicePlayOptions } from "./AudioOutputsService";
 
-// Mock the dependencies
 jest.mock("./MediaAudio", () => {
   return jest.fn().mockImplementation(() => {
     let volume = 1;
@@ -27,6 +19,7 @@ jest.mock("./MediaAudio", () => {
     };
   });
 });
+
 jest.mock("./AudioInputsService", () => {
   return jest.fn().mockImplementation(() => {
     return {
@@ -37,6 +30,7 @@ jest.mock("./AudioInputsService", () => {
     };
   });
 });
+
 jest.mock("./AudioOutputsService", () => {
   return jest.fn().mockImplementation(() => {
     return {
@@ -63,7 +57,6 @@ describe("AudioManager", () => {
   let mockMediaAudioInstance: MediaAudio;
 
   beforeEach(() => {
-    // Set up default options
     mockOptions = {
       duckVolumeLevel: 0.2,
       normalVolumeLevel: 1,
