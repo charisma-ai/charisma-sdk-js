@@ -78,7 +78,6 @@ window.start = async function start() {
 
   let started = false;
   playthrough.on("connection-status", (status) => {
-    console.log("connection status", status);
     if (status === "connected" && !started) {
       conversation.start();
       started = true;

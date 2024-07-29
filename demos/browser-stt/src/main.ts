@@ -31,8 +31,6 @@ let conversation: Conversation;
 
 const messagesDiv = document.getElementById("messages");
 
-console.log(import.meta.env.VITE_STORY_ID);
-
 window.start = async function start() {
   const { token } = await createPlaythroughToken({
     storyId: Number(import.meta.env.VITE_STORY_ID),
@@ -80,7 +78,6 @@ window.start = async function start() {
 
   let started = false;
   playthrough.on("connection-status", (status) => {
-    console.log("connection status", status);
     if (status === "connected" && !started) {
       conversation.start();
       started = true;
