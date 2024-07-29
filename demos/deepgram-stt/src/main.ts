@@ -2,8 +2,7 @@
 import "./style.css";
 import {
   Playthrough,
-  AudioInputsService,
-  AudioOutputsService,
+  AudioManager,
   createPlaythroughToken,
   createConversation,
   Conversation,
@@ -20,11 +19,12 @@ declare global {
   }
 }
 
-const STORY_ID = 17221;
-
-const speaker = new AudioOutputsService(); // For character speech
-const backgroundAudio = new Audio(); // For background audio
-const microphone = new AudioInputsService(); // For player speech
+const audio = new AudioManager({
+  duckVolumeLevel: 0.1,
+  normalVolumeLevel: 1,
+  sttService: "deepgram",
+  streamTimeslice: 100,
+});
 
 let playthrough: Playthrough;
 let conversation: Conversation;
@@ -33,7 +33,7 @@ const messagesDiv = document.getElementById("messages");
 
 window.start = async function start() {
   const { token } = await createPlaythroughToken({
-    storyId: STORY_ID,
+    storyId: import.meta.env.VITE_STORY_ID as number,
     apiKey: import.meta.env.VITE_STORY_API_KEY as string,
     version: -1, // -1 refers to the current draft version
   });
@@ -54,7 +54,7 @@ window.start = async function start() {
     messagesDiv?.appendChild(div);
 
     if (characterMessage.speech) {
-      speaker.play(characterMessage.speech.audio as ArrayBuffer, {
+      audio.outputServicePlay(characterMessage.speech.audio as ArrayBuffer, {
         trackId: String(characterMessage.character?.id),
         interrupt: "track",
       });
@@ -62,9 +62,9 @@ window.start = async function start() {
 
     // Play background audio.
     if (characterMessage.media.audioTracks.length > 0) {
-      backgroundAudio.src = characterMessage.media.audioTracks[0].url;
-      backgroundAudio.fastSeek(0);
-      backgroundAudio.play();
+      audio.mediaAudio.src = characterMessage.media.audioTracks[0].url;
+      audio.mediaAudioFastSeek(0);
+      audio.mediaAudioPlay();
     }
   });
 
@@ -86,7 +86,7 @@ window.start = async function start() {
   });
 
   await playthrough.connect();
-  microphone.connect(token);
+  audio.inputServiceConnect(token);
 };
 
 const reply = () => {
@@ -115,18 +115,18 @@ window.reply = reply;
 
 window.toggleMicrophone = (event) => {
   if ((<HTMLInputElement>event.currentTarget).checked) {
-    microphone.startListening();
+    audio.inputServiceStartListening();
   } else {
-    microphone.stopListening();
+    audio.inputServiceStopListening();
   }
 };
 
 window.toggleMuteBackgroundAudio = () => {
-  backgroundAudio.muted = !backgroundAudio.muted;
+  audio.mediaAudio.muted = !audio.mediaAudio.muted;
 };
 
 // Gets the transcript.
-microphone.on("transcript", (transcript) => {
+audio.audioInputsService.on("transcript", (transcript) => {
   console.log("Recognised Transcript:", transcript);
   const replyInput = <HTMLInputElement>document.getElementById("reply-input");
   if (replyInput) {

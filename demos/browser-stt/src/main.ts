@@ -20,8 +20,6 @@ declare global {
   }
 }
 
-const STORY_ID = 17221;
-
 const speaker = new AudioOutputsService(); // For character speech
 const backgroundAudio = new Audio(); // For background audio
 const microphone = new BrowserSttService(); // For player speech
@@ -33,7 +31,7 @@ const messagesDiv = document.getElementById("messages");
 
 window.start = async function start() {
   const { token } = await createPlaythroughToken({
-    storyId: STORY_ID,
+    storyId: import.meta.env.VITE_STORY_ID as number,
     apiKey: import.meta.env.VITE_STORY_API_KEY as string,
     version: -1, // -1 refers to the current draft version
   });
