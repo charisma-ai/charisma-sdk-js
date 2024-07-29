@@ -2,8 +2,7 @@
 import "./style.css";
 import {
   Playthrough,
-  BrowserSttService,
-  AudioOutputsService,
+  AudioManager,
   createPlaythroughToken,
   createConversation,
   Conversation,
@@ -20,18 +19,23 @@ declare global {
   }
 }
 
-const speaker = new AudioOutputsService(); // For character speech
-const backgroundAudio = new Audio(); // For background audio
-const microphone = new BrowserSttService(); // For player speech
+const audio = new AudioManager({
+  duckVolumeLevel: 0.1,
+  normalVolumeLevel: 1,
+  sttService: "browser",
+  streamTimeslice: 100,
+});
 
 let playthrough: Playthrough;
 let conversation: Conversation;
 
 const messagesDiv = document.getElementById("messages");
 
+console.log(import.meta.env.VITE_STORY_ID);
+
 window.start = async function start() {
   const { token } = await createPlaythroughToken({
-    storyId: import.meta.env.VITE_STORY_ID as number,
+    storyId: Number(import.meta.env.VITE_STORY_ID),
     apiKey: import.meta.env.VITE_STORY_API_KEY as string,
     version: -1, // -1 refers to the current draft version
   });
@@ -52,7 +56,7 @@ window.start = async function start() {
     messagesDiv?.appendChild(div);
 
     if (characterMessage.speech) {
-      speaker.play(characterMessage.speech.audio as ArrayBuffer, {
+      audio.outputServicePlay(characterMessage.speech.audio as ArrayBuffer, {
         trackId: String(characterMessage.character?.id),
         interrupt: "track",
       });
@@ -60,9 +64,9 @@ window.start = async function start() {
 
     // Play background audio.
     if (characterMessage.media.audioTracks.length > 0) {
-      backgroundAudio.src = characterMessage.media.audioTracks[0].url;
-      backgroundAudio.fastSeek(0);
-      backgroundAudio.play();
+      audio.mediaAudio.src = characterMessage.media.audioTracks[0].url;
+      audio.mediaAudioFastSeek(0);
+      audio.mediaAudioPlay();
     }
   });
 
@@ -112,18 +116,18 @@ window.reply = reply;
 
 window.toggleMicrophone = (event) => {
   if ((<HTMLInputElement>event.currentTarget).checked) {
-    microphone.startListening();
+    audio.inputServiceStartListening();
   } else {
-    microphone.stopListening();
+    audio.inputServiceStopListening();
   }
 };
 
 window.toggleMuteBackgroundAudio = () => {
-  backgroundAudio.muted = !backgroundAudio.muted;
+  audio.mediaAudio.muted = !audio.mediaAudio.muted;
 };
 
 // Gets the transcript.
-microphone.on("transcript", (transcript) => {
+audio.audioInputsService.on("transcript", (transcript) => {
   console.log("Recognised Transcript:", transcript);
   const replyInput = <HTMLInputElement>document.getElementById("reply-input");
   if (replyInput) {

@@ -33,7 +33,7 @@ const messagesDiv = document.getElementById("messages");
 
 window.start = async function start() {
   const { token } = await createPlaythroughToken({
-    storyId: import.meta.env.VITE_STORY_ID as number,
+    storyId: Number(import.meta.env.VITE_STORY_ID),
     apiKey: import.meta.env.VITE_STORY_API_KEY as string,
     version: -1, // -1 refers to the current draft version
   });
@@ -86,7 +86,7 @@ window.start = async function start() {
   });
 
   await playthrough.connect();
-  audio.inputServiceConnect(token);
+  // audio.inputServiceConnect(token);
 };
 
 const reply = () => {
