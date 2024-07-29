@@ -33,17 +33,17 @@ export interface SpeechRecognitionStopOptions {
   waitForLastResult?: boolean;
 }
 
-type MicrophoneEvents = {
+type BrowserSttServiceEvents = {
   result: [SpeechRecognitionEvent];
-  recognise: [string];
-  "recognise-interim": [string];
+  transcript: [string];
+  "transcript-interim": [string];
   error: [SpeechRecognitionErrorCode];
   timeout: [];
   start: [];
   stop: [];
 };
 
-class Microphone extends EventEmitter<MicrophoneEvents> {
+class BrowserSttService extends EventEmitter<BrowserSttServiceEvents> {
   private recognition = SpeechRecognitionClass
     ? new SpeechRecognitionClass()
     : undefined;
@@ -144,11 +144,11 @@ class Microphone extends EventEmitter<MicrophoneEvents> {
     const lastResult = event.results[event.results.length - 1];
     const message = lastResult[0].transcript.trim();
     if (lastResult.isFinal) {
-      this.emit("recognise", message);
+      this.emit("transcript", message);
     } else {
-      this.emit("recognise-interim", message);
+      this.emit("transcript-interim", message);
     }
   };
 }
 
-export default Microphone;
+export default BrowserSttService;

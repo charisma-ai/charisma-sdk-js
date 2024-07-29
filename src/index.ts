@@ -6,12 +6,12 @@ export {
   type ConnectionStatus,
 } from "./Playthrough.js";
 export {
-  default as Microphone,
+  default as BrowserSttService,
   type SpeechRecognitionOptions,
   type SpeechRecognitionStopOptions,
-} from "./Microphone.js";
-export { default as MicrophoneRecorder } from "./MicrophoneRecorder.js";
-export { default as Speaker } from "./Speaker.js";
+} from "./BrowserSttService.js";
+export { default as AudioInputsService } from "./AudioInputsService.js";
+export { default as AudioOutputsService } from "./AudioOutputsService.js";
 
 export {
   Conversation,
