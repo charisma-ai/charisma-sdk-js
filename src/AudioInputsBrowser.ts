@@ -33,7 +33,7 @@ export interface SpeechRecognitionStopOptions {
   waitForLastResult?: boolean;
 }
 
-type BrowserSttServiceEvents = {
+type AudioInputsBrowserEvents = {
   result: [SpeechRecognitionEvent];
   transcript: [string];
   "transcript-interim": [string];
@@ -43,7 +43,7 @@ type BrowserSttServiceEvents = {
   stop: [];
 };
 
-class BrowserSttService extends EventEmitter<BrowserSttServiceEvents> {
+class AudioInputsBrowser extends EventEmitter<AudioInputsBrowserEvents> {
   private recognition = SpeechRecognitionClass
     ? new SpeechRecognitionClass()
     : undefined;
@@ -151,4 +151,4 @@ class BrowserSttService extends EventEmitter<BrowserSttServiceEvents> {
   };
 }
 
-export default BrowserSttService;
+export default AudioInputsBrowser;

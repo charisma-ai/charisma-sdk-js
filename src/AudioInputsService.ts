@@ -4,10 +4,6 @@ import type { SpeechRecognitionEvent } from "./speech-types.js";
 
 const STT_URL = "https://stt-staging.charisma.ai";
 
-export interface SpeechRecognitionOptions {
-  timeout?: number;
-}
-
 type AudioInputsServiceEvents = {
   result: [SpeechRecognitionEvent];
   transcript: [string];
@@ -18,21 +14,69 @@ type AudioInputsServiceEvents = {
 };
 
 class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
-  private timeoutId: number | undefined;
+  private timeoutId?: number;
 
-  private microphone: MediaRecorder | undefined;
+  private microphone?: MediaRecorder;
 
-  private socket: Socket | undefined;
+  private socket?: Socket;
 
-  public startListening = async ({
-    timeout = 10000,
-  }: SpeechRecognitionOptions = {}): Promise<void> => {
-    if (!this.microphone) {
-      const userMedia = await navigator.mediaDevices.getUserMedia({
-        audio: true,
+  private connect = (token: string): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      if (this.socket) {
+        reject(new Error("Socket already connected"));
+        return;
+      }
+
+      this.socket = io(STT_URL, {
+        transports: ["websocket"],
+        query: { token },
       });
 
-      this.microphone = new MediaRecorder(userMedia);
+      this.socket.on("connect", () => {
+        console.log("Speech to Text Connected");
+        resolve();
+      });
+
+      this.socket.on("error", (error: string) => {
+        console.error(error);
+        this.emit("error", error);
+        reject(error);
+      });
+
+      this.socket.on("transcript", (transcript: string) => {
+        if (transcript) {
+          this.emit("transcript", transcript);
+        }
+      });
+    });
+  };
+
+  public startListening = async (
+    token: string,
+    timeout = 10000,
+  ): Promise<void> => {
+    try {
+      if (!this.microphone) {
+        const userMedia = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+        });
+
+        this.microphone = new MediaRecorder(userMedia);
+      }
+    } catch (error) {
+      console.error("Failed to access microphone:", error);
+      this.emit("error", "Failed to access microphone");
+      return;
+    }
+
+    if (!this.socket) {
+      try {
+        await this.connect(token);
+      } catch (error) {
+        console.error("Failed to connect to socket:", error);
+        this.emit("error", "Failed to connect to socket");
+        return;
+      }
     }
 
     this.microphone.start(100);
@@ -67,28 +111,6 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
     };
 
     this.microphone.stop();
-  };
-
-  public connect = (token: string) => {
-    this.socket = io(STT_URL, {
-      transports: ["websocket"],
-      query: { token },
-    });
-
-    this.socket.on("connect", () => {
-      console.log("Speech to Text Connected");
-    });
-
-    this.socket.on("transcript", (transcript: string) => {
-      if (transcript !== "") {
-        this.emit("transcript", transcript);
-      }
-    });
-
-    this.socket.on("error", (error: string) => {
-      console.error(error);
-      this.emit("error", error);
-    });
   };
 
   public resetTimeout = (timeout: number): void => {
