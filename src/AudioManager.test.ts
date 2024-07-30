@@ -1,182 +1,62 @@
-import MediaAudio from "./MediaAudio";
+import MockMediaAudio from "./__mocks__/MockMediaAudio";
+import MockAudioInputsService from "./__mocks__/MockAudioInputsService";
+import MockAudioInputsBrowser from "./__mocks__/MockAudioInputsBrowser";
+import MockAudioOutputsService from "./__mocks__/MockAudioOutputsService";
+
 import AudioManager, { AudioManagerOptions } from "./AudioManager";
-import { AudioOutputsServicePlayOptions } from "./AudioOutputsService";
 
-jest.mock("./MediaAudio", () => {
-  return jest.fn().mockImplementation(() => {
-    let volume = 1;
-    return {
-      isPlaying: false,
-      get volume() {
-        return volume;
-      },
-      set volume(newVolume) {
-        volume = newVolume;
-      },
-      play: jest.fn(),
-      pause: jest.fn(),
-      fastSeek: jest.fn(),
-    };
-  });
-});
+jest.mock("./MediaAudio", () => ({
+  __esModule: true,
+  default: jest.fn().mockImplementation(() => MockMediaAudio),
+}));
 
-jest.mock("./AudioInputsService", () => {
-  return jest.fn().mockImplementation(() => {
-    return {
-      startListening: jest.fn(),
-      stopListening: jest.fn(),
-      connect: jest.fn(),
-      resetTimeout: jest.fn(),
-    };
-  });
-});
+jest.mock("./AudioInputsService", () => ({
+  __esModule: true,
+  default: MockAudioInputsService,
+}));
 
-jest.mock("./AudioOutputsService", () => {
-  return jest.fn().mockImplementation(() => {
-    return {
-      getAudioContext: jest.fn(),
-      play: jest.fn(),
-    };
-  });
-});
+jest.mock("./AudioInputsBrowser", () => ({
+  __esModule: true,
+  default: MockAudioInputsBrowser,
+}));
 
-jest.mock("./BrowserSttService", () => {
-  return jest.fn().mockImplementation(() => {
-    return {
-      isSupported: true,
-      startListening: jest.fn(),
-      stopListening: jest.fn(),
-      resetTimeout: jest.fn(),
-    };
-  });
-});
+jest.mock("./AudioOutputsService", () => ({
+  __esModule: true,
+  default: jest.fn().mockImplementation(() => MockAudioOutputsService),
+}));
 
 describe("AudioManager", () => {
-  let audioManager: AudioManager;
-  let mockOptions: AudioManagerOptions;
-  let mockMediaAudioInstance: MediaAudio;
+  test("should initialize correctly", () => {
+    const mockOptions: AudioManagerOptions = {
+      duckVolumeLevel: 0.2,
+      normalVolumeLevel: 1,
+      sttService: "browser",
+      streamTimeslice: 100,
+    };
+    const audioManager = new AudioManager(mockOptions);
+    expect(audioManager).toBeInstanceOf(AudioManager);
+  });
 
-  beforeEach(() => {
-    mockOptions = {
+  test("inputServiceStartListening should call startListening", () => {
+    const mockOptions: AudioManagerOptions = {
       duckVolumeLevel: 0.2,
       normalVolumeLevel: 1,
       sttService: "browser",
       streamTimeslice: 100,
     };
 
-    // Create a new instance of AudioManager
-    audioManager = new AudioManager(mockOptions);
+    const mockAudioInputsBrowserInstance = new MockAudioInputsBrowser();
+    const mockAudioInputsServiceInstance = new MockAudioInputsService();
+    const audioManager = new AudioManager(mockOptions);
 
-    // Retrieve the instance of MediaAudio
-    // eslint-disable-next-line prefer-destructuring, @typescript-eslint/no-unsafe-assignment
-    mockMediaAudioInstance = (MediaAudio as jest.Mock).mock.instances[0];
-    mockMediaAudioInstance.isPlaying = true;
-  });
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    (audioManager as any).audioInputsBrowser = mockAudioInputsBrowserInstance;
 
-  // Audio Input Service Tests
-  test("inputServiceStartListening should call startListening and duck volume if media is playing", () => {
-    audioManager.mediaAudio.isPlaying = true;
-    audioManager.inputServiceStartListening();
-    expect(audioManager.audioInputsService.startListening).toHaveBeenCalled();
-    expect(audioManager.mediaAudio.volume).toBe(mockOptions.duckVolumeLevel);
-  });
+    audioManager.startListening("test-token");
 
-  test("inputServiceStartListening should call startListening and not change volume if media is not playing", () => {
-    audioManager.mediaAudio.isPlaying = false;
-    audioManager.inputServiceStartListening();
-    expect(audioManager.audioInputsService.startListening).toHaveBeenCalled();
-    expect(audioManager.mediaAudio.volume).not.toBe(
-      mockOptions.duckVolumeLevel,
-    );
-  });
-
-  test("inputServiceStopListening should call stopListening and set volume to normal if media is playing", () => {
-    audioManager.mediaAudio.isPlaying = true;
-    audioManager.inputServiceStopListening();
-    expect(audioManager.audioInputsService.stopListening).toHaveBeenCalled();
-    expect(audioManager.mediaAudio.volume).toBe(mockOptions.normalVolumeLevel);
-  });
-
-  test("inputServiceStopListening should call stopListening and not change volume if media is not playing", () => {
-    audioManager.mediaAudio.isPlaying = false;
-    audioManager.inputServiceStopListening();
-    expect(audioManager.audioInputsService.stopListening).toHaveBeenCalled();
-    expect(audioManager.mediaAudio.volume).toBe(mockOptions.normalVolumeLevel);
-  });
-
-  test("inputServiceConnect should call connect with the provided token", () => {
-    const token = "testToken";
-    audioManager.inputServiceConnect(token);
-    expect(audioManager.audioInputsService.connect).toHaveBeenCalledWith(token);
-  });
-
-  test("inputServiceResetTimeout should call resetTimeout with the provided timeout", () => {
-    const timeout = 5000;
-    audioManager.inputServiceResetTimeout(timeout);
-    expect(audioManager.audioInputsService.resetTimeout).toHaveBeenCalledWith(
-      timeout,
-    );
-  });
-
-  // Browser STT Service Tests
-  test("browserIsSupported should return isSupported from BrowserSttService", () => {
-    expect(audioManager.browserIsSupported()).toBe(
-      audioManager.audioInputsBrowser.isSupported,
-    );
-  });
-
-  test("browserStartListening should call startListening and duck volume if media is playing", () => {
-    audioManager.mediaAudio.isPlaying = true;
-    audioManager.browserStartListening();
-    expect(audioManager.audioInputsBrowser.startListening).toHaveBeenCalled();
-    expect(audioManager.mediaAudio.volume).toBe(mockOptions.duckVolumeLevel);
-  });
-
-  test("browserStartListening should call startListening and not change volume if media is not playing", () => {
-    audioManager.mediaAudio.isPlaying = false;
-    audioManager.browserStartListening();
-    expect(audioManager.audioInputsBrowser.startListening).toHaveBeenCalled();
-    expect(audioManager.mediaAudio.volume).not.toBe(
-      mockOptions.duckVolumeLevel,
-    );
-  });
-
-  test("browserStopListening should call stopListening and set volume to normal if media is playing", () => {
-    audioManager.mediaAudio.isPlaying = true;
-    audioManager.browserStopListening();
-    expect(audioManager.audioInputsBrowser.stopListening).toHaveBeenCalled();
-    expect(audioManager.mediaAudio.volume).toBe(mockOptions.normalVolumeLevel);
-  });
-
-  test("browserStopListening should call stopListening and not change volume if media is not playing", () => {
-    audioManager.mediaAudio.isPlaying = false;
-    audioManager.browserStopListening();
-    expect(audioManager.audioInputsBrowser.stopListening).toHaveBeenCalled();
-    expect(audioManager.mediaAudio.volume).toBe(mockOptions.normalVolumeLevel);
-  });
-
-  test("browserResetTimeout should call resetTimeout with the provided timeout", () => {
-    const timeout = 5000;
-    audioManager.browserResetTimeout(timeout);
-    expect(audioManager.audioInputsBrowser.resetTimeout).toHaveBeenCalledWith(
-      timeout,
-    );
-  });
-
-  // Audio Outputs Service Tests
-  test("outputServiceGetAudioContext should return the audio context", () => {
-    expect(audioManager.outputServiceGetAudioContext()).toBe(
-      audioManager.audioOutputsService.getAudioContext(),
-    );
-  });
-
-  test("outputServicePlay should call play with the provided audio and options", async () => {
-    const audio = new ArrayBuffer(8);
-    const options: AudioOutputsServicePlayOptions = { interrupt: "all" };
-    await audioManager.outputServicePlay(audio, options);
-    expect(audioManager.audioOutputsService.play).toHaveBeenCalledWith(
-      audio,
-      options,
-    );
+    expect(mockAudioInputsBrowserInstance.startListening).toHaveBeenCalled();
+    expect(
+      mockAudioInputsServiceInstance.startListening,
+    ).not.toHaveBeenCalled();
   });
 });

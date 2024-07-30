@@ -3,7 +3,6 @@ export default {
   testEnvironment: "node",
   testMatch: ["**/?(*.)+(spec|test).[tj]s?(x)"],
   moduleFileExtensions: ["ts", "js", "json", "node"],
-  setupFiles: ["./jest.setup.ts"],
   globals: {
     "ts-test": {
       isolatedModules: true,
