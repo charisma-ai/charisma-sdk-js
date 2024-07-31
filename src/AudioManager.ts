@@ -14,10 +14,10 @@ export interface AudioManagerOptions {
 }
 
 type AudioManagerEvents = {
-  start: [];
+  "start-stt": [];
+  "stop-stt": [];
   transcript: [string];
   error: [string];
-  stop: [];
 };
 
 class AudioManager extends EventEmitter<AudioManagerEvents> {
@@ -46,8 +46,8 @@ class AudioManager extends EventEmitter<AudioManagerEvents> {
     };
 
     // Listen to events from the AudioInputsService
-    this.audioInputsService.on("start", () => this.emit("start"));
-    this.audioInputsService.on("stop", () => this.emit("stop"));
+    this.audioInputsService.on("start", () => this.emit("start-stt"));
+    this.audioInputsService.on("stop", () => this.emit("stop-stt"));
     this.audioInputsService.on("transcript", (transcript: string) =>
       this.emit("transcript", transcript),
     );
@@ -56,8 +56,8 @@ class AudioManager extends EventEmitter<AudioManagerEvents> {
     );
 
     // Listen to events from the AudioInputsBrowser
-    this.audioInputsBrowser.on("start", () => this.emit("start"));
-    this.audioInputsBrowser.on("stop", () => this.emit("stop"));
+    this.audioInputsBrowser.on("start", () => this.emit("start-stt"));
+    this.audioInputsBrowser.on("stop", () => this.emit("stop-stt"));
     this.audioInputsBrowser.on("transcript", (transcript: string) =>
       this.emit("transcript", transcript),
     );
@@ -92,11 +92,6 @@ class AudioManager extends EventEmitter<AudioManagerEvents> {
       this.mediaAudio.volume = this.options.normalVolumeLevel;
     }
   };
-
-  // TODO - Remove this and connect automatically
-  // public inputServiceConnect = (token: string) => {
-  //   this.audioInputsService.connect(token);
-  // };
 
   public inputServiceResetTimeout = (timeout: number): void => {
     this.audioInputsService.resetTimeout(timeout);
