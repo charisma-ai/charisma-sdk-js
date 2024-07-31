@@ -1,4 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+
 import "./style.css";
 import {
   Playthrough,
@@ -22,21 +23,26 @@ declare global {
 const audio = new AudioManager({
   duckVolumeLevel: 0.1,
   normalVolumeLevel: 1,
-  sttService: "deepgram",
+  sttService: "charisma/deepgram",
   streamTimeslice: 100,
 });
 
 let playthrough: Playthrough;
 let conversation: Conversation;
 
+let token: string;
+
+let recordingStatus: "recording" | "off" | "starting" = "off";
+
 const messagesDiv = document.getElementById("messages");
+const recordButton = document.getElementById("record-button");
 
 window.start = async function start() {
-  const { token } = await createPlaythroughToken({
+  ({ token } = await createPlaythroughToken({
     storyId: Number(import.meta.env.VITE_STORY_ID),
     apiKey: import.meta.env.VITE_STORY_API_KEY as string,
     version: -1, // -1 refers to the current draft version
-  });
+  }));
 
   const { conversationUuid } = await createConversation(token);
   playthrough = new Playthrough(token);
@@ -62,7 +68,7 @@ window.start = async function start() {
 
     // Play background audio.
     if (characterMessage.media.audioTracks.length > 0) {
-      audio.mediaAudio.src = characterMessage.media.audioTracks[0].url;
+      audio.mediaSrc = characterMessage.media.audioTracks[0].url;
       audio.mediaAudioFastSeek(0);
       audio.mediaAudioPlay();
     }
@@ -85,7 +91,6 @@ window.start = async function start() {
   });
 
   await playthrough.connect();
-  audio.inputServiceConnect(token);
 };
 
 const reply = () => {
@@ -112,23 +117,45 @@ window.onKeyPress = function onKeyPress(event) {
 
 window.reply = reply;
 
-window.toggleMicrophone = (event) => {
-  if ((<HTMLInputElement>event.currentTarget).checked) {
-    audio.inputServiceStartListening();
-  } else {
-    audio.inputServiceStopListening();
+// Toggling the microphone will request the stt service to connect.
+window.toggleMicrophone = () => {
+  if (!recordButton) return;
+
+  if (recordingStatus === "off") {
+    audio.startListening(token);
+    recordingStatus = "starting";
+    recordButton.innerHTML = "...";
+  } else if (recordingStatus === "recording") {
+    audio.stopListening();
+    recordingStatus = "off";
+    recordButton.innerHTML = "Record";
   }
 };
 
 window.toggleMuteBackgroundAudio = () => {
-  audio.mediaAudio.muted = !audio.mediaAudio.muted;
+  audio.muted = !audio.muted;
 };
 
 // Gets the transcript.
-audio.audioInputsService.on("transcript", (transcript) => {
+audio.on("transcript", (transcript: string) => {
   console.log("Recognised Transcript:", transcript);
   const replyInput = <HTMLInputElement>document.getElementById("reply-input");
   if (replyInput) {
     replyInput.value = transcript;
   }
+});
+
+audio.on("start-stt", () => {
+  console.log("Listening Started");
+  recordingStatus = "recording";
+  if (recordButton) recordButton.innerHTML = "Stop";
+});
+
+audio.on("stop-stt", () => {
+  recordingStatus = "off";
+  if (recordButton) recordButton.innerHTML = "Record";
+});
+
+audio.on("error", (error) => {
+  console.error("Error:", error);
 });
