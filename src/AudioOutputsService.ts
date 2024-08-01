@@ -75,12 +75,16 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
       audioContext.decodeAudioData(audio, resolve, reject);
     });
 
-    if (audioContext.state !== "running") {
-      // This could be because the user hasn't given permission for the context to run
-      // i.e. `state` is `suspended`
-      // Instead of waiting for eternity, let's resolve immediately
-      return Promise.resolve();
-    }
+    // Removed as it doesn't play the first character audio when this is called
+    // if (audioContext.state !== "running") {
+    //   console.log(
+    //     "AudioOutputsService.play - audioContext.state is not running",
+    //   );
+    //   // This could be because the user hasn't given permission for the context to run
+    //   // i.e. `state` is `suspended`
+    //   // Instead of waiting for eternity, let's resolve immediately
+    //   return Promise.resolve();
+    // }
 
     return new Promise((resolve): void => {
       source.onended = (): void => {
