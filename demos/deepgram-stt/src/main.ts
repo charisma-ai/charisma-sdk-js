@@ -7,9 +7,10 @@ import {
   createPlaythroughToken,
   createConversation,
   Conversation,
-  MessageCharacter,
+  Message,
 } from "@charisma-ai/sdk";
 
+// In this demo, we'll extend the global "window" with the functions we need so we can call them from the HTML.
 declare global {
   interface Window {
     start: () => Promise<void>;
@@ -20,22 +21,46 @@ declare global {
   }
 }
 
+// Keep track of the recording statuses of the microphone so we can update the UI accordingly.
+let recordingStatus: "recording" | "off" | "starting" = "off";
+
+const messagesDiv = document.getElementById("messages");
+const recordButton = document.getElementById("record-button");
+
+const handleStartSTT = () => {
+  console.log("Listening Started");
+  recordingStatus = "recording";
+  if (recordButton) recordButton.innerHTML = "Stop";
+};
+
+const handleStopSTT = () => {
+  recordingStatus = "off";
+  if (recordButton) recordButton.innerHTML = "Record";
+};
+
+const handleTranscript = (transcript: string) => {
+  console.log("Recognised Transcript:", transcript);
+  const replyInput = <HTMLInputElement>document.getElementById("reply-input");
+  if (replyInput) {
+    replyInput.value = transcript;
+  }
+};
+
+// Setup the audio manager.
 const audio = new AudioManager({
   duckVolumeLevel: 0.1,
   normalVolumeLevel: 1,
   sttService: "charisma/deepgram",
   streamTimeslice: 100,
+  handleTranscript,
+  handleStartSTT,
+  handleStopSTT,
 });
 
 let playthrough: Playthrough;
 let conversation: Conversation;
 
 let token: string;
-
-let recordingStatus: "recording" | "off" | "starting" = "off";
-
-const messagesDiv = document.getElementById("messages");
-const recordButton = document.getElementById("record-button");
 
 window.start = async function start() {
   ({ token } = await createPlaythroughToken({
@@ -48,10 +73,14 @@ window.start = async function start() {
   playthrough = new Playthrough(token);
   conversation = playthrough.joinConversation(conversationUuid);
 
-  conversation.on("message", (message) => {
-    const characterMessage: MessageCharacter = message.message;
+  conversation.on("message", (message: Message) => {
+    const characterMessage =
+      message.type === "character" ? message.message : null;
 
-    // Put character message on the page.
+    // For this demo, we only care about character messages.
+    if (!characterMessage) return;
+
+    // Put the character message on the page.
     const div = document.createElement("div");
     div.classList.add("message", "character");
     div.innerHTML = `<b>${characterMessage.character?.name || "???"}</b>: ${
@@ -59,6 +88,7 @@ window.start = async function start() {
     }`;
     messagesDiv?.appendChild(div);
 
+    // Play character speech.
     if (characterMessage.speech) {
       audio.outputServicePlay(characterMessage.speech.audio as ArrayBuffer, {
         trackId: String(characterMessage.character?.id),
@@ -80,8 +110,7 @@ window.start = async function start() {
     output: "buffer",
   });
 
-  conversation.start();
-
+  // Listen for the playthrough to connect and start the conversation when it does.
   let started = false;
   playthrough.on("connection-status", (status) => {
     if (status === "connected" && !started) {
@@ -108,6 +137,7 @@ const reply = () => {
   messagesDiv?.appendChild(div);
 };
 
+// Handle the Enter key press.
 window.onKeyPress = function onKeyPress(event) {
   if (!event || !event.currentTarget) return;
   if (event.key === "Enter") {
@@ -133,29 +163,7 @@ window.toggleMicrophone = () => {
 };
 
 window.toggleMuteBackgroundAudio = () => {
-  audio.muted = !audio.muted;
+  audio.mediaMuted = !audio.mediaMuted;
 };
 
 // Gets the transcript.
-audio.on("transcript", (transcript: string) => {
-  console.log("Recognised Transcript:", transcript);
-  const replyInput = <HTMLInputElement>document.getElementById("reply-input");
-  if (replyInput) {
-    replyInput.value = transcript;
-  }
-});
-
-audio.on("start-stt", () => {
-  console.log("Listening Started");
-  recordingStatus = "recording";
-  if (recordButton) recordButton.innerHTML = "Stop";
-});
-
-audio.on("stop-stt", () => {
-  recordingStatus = "off";
-  if (recordButton) recordButton.innerHTML = "Record";
-});
-
-audio.on("error", (error) => {
-  console.error("Error:", error);
-});
