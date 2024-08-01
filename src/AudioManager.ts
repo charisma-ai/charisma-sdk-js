@@ -1,4 +1,3 @@
-import { EventEmitter } from "eventemitter3";
 import MediaAudio from "./MediaAudio";
 import AudioInputsService from "./AudioInputsService";
 import AudioOutputsService, {
@@ -7,20 +6,17 @@ import AudioOutputsService, {
 import AudioInputsBrowser from "./AudioInputsBrowser";
 
 export interface AudioManagerOptions {
-  duckVolumeLevel: number;
-  normalVolumeLevel: number;
-  sttService: "browser" | "charisma/deepgram";
-  streamTimeslice: number;
+  duckVolumeLevel?: number;
+  normalVolumeLevel?: number;
+  sttService?: "browser" | "charisma/deepgram";
+  streamTimeslice?: number;
+  handleStartSTT: () => void;
+  handleStopSTT: () => void;
+  handleTranscript: (transcript: string) => void;
+  handleError?: (error: string) => void;
 }
 
-type AudioManagerEvents = {
-  "start-stt": [];
-  "stop-stt": [];
-  transcript: [string];
-  error: [string];
-};
-
-class AudioManager extends EventEmitter<AudioManagerEvents> {
+class AudioManager {
   private audioInputsService: AudioInputsService;
 
   private audioInputsBrowser: AudioInputsBrowser;
@@ -32,7 +28,6 @@ class AudioManager extends EventEmitter<AudioManagerEvents> {
   private options: AudioManagerOptions;
 
   constructor(options: AudioManagerOptions) {
-    super();
     this.audioInputsService = new AudioInputsService();
     this.audioInputsBrowser = new AudioInputsBrowser();
     this.audioOutputsService = new AudioOutputsService();
@@ -43,26 +38,28 @@ class AudioManager extends EventEmitter<AudioManagerEvents> {
       normalVolumeLevel: options.normalVolumeLevel ?? 1,
       sttService: options.sttService ?? "charisma/deepgram",
       streamTimeslice: options.streamTimeslice ?? 100,
+      handleStartSTT: options.handleStartSTT,
+      handleStopSTT: options.handleStopSTT,
+      handleTranscript: options.handleTranscript,
+      handleError:
+        options.handleError ??
+        ((error: string) => console.error("Error:", error)),
     };
 
     // Listen to events from the AudioInputsService
-    this.audioInputsService.on("start", () => this.emit("start-stt"));
-    this.audioInputsService.on("stop", () => this.emit("stop-stt"));
-    this.audioInputsService.on("transcript", (transcript: string) =>
-      this.emit("transcript", transcript),
-    );
+    this.audioInputsService.on("start", this.options.handleStartSTT);
+    this.audioInputsService.on("stop", this.options.handleStopSTT);
+    this.audioInputsService.on("transcript", this.options.handleTranscript);
     this.audioInputsService.on("error", (error: string) =>
-      this.emit("error", error),
+      this.options.handleError?.(error),
     );
 
     // Listen to events from the AudioInputsBrowser
-    this.audioInputsBrowser.on("start", () => this.emit("start-stt"));
-    this.audioInputsBrowser.on("stop", () => this.emit("stop-stt"));
-    this.audioInputsBrowser.on("transcript", (transcript: string) =>
-      this.emit("transcript", transcript),
-    );
+    this.audioInputsBrowser.on("start", this.options.handleStartSTT);
+    this.audioInputsBrowser.on("stop", this.options.handleStopSTT);
+    this.audioInputsBrowser.on("transcript", this.options.handleTranscript);
     this.audioInputsBrowser.on("error", (error: string) =>
-      this.emit("error", error),
+      this.options.handleError?.(error),
     );
   }
 
@@ -77,7 +74,7 @@ class AudioManager extends EventEmitter<AudioManagerEvents> {
     }
 
     if (this.mediaAudio.isPlaying) {
-      this.mediaAudio.volume = this.options.duckVolumeLevel;
+      this.mediaAudio.volume = this.options.duckVolumeLevel as number;
     }
   };
 
@@ -89,7 +86,13 @@ class AudioManager extends EventEmitter<AudioManagerEvents> {
     }
 
     if (this.mediaAudio.isPlaying) {
-      this.mediaAudio.volume = this.options.normalVolumeLevel;
+      this.mediaAudio.volume = this.options.normalVolumeLevel as number;
+    }
+  };
+
+  public connect = (token: string): void => {
+    if (this.options.sttService === "charisma/deepgram") {
+      this.audioInputsService.connect(token);
     }
   };
 
@@ -138,18 +141,14 @@ class AudioManager extends EventEmitter<AudioManagerEvents> {
   }
 
   set mediaSrc(value: string | null) {
-    if (value) {
-      this.mediaAudio.src = value;
-    } else {
-      this.mediaAudio.src = "";
-    }
+    this.mediaAudio.src = value ?? "";
   }
 
-  get muted() {
+  get mediaMuted() {
     return this.mediaAudio.muted;
   }
 
-  set muted(value: boolean) {
+  set mediaMuted(value: boolean) {
     this.mediaAudio.muted = value;
   }
 }
