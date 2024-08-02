@@ -10,9 +10,9 @@ export interface AudioManagerOptions {
   normalVolumeLevel?: number;
   sttService?: "browser" | "charisma/deepgram";
   streamTimeslice?: number;
-  handleStartSTT: () => void;
-  handleStopSTT: () => void;
-  handleTranscript: (transcript: string) => void;
+  handleStartSTT?: () => void;
+  handleStopSTT?: () => void;
+  handleTranscript?: (transcript: string) => void;
   handleError?: (error: string) => void;
 }
 
@@ -42,15 +42,39 @@ class AudioManager {
     this.mediaAudio = new MediaAudio();
 
     // Listen to events from the AudioInputsService
-    this.audioInputsService.on("start", options.handleStartSTT);
-    this.audioInputsService.on("stop", options.handleStopSTT);
-    this.audioInputsService.on("transcript", options.handleTranscript);
+    this.audioInputsService.on(
+      "start",
+      options.handleStartSTT ??
+        (() => console.error("handleStartSTT() is not setup")),
+    );
+    this.audioInputsService.on(
+      "stop",
+      options.handleStopSTT ??
+        (() => console.error("handleStopSTT() is not setup")),
+    );
+    this.audioInputsService.on(
+      "transcript",
+      options.handleTranscript ??
+        (() => console.error("handleTranscript() is not setup.")),
+    );
     this.audioInputsService.on("error", options.handleError ?? console.error);
 
     // Listen to events from the AudioInputsBrowser
-    this.audioInputsBrowser.on("start", options.handleStartSTT);
-    this.audioInputsBrowser.on("stop", options.handleStopSTT);
-    this.audioInputsBrowser.on("transcript", options.handleTranscript);
+    this.audioInputsBrowser.on(
+      "start",
+      options.handleStartSTT ??
+        (() => console.error("handleStartSTT() is not setup")),
+    );
+    this.audioInputsBrowser.on(
+      "stop",
+      options.handleStopSTT ??
+        (() => console.error("handleStopSTT() is not setup")),
+    );
+    this.audioInputsBrowser.on(
+      "transcript",
+      options.handleTranscript ??
+        (() => console.error("handleTranscript() is not setup")),
+    );
     this.audioInputsBrowser.on("error", options.handleError ?? console.error);
   }
 
