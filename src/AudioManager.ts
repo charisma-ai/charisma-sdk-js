@@ -68,11 +68,11 @@ class AudioManager {
   // **
   // ** Audio Input ** //
   // **
-  public startListening = (token: string): void => {
+  public startListening = (): void => {
     if (this.options.sttService === "browser") {
       this.audioInputsBrowser.startListening();
     } else if (this.options.sttService === "charisma/deepgram") {
-      this.audioInputsService.startListening(token);
+      this.audioInputsService.startListening();
     }
 
     if (this.mediaAudio.isPlaying) {

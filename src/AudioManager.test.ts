@@ -62,7 +62,7 @@ describe("AudioManager", () => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     (audioManager as any).audioInputsService = mockAudioInputsServiceInstance;
 
-    audioManager.startListening("test-token");
+    audioManager.startListening();
 
     expect(mockAudioInputsBrowserInstance.startListening).toHaveBeenCalled();
     expect(
@@ -91,7 +91,7 @@ describe("AudioManager", () => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     (audioManager as any).audioInputsService = mockAudioInputsServiceInstance;
 
-    audioManager.startListening("test-token");
+    audioManager.startListening();
 
     expect(mockAudioInputsServiceInstance.startListening).toHaveBeenCalled();
     expect(

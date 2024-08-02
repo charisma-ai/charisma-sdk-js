@@ -38,7 +38,6 @@ const handleStopSTT = () => {
 };
 
 const handleTranscript = (transcript: string) => {
-  console.log("Recognised Transcript:", transcript);
   const replyInput = <HTMLInputElement>document.getElementById("reply-input");
   if (replyInput) {
     replyInput.value = transcript;
@@ -59,14 +58,12 @@ const audio = new AudioManager({
 let playthrough: Playthrough;
 let conversation: Conversation;
 
-let token: string;
-
 window.start = async function start() {
-  ({ token } = await createPlaythroughToken({
+  const { token } = await createPlaythroughToken({
     storyId: Number(import.meta.env.VITE_STORY_ID),
     apiKey: import.meta.env.VITE_STORY_API_KEY as string,
     version: -1, // -1 refers to the current draft version
-  }));
+  });
 
   const { conversationUuid } = await createConversation(token);
   playthrough = new Playthrough(token);
@@ -153,7 +150,7 @@ window.toggleMicrophone = () => {
   if (!recordButton) return;
 
   if (recordingStatus === "off") {
-    audio.startListening(token);
+    audio.startListening();
     recordingStatus = "starting";
     recordButton.innerHTML = "...";
   } else if (recordingStatus === "recording") {
@@ -166,5 +163,3 @@ window.toggleMicrophone = () => {
 window.toggleMuteBackgroundAudio = () => {
   audio.mediaMuted = !audio.mediaMuted;
 };
-
-// Gets the transcript.

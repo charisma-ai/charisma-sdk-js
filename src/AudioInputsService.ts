@@ -22,6 +22,8 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
 
   private streamTimeslice: number;
 
+  private ready = false;
+
   constructor(streamTimeslice: number | undefined) {
     super();
 
@@ -54,17 +56,21 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
       });
 
       this.socket.on("connect", () => {
-        console.log("Speech to Text Connected");
-        resolve();
+        // Deepgram requires a short interval before data is sent.
+        setTimeout(() => {
+          this.ready = true;
+          resolve();
+        }, 2000);
       });
     });
   };
 
-  public startListening = async (
-    token: string,
-    timeout = 10000,
-  ): Promise<void> => {
+  public startListening = async (timeout = 10000): Promise<void> => {
     try {
+      if (!this.ready) {
+        return;
+      }
+
       if (!this.microphone) {
         const userMedia = await navigator.mediaDevices.getUserMedia({
           audio: true,
@@ -78,24 +84,9 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
       return;
     }
 
-    if (!this.socket) {
-      try {
-        await this.connect(token);
-      } catch (error) {
-        console.error("Failed to connect to socket:", error);
-        this.emit("error", "Failed to connect to socket");
-        return;
-      }
-    }
-
-    this.microphone.start(this.streamTimeslice);
-
-    if (this.timeoutId !== undefined) {
-      clearTimeout(this.timeoutId);
-    }
-
     this.microphone.ondataavailable = (event) => {
-      if (!this.socket) return;
+      if (!this.socket || event.data.size <= 0) return;
+
       this.socket.emit("packet-sent", event.data);
     };
 
@@ -106,6 +97,12 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
     this.microphone.onstop = () => {
       this.emit("stop");
     };
+
+    this.microphone.start(this.streamTimeslice);
+
+    if (this.timeoutId !== undefined) {
+      clearTimeout(this.timeoutId);
+    }
 
     if (timeout !== undefined) {
       this.timeoutId = window.setTimeout(this.onTimeout, timeout);
