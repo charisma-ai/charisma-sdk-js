@@ -28,7 +28,6 @@ const messagesDiv = document.getElementById("messages");
 const recordButton = document.getElementById("record-button");
 
 const handleStartSTT = () => {
-  console.log("Listening Started");
   recordingStatus = "recording";
   if (recordButton) recordButton.innerHTML = "Stop";
 };
@@ -73,6 +72,11 @@ window.start = async function start() {
   playthrough = new Playthrough(token);
   conversation = playthrough.joinConversation(conversationUuid);
 
+  conversation.setSpeechConfig({
+    encoding: ["ogg", "mp3"],
+    output: "buffer",
+  });
+
   conversation.on("message", (message: Message) => {
     const characterMessage =
       message.type === "character" ? message.message : null;
@@ -105,10 +109,6 @@ window.start = async function start() {
   });
 
   conversation.on("problem", console.warn);
-  conversation.setSpeechConfig({
-    encoding: ["ogg", "mp3"],
-    output: "buffer",
-  });
 
   // Listen for the playthrough to connect and start the conversation when it does.
   let started = false;
@@ -120,6 +120,7 @@ window.start = async function start() {
   });
 
   await playthrough.connect();
+  audio.connect(token);
 };
 
 const reply = () => {
