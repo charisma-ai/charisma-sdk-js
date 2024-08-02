@@ -28,11 +28,6 @@ class AudioManager {
   private options: AudioManagerOptions;
 
   constructor(options: AudioManagerOptions) {
-    this.audioInputsService = new AudioInputsService();
-    this.audioInputsBrowser = new AudioInputsBrowser();
-    this.audioOutputsService = new AudioOutputsService();
-    this.mediaAudio = new MediaAudio();
-
     this.options = {
       duckVolumeLevel: options.duckVolumeLevel ?? 0,
       normalVolumeLevel: options.normalVolumeLevel ?? 1,
@@ -45,6 +40,13 @@ class AudioManager {
         options.handleError ??
         ((error: string) => console.error("Error:", error)),
     };
+
+    this.audioInputsService = new AudioInputsService(
+      this.options.streamTimeslice,
+    );
+    this.audioInputsBrowser = new AudioInputsBrowser();
+    this.audioOutputsService = new AudioOutputsService();
+    this.mediaAudio = new MediaAudio();
 
     // Listen to events from the AudioInputsService
     this.audioInputsService.on("start", this.options.handleStartSTT);

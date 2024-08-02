@@ -20,21 +20,24 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
 
   private socket?: Socket;
 
-  private connect = (token: string): Promise<void> => {
+  private streamTimeslice: number;
+
+  constructor(streamTimeslice: number | undefined) {
+    super();
+
+    this.streamTimeslice = streamTimeslice ?? 100;
+  }
+
+  public connect = (token: string): Promise<void> => {
     return new Promise((resolve, reject) => {
       if (this.socket) {
-        reject(new Error("Socket already connected"));
-        return;
+        console.log("Socket already connected");
+        resolve();
       }
 
       this.socket = io(STT_URL, {
         transports: ["websocket"],
         query: { token },
-      });
-
-      this.socket.on("connect", () => {
-        console.log("Speech to Text Connected");
-        resolve();
       });
 
       this.socket.on("error", (error: string) => {
@@ -44,9 +47,15 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
       });
 
       this.socket.on("transcript", (transcript: string) => {
+        console.log("Received transcript:", transcript);
         if (transcript) {
           this.emit("transcript", transcript);
         }
+      });
+
+      this.socket.on("connect", () => {
+        console.log("Speech to Text Connected");
+        resolve();
       });
     });
   };
@@ -79,19 +88,23 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
       }
     }
 
-    this.microphone.start(100);
+    this.microphone.start(this.streamTimeslice);
 
     if (this.timeoutId !== undefined) {
       clearTimeout(this.timeoutId);
     }
 
+    this.microphone.ondataavailable = (event) => {
+      if (!this.socket) return;
+      this.socket.emit("packet-sent", event.data);
+    };
+
     this.microphone.onstart = () => {
       this.emit("start");
     };
 
-    this.microphone.ondataavailable = (event) => {
-      if (!this.socket) return;
-      this.socket.emit("packet-sent", event.data);
+    this.microphone.onstop = () => {
+      this.emit("stop");
     };
 
     if (timeout !== undefined) {
@@ -105,10 +118,6 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
     }
 
     if (!this.microphone) return;
-
-    this.microphone.onstop = () => {
-      this.emit("stop");
-    };
 
     this.microphone.stop();
   };
