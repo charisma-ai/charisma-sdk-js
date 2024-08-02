@@ -25,81 +25,74 @@ class AudioManager {
 
   private mediaAudio: MediaAudio;
 
-  private options: AudioManagerOptions;
+  private duckVolumeLevel: number;
+
+  private normalVolumeLevel: number;
+
+  private sttService: "browser" | "charisma/deepgram";
 
   constructor(options: AudioManagerOptions) {
-    this.options = {
-      duckVolumeLevel: options.duckVolumeLevel ?? 0,
-      normalVolumeLevel: options.normalVolumeLevel ?? 1,
-      sttService: options.sttService ?? "charisma/deepgram",
-      streamTimeslice: options.streamTimeslice ?? 100,
-      handleStartSTT: options.handleStartSTT,
-      handleStopSTT: options.handleStopSTT,
-      handleTranscript: options.handleTranscript,
-      handleError:
-        options.handleError ??
-        ((error: string) => console.error("Error:", error)),
-    };
+    this.duckVolumeLevel = options.duckVolumeLevel ?? 0;
+    this.normalVolumeLevel = options.normalVolumeLevel ?? 1;
+    this.sttService = options.sttService ?? "charisma/deepgram";
 
-    this.audioInputsService = new AudioInputsService(
-      this.options.streamTimeslice,
-    );
+    this.audioInputsService = new AudioInputsService(options.streamTimeslice);
     this.audioInputsBrowser = new AudioInputsBrowser();
     this.audioOutputsService = new AudioOutputsService();
     this.mediaAudio = new MediaAudio();
 
     // Listen to events from the AudioInputsService
-    this.audioInputsService.on("start", this.options.handleStartSTT);
-    this.audioInputsService.on("stop", this.options.handleStopSTT);
-    this.audioInputsService.on("transcript", this.options.handleTranscript);
-    this.audioInputsService.on("error", (error: string) =>
-      this.options.handleError?.(error),
-    );
+    this.audioInputsService.on("start", options.handleStartSTT);
+    this.audioInputsService.on("stop", options.handleStopSTT);
+    this.audioInputsService.on("transcript", options.handleTranscript);
+    this.audioInputsService.on("error", options.handleError ?? console.error);
 
     // Listen to events from the AudioInputsBrowser
-    this.audioInputsBrowser.on("start", this.options.handleStartSTT);
-    this.audioInputsBrowser.on("stop", this.options.handleStopSTT);
-    this.audioInputsBrowser.on("transcript", this.options.handleTranscript);
-    this.audioInputsBrowser.on("error", (error: string) =>
-      this.options.handleError?.(error),
-    );
+    this.audioInputsBrowser.on("start", options.handleStartSTT);
+    this.audioInputsBrowser.on("stop", options.handleStopSTT);
+    this.audioInputsBrowser.on("transcript", options.handleTranscript);
+    this.audioInputsBrowser.on("error", options.handleError ?? console.error);
   }
 
   // **
   // ** Audio Input ** //
   // **
   public startListening = (): void => {
-    if (this.options.sttService === "browser") {
+    if (this.sttService === "browser") {
       this.audioInputsBrowser.startListening();
-    } else if (this.options.sttService === "charisma/deepgram") {
+    } else if (this.sttService === "charisma/deepgram") {
       this.audioInputsService.startListening();
     }
 
     if (this.mediaAudio.isPlaying) {
-      this.mediaAudio.volume = this.options.duckVolumeLevel as number;
+      this.mediaAudio.volume = this.duckVolumeLevel;
     }
   };
 
   public stopListening = (): void => {
-    if (this.options.sttService === "browser") {
+    if (this.sttService === "browser") {
       this.audioInputsBrowser.stopListening();
-    } else if (this.options.sttService === "charisma/deepgram") {
+    } else if (this.sttService === "charisma/deepgram") {
       this.audioInputsService.stopListening();
     }
 
     if (this.mediaAudio.isPlaying) {
-      this.mediaAudio.volume = this.options.normalVolumeLevel as number;
+      this.mediaAudio.volume = this.normalVolumeLevel;
     }
   };
 
   public connect = (token: string): void => {
-    if (this.options.sttService === "charisma/deepgram") {
+    if (this.sttService === "charisma/deepgram") {
       this.audioInputsService.connect(token);
     }
   };
 
-  public inputServiceResetTimeout = (timeout: number): void => {
-    this.audioInputsService.resetTimeout(timeout);
+  public resetTimeout = (timeout: number): void => {
+    if (this.sttService === "charisma/deepgram") {
+      this.audioInputsService.resetTimeout(timeout);
+    } else {
+      this.audioInputsBrowser.resetTimeout(timeout);
+    }
   };
 
   // **
@@ -107,10 +100,6 @@ class AudioManager {
   // **
   public browserIsSupported = (): boolean => {
     return this.audioInputsBrowser.isSupported;
-  };
-
-  public browserResetTimeout = (timeout: number): void => {
-    this.audioInputsBrowser.resetTimeout(timeout);
   };
 
   // **
