@@ -8,6 +8,7 @@ pnpm install
 
 Add a `.env` file to the root of the project with the following:
 ```
+VITE_STORY_ID=000000
 VITE_STORY_API_KEY=your-story-api-key
 ```
 

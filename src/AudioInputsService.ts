@@ -4,10 +4,6 @@ import type { SpeechRecognitionEvent } from "./speech-types.js";
 
 const STT_URL = "https://stt-staging.charisma.ai";
 
-export interface SpeechRecognitionOptions {
-  timeout?: number;
-}
-
 type AudioInputsServiceEvents = {
   result: [SpeechRecognitionEvent];
   transcript: [string];
@@ -17,38 +13,101 @@ type AudioInputsServiceEvents = {
   stop: [];
 };
 
+const setupMicrophone = async (): Promise<MediaRecorder> => {
+  const userMedia = await navigator.mediaDevices.getUserMedia({
+    audio: true,
+  });
+
+  const mediaRecorder = new MediaRecorder(userMedia);
+  return mediaRecorder;
+};
+
 class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
-  private timeoutId: number | undefined;
+  private timeoutId?: number;
 
-  private microphone: MediaRecorder | undefined;
+  private microphone?: MediaRecorder;
 
-  private socket: Socket | undefined;
+  private socket?: Socket;
 
-  public startListening = async ({
-    timeout = 10000,
-  }: SpeechRecognitionOptions = {}): Promise<void> => {
-    if (!this.microphone) {
-      const userMedia = await navigator.mediaDevices.getUserMedia({
-        audio: true,
+  private streamTimeslice: number;
+
+  private ready = false;
+
+  constructor(streamTimeslice: number | undefined) {
+    super();
+
+    this.streamTimeslice = streamTimeslice ?? 100;
+  }
+
+  public connect = (token: string): Promise<void> => {
+    return new Promise((resolve, reject) => {
+      if (this.socket) {
+        console.log("Socket already connected");
+        resolve();
+      }
+
+      this.socket = io(STT_URL, {
+        transports: ["websocket"],
+        query: { token },
       });
 
-      this.microphone = new MediaRecorder(userMedia);
+      this.socket.on("error", (error: string) => {
+        console.error(error);
+        this.emit("error", error);
+        reject(error);
+      });
+
+      this.socket.on("transcript", (transcript: string) => {
+        console.log("Received transcript:", transcript);
+        if (transcript) {
+          this.emit("transcript", transcript);
+        }
+      });
+
+      this.socket.on("connect", () => {
+        // Deepgram requires a short interval before data is sent.
+        setTimeout(() => {
+          this.ready = true;
+          resolve();
+        }, 2000);
+      });
+    });
+  };
+
+  public startListening = async (timeout = 10000): Promise<void> => {
+    if (!this.ready) {
+      return;
     }
 
-    this.microphone.start(100);
-
-    if (this.timeoutId !== undefined) {
-      clearTimeout(this.timeoutId);
+    try {
+      if (!this.microphone) {
+        this.microphone = await setupMicrophone();
+      }
+    } catch (error) {
+      console.error("Failed to access microphone:", error);
+      this.emit("error", "Failed to access microphone");
+      return;
     }
+
+    this.microphone.ondataavailable = (event) => {
+      if (!this.socket || event.data.size === 0) return;
+
+      this.socket.emit("packet-sent", event.data);
+    };
 
     this.microphone.onstart = () => {
       this.emit("start");
     };
 
-    this.microphone.ondataavailable = (event) => {
-      if (!this.socket) return;
-      this.socket.emit("packet-sent", event.data);
+    this.microphone.onstop = () => {
+      this.emit("stop");
     };
+
+    this.microphone.start(this.streamTimeslice);
+
+    if (this.timeoutId !== undefined) {
+      clearTimeout(this.timeoutId);
+    }
 
     if (timeout !== undefined) {
       this.timeoutId = window.setTimeout(this.onTimeout, timeout);
@@ -62,33 +121,7 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
 
     if (!this.microphone) return;
 
-    this.microphone.onstop = () => {
-      this.emit("stop");
-    };
-
     this.microphone.stop();
-  };
-
-  public connect = (token: string) => {
-    this.socket = io(STT_URL, {
-      transports: ["websocket"],
-      query: { token },
-    });
-
-    this.socket.on("connect", () => {
-      console.log("Speech to Text Connected");
-    });
-
-    this.socket.on("transcript", (transcript: string) => {
-      if (transcript !== "") {
-        this.emit("transcript", transcript);
-      }
-    });
-
-    this.socket.on("error", (error: string) => {
-      console.error(error);
-      this.emit("error", error);
-    });
   };
 
   public resetTimeout = (timeout: number): void => {
