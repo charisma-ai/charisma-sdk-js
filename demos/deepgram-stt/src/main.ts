@@ -103,6 +103,10 @@ window.start = async function start() {
       audio.mediaAudioFastSeek(0);
       audio.mediaAudioPlay();
     }
+
+    if (characterMessage.media.stopAllAudio) {
+      audio.mediaAudioPause();
+    }
   });
 
   conversation.on("problem", console.warn);
