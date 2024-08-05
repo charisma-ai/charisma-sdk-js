@@ -13,6 +13,15 @@ type AudioInputsServiceEvents = {
   stop: [];
 };
 
+const setupMicrophone = async (): Promise<MediaRecorder> => {
+  const userMedia = await navigator.mediaDevices.getUserMedia({
+    audio: true,
+  });
+
+  const mediaRecorder = new MediaRecorder(userMedia);
+  return mediaRecorder;
+};
+
 class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
   private timeoutId?: number;
 
@@ -66,17 +75,13 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
   };
 
   public startListening = async (timeout = 10000): Promise<void> => {
+    if (!this.ready) {
+      return;
+    }
+
     try {
-      if (!this.ready) {
-        return;
-      }
-
       if (!this.microphone) {
-        const userMedia = await navigator.mediaDevices.getUserMedia({
-          audio: true,
-        });
-
-        this.microphone = new MediaRecorder(userMedia);
+        this.microphone = await setupMicrophone();
       }
     } catch (error) {
       console.error("Failed to access microphone:", error);
@@ -85,7 +90,7 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
     }
 
     this.microphone.ondataavailable = (event) => {
-      if (!this.socket || event.data.size <= 0) return;
+      if (!this.socket || event.data.size === 0) return;
 
       this.socket.emit("packet-sent", event.data);
     };

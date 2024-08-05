@@ -54,21 +54,6 @@ describe("AudioManager", () => {
     expect(audioManager["sttService"]).toBe("browser");
   });
 
-  test("should initialise correctly", () => {
-    const mockOptions: AudioManagerOptions = {
-      duckVolumeLevel: 0.2,
-      normalVolumeLevel: 1,
-      sttService: "browser",
-      streamTimeslice: 100,
-      handleError: jest.fn(),
-      handleStartSTT: jest.fn(),
-      handleStopSTT: jest.fn(),
-      handleTranscript: jest.fn(),
-    };
-    const audioManager = new AudioManager(mockOptions);
-    expect(audioManager).toBeInstanceOf(AudioManager);
-  });
-
   test("microphone methods should call on audioInputsBrowser when browser is used", () => {
     const mockOptions: AudioManagerOptions = {
       sttService: "browser",

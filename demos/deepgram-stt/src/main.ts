@@ -129,6 +129,9 @@ const reply = () => {
 
   const replyInput = <HTMLInputElement>document.getElementById("reply-input");
   const text = replyInput.value;
+
+  if (text.trim() === "") return;
+
   conversation.reply({ text });
   replyInput.value = "";
 
