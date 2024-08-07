@@ -271,7 +271,7 @@ const audio = new AudioManager({
 | `duckVolumeLevel` | `number` | 0 | Volume level when ducking (0 to 1) |
 | `normalVolumeLevel` | `number` | 1 | Regular volume level (0 to 1)
 | `sttService` | `"charisma/deepgram" \| "browser"` | `"charisma/deepgram"` |Speech-to-text service to use (see below).
-| `handleTranscript` | `(transcript: string) => {}` | | Callback to handle transcripts.
+| `handleTranscript` | `(transcript: string) => void` | | Callback to handle transcripts.
 | `handleStartSTT` | `() => void` | | Callback to handle when speech-to-text starts. Can be used to update the UI.
 | `handleStopSTT` | `() => void` | | Callback to handle when speech-to-text stops.
 | `handleError` | `(error: string) => void` | `console.error(error)` |Callback to handle errors.
