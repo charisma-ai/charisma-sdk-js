@@ -6,93 +6,37 @@ pnpm i @charisma-ai/sdk
 
 ## Usage
 
-```html
-<!-- index.html -->
-<html>
-  <body>
-    <button onclick="start()">Start</button>
-    <div id="messages"></div>
-    <button id="record-button" onclick="toggleMicrophone(event)">
-      Record
-    </button>
-    <input
-      type="text"
-      id="reply-input"
-    />
-    <button onclick="reply()">Send</button>
-
-    <script type="module" src="main.js"></script>
-  </body>
-</html>
-
-```
-
 ```js
 // main.js
 import {
   Playthrough,
-  AudioManager,
   createPlaythroughToken,
   createConversation,
 } from "@charisma-ai/sdk";
 
-// Keep track of the recording statuses of the microphone so we can update the UI accordingly.
-let recordingStatus: "recording" | "off" | "starting" = "off";
-
-function handleTranscript(transcript: string) {
-  document.getElementById("reply-input").value = transcript;
-};
-
-const audio = new AudioManager({
-  handleTranscript,
-});
-
-let playthrough;
 let conversation;
 
 async function start() {
+  // Get a unique token for the playthrough.
   const { token } = await createPlaythroughToken({ storyId: 4 });
+
+  // Create a new conversation.
   const { conversationUuid } = await createConversation(token);
-  playthrough = new Playthrough(token);
+
+  // Create a new playthrough.
+  const playthrough = new Playthrough(token);
+
+  // Join the conversation.
   conversation = playthrough.joinConversation(conversationUuid);
 
-  conversation.setSpeechConfig({
-    encoding: ["ogg", "mp3"],
-    output: "buffer",
-  });
-  
+  // Handle messages in the conversation.
   conversation.on("message", (message) => {
-    // Handle character messages, ignore the rest for this demo.
-    const characterMessage = message.type === "character" ? message.message : null;
-    if (!characterMessage) return;
-
-    // Display the character message on the page.
-    const displayedMessage = document.createElement("div").innerHTML = `<b>${characterMessage.character?.name}</b>: ${characterMessage.text}`;
-    document.getElementById("messages").appendChild(displayedMessage);
-
-    // Play character speech.
-    if (characterMessage.speech) {
-      audio.outputServicePlay(characterMessage.speech.audio, {
-        trackId: characterMessage.character?.id
-      });
-    }
-
-    // Play background audio.
-    if (characterMessage.media.audioTracks.length > 0) {
-      audio.mediaSrc = characterMessage.media.audioTracks[0].url;
-      audio.mediaAudioFastSeek(0);
-      audio.mediaAudioPlay();
-    }
-
-    // Stop all audio
-    if (characterMessage.media.stopAllAudio) {
-      audio.mediaAudioPause();
-    }
+    console.log(message.message.text)
   });
 
   conversation.on("problem", console.warn);
   
-  // Prepart the listener to start the conversation when the playthrough is connected.
+  // Prepare the listener to start the conversation when the playthrough is connected.
   playthrough.on("connection-status", (status) => {
     if (status === "connected") {
       conversation.start();
@@ -100,33 +44,11 @@ async function start() {
   });
 
   await playthrough.connect();
-  audio.connect(token);
 }
 
-// Handle clicking the send button.
-function reply() {
-  const replyInput = document.getElementById("reply-input").value.trim();
-  if (!playthrough || !conversation || replyInput.length === 0) return;
-
-  // Send the reply to charisma.
-  conversation.reply({ text: replyInput });
-
-  // Put player message on the page.
-  const displayedMessage = document.createElement("div").innerHTML = `<b>You</b>: ${replyInput}`;
-  document.getElementById("messages").appendChild(displayedMessage);
-
-  // Clear the input field.
-  document.getElementById("reply-input").value = "";
-}
-
-function toggleMicrophone() {
-  if (recordingStatus === "off") {
-    audio.startListening();
-    recordingStatus = "starting";
-  } else if (recordingStatus === "recording") {
-    audio.stopListening();
-    recordingStatus = "off";
-  }
+// Send the reply to charisma.
+function reply(message) {
+  conversation.reply({ text: message });
 }
 ```
 
@@ -336,22 +258,23 @@ The audio manager will handle the audio from characters, media and speech-to-tex
 import { AudioManager } from "@charisma-ai/sdk";
 
 const audio = new AudioManager({
-  // Volume level when ducking (0 to 1). Optional.
-  duckVolumeLevel: 0,
-  // Regular volume level (0 to 1). Optional.
-  normalVolumeLevel: 1,
-  // Speech-to-text service to use (see below). Optional - defaults to "charisma/deepgram".
-  sttService: "charisma/deepgram",
-  // Callback to handle transcripts
-  handleTranscript: (transcript: string) => {},
-  // Callback to handle when speech-to-text starts. Can be used to update the UI.
-  handleStartSTT: () => {},
-  // Callback to handle when speech-to-text stops.
-  handleStopSTT: () => {},
-  // Callback to handle errors. Optional - defaults to console.error.
-  handleError: (error: string) => {} 
+  // AudioManager options
+  handleTranscript: (transcript: string) => {
+    console.log(transcript)
+  },
 })
 ```
+
+#### AudioManager Options
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `duckVolumeLevel` | `number` | 0 | Volume level when ducking (0 to 1) |
+| `normalVolumeLevel` | `number` | 1 | Regular volume level (0 to 1)
+| `sttService` | `"charisma/deepgram" \| "browser"` | `"charisma/deepgram"` |Speech-to-text service to use (see below).
+| `handleTranscript` | `(transcript: string) => {}` | | Callback to handle transcripts.
+| `handleStartSTT` | `() => void` | | Callback to handle when speech-to-text starts. Can be used to update the UI.
+| `handleStopSTT` | `() => void` | Callback to handle when speech-to-text stops.
+| `handleError` | `(error: string) => void` | `console.error(error)` |Callback to handle errors.
 
 There are currently two speech-to-text services available:
 - `charisma/deepgram`: Deepgram is a neural network based speech-to-text service that that can be accessed through Charsima.ai.
