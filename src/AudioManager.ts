@@ -1,4 +1,4 @@
-import MediaAudio from "./MediaAudio";
+import AudioTrackManager from "./AudioTrackManager";
 import AudioInputsService from "./AudioInputsService";
 import AudioOutputsService, {
   AudioOutputsServicePlayOptions,
@@ -24,7 +24,7 @@ class AudioManager {
 
   private audioOutputsService: AudioOutputsService;
 
-  private mediaAudio: MediaAudio;
+  private audioTrackManager: AudioTrackManager;
 
   private duckVolumeLevel: number;
 
@@ -40,7 +40,7 @@ class AudioManager {
     this.audioInputsService = new AudioInputsService(options.streamTimeslice);
     this.audioInputsBrowser = new AudioInputsBrowser();
     this.audioOutputsService = new AudioOutputsService();
-    this.mediaAudio = new MediaAudio();
+    this.audioTrackManager = new AudioTrackManager();
 
     // Listen to events from the AudioInputsService
     this.audioInputsService.on(
@@ -89,8 +89,8 @@ class AudioManager {
       this.audioInputsService.startListening();
     }
 
-    if (this.mediaAudio.isPlaying) {
-      this.mediaAudio.setVolume(this.duckVolumeLevel);
+    if (this.audioTrackManager.isPlaying) {
+      this.audioTrackManager.setVolume(this.duckVolumeLevel);
     }
   };
 
@@ -101,8 +101,8 @@ class AudioManager {
       this.audioInputsService.stopListening();
     }
 
-    if (this.mediaAudio.isPlaying) {
-      this.mediaAudio.setVolume(this.normalVolumeLevel);
+    if (this.audioTrackManager.isPlaying) {
+      this.audioTrackManager.setVolume(this.normalVolumeLevel);
     }
   };
 
@@ -138,22 +138,22 @@ class AudioManager {
   };
 
   // **
-  // ** Media Audio ** //
+  // ** Audio Track Manager ** //
   // **
   public mediaAudioPlay = (audioTracks: AudioTrack[]): void => {
-    return this.mediaAudio.play(audioTracks);
+    return this.audioTrackManager.play(audioTracks);
   };
 
   public mediaAudioSetVolume = (volume: number): void => {
-    this.mediaAudio.setVolume(volume);
+    this.audioTrackManager.setVolume(volume);
   };
 
   public mediaAudioToggleMute = (): void => {
-    this.mediaAudio.toggleMute();
+    this.audioTrackManager.toggleMute();
   };
 
   public mediaAudioStopAll = (): void => {
-    this.mediaAudio.stopAll();
+    this.audioTrackManager.stopAll();
   };
 }
 
