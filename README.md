@@ -7,55 +7,48 @@ pnpm i @charisma-ai/sdk
 ## Usage
 
 ```js
+// main.js
 import {
   Playthrough,
-  Microphone,
-  Speaker,
   createPlaythroughToken,
   createConversation,
 } from "@charisma-ai/sdk";
 
-async function run() {
+let conversation;
+
+async function start() {
+  // Get a unique token for the playthrough.
   const { token } = await createPlaythroughToken({ storyId: 4 });
+
+  // Create a new conversation.
   const { conversationUuid } = await createConversation(token);
 
+  // Create a new playthrough.
   const playthrough = new Playthrough(token);
-  const speaker = new Speaker();
-  const microphone = new Microphone();
 
-  const conversation = playthrough.joinConversation(conversationUuid);
-  conversation.on("start-typing", () =>
-    console.log("Character started typing..."),
-  );
-  conversation.on("stop-typing", () =>
-    console.log("Character stopped typing..."),
-  );
+  // Join the conversation.
+  conversation = playthrough.joinConversation(conversationUuid);
+
+  // Handle messages in the conversation.
   conversation.on("message", (message) => {
-    console.log(message);
-    if (message.message.speech) {
-      microphone.stopListening();
-      speaker.play(message.message.speech.audio, {
-        trackId: message.message.character?.id,
-        interrupt: "track",
-      });
-      microphone.startListening();
+    console.log(message.message.text)
+  });
+
+  conversation.on("problem", console.warn);
+  
+  // Prepare the listener to start the conversation when the playthrough is connected.
+  playthrough.on("connection-status", (status) => {
+    if (status === "connected") {
+      conversation.start();
     }
   });
-  conversation.on("problem", console.warn);
-  conversation.setSpeechConfig({
-    encoding: ["ogg", "mp3"],
-    output: "buffer",
-  });
 
-  playthrough.connect();
-  conversation.start({
-    // required for pro stories so they know where to start. Find the uuid at '...' -> 'Edit details' next to the subplot in the sidebar.
-    // do not provide it for web comic stories as they will start automatically from the first scene
-    startGraphReferenceId: "my-id",
-  });
+  await playthrough.connect();
+}
 
-  microphone.startListening();
-  microphone.on("recognise", (text) => conversation.reply({ text }));
+// Send the reply to charisma.
+function reply(message) {
+  conversation.reply({ text: message });
 }
 ```
 
@@ -140,38 +133,6 @@ If you want to end the connection to the playthrough, you can call `playthrough.
 
 ```js
 playthrough.disconnect();
-```
-
-#### Playthrough.startSpeechRecognition({ ... })
-
-Opens a stream of audio chunks from the user's microphone to the server. Charisma provides a single interface to make it easy to switch between Speech To Text (STT) providers, and returns results in a simplified format, assuming input from one speaker.
-See [speech-recognition-start in the Charisma docs](https://charisma.ai/docs/sdk-integration/speech-recognition) for more details.
-If the service is started successfully, a "speech-recognition-started" event will be returned from from the server, and [speech-recognition-result](https://charisma.ai/docs/sdk-integration/speech-recognition#speech-recognition-result) events.
-Otherwise look for a [speech-recognition-error](https://charisma.ai/docs/sdk-integration/speech-recognition#speech-recognition-error) on the websockets stream.
-
-```js
-playthrough.startSpeechRecognition();
-```
-
-```js
-playthrough.startSpeechRecognition({
-  service: "unified:deepgram",
-  language: "es",
-  customServiceParameters: {
-    endpointing: 1200,
-    utterance_end_ms: 2000,
-  },
-  // Many further optional parameters,
-  // see docs for speech-recognition-start
-});
-```
-
-#### Playthrough.stopSpeechRecognition
-
-Sends a request to stop a speech recognition stream, which will be confirmed by a speech-recognition-stopped event on the stream.
-
-```js
-playthrough.stopSpeechRecognition();
 ```
 
 ## Events
@@ -289,75 +250,62 @@ This sets the speech configuration to use for all events in the conversation unt
 
 `output` determines whether the speech received back is a `buffer` (a byte array) or whether it should instead be a `url` pointing to the audio file.
 
-## Microphone
+## AudioManager
 
-The microphone can be used to provide speech-to-text functionality. **This is only available in browsers that support `SpeechRecognition`. Please refer to [this browser compatibility table](https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition#browser_compatibility) for more details.**
-
-```js
-import { Microphone } from "@charisma-ai/sdk";
-
-const microphone = new Microphone();
-```
-
-#### microphone.on('recognise', (text) => { ... })
-
-To be used in conjunction with speech recognition (see below).
-
-#### microphone.on('recognise-interim', (text) => { ... })
-
-To be used in conjunction with speech recognition (see below).
-
-#### microphone.on('start', () => { ... })
-
-Emitted when the microphone is manually started via `startListening`.
-
-#### microphone.on('stop', () => { ... })
-
-Emitted when the microphone is either manually stopped via `stopListening` or automatically stopped after a timeout.
-
-#### microphone.on('timeout', () => { ... })
-
-Emitted when the microphone is automatically stopped after a timeout.
-
-#### microphone.startListening(listeningOptions?: SpeechRecognitionOptions)
-
-Starts browser speech recognition. The built in browser [SpeechRecognition](https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition) is free, but not available in every browser (such as Firefox). For premium results with better recognition and wider browser support, please use `playthrough.startSpeechRecognition()`.
-The microphone will then emit `recognise-interim` (player hasn't finished speaking, this is the current best guess) and `recognise` (player has finished speaking and we're confident about the result) events.
-
-The speech recognition will _NOT_ automatically pause when a character is speaking via `speaker.play`, but this could be set up by subscribing to the `start` and `stop` events on `speaker`, and calling `startListening` and `stopListening` on `microphone`.
-
-A timeout can optionally be passed, which will automatically stop the microphone after `timeout` milliseconds.
-
-The options for this method are:
-
-```ts
-interface SpeechRecognitionOptions {
-  continuous?: boolean;
-  interimResults?: boolean;
-  lang?: string;
-  timeout?: number;
-}
-```
-
-#### microphone.stopListening()
-
-Stops browser speech recognition.
-
-#### microphone.resetTimeout(timeout: number)
-
-Resets the microphone timeout to `timeout` milliseconds.
-
-## Speaker
-
-The speaker can be used to provide text-to-speech functionality.
+The audio manager will handle the audio from characters, media and speech-to-text functionality.
 
 ```js
-import { Speaker } from "@charisma-ai/sdk";
+import { AudioManager } from "@charisma-ai/sdk";
 
-const speaker = new Speaker();
+const audio = new AudioManager({
+  // AudioManager options
+  handleTranscript: (transcript: string) => {
+    console.log(transcript)
+  },
+})
 ```
 
-#### speaker.play(data, options)
+#### AudioManager Options
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `duckVolumeLevel` | `number` | 0 | Volume level when ducking (0 to 1) |
+| `normalVolumeLevel` | `number` | 1 | Regular volume level (0 to 1)
+| `sttService` | `"charisma/deepgram" \| "browser"` | `"charisma/deepgram"` |Speech-to-text service to use (see below).
+| `handleTranscript` | `(transcript: string) => void` | | Callback to handle transcripts.
+| `handleStartSTT` | `() => void` | | Callback to handle when speech-to-text starts. Can be used to update the UI.
+| `handleStopSTT` | `() => void` | | Callback to handle when speech-to-text stops.
+| `handleError` | `(error: string) => void` | `console.error(error)` |Callback to handle errors.
+
+There are currently two speech-to-text services available:
+- `charisma/deepgram`: Deepgram is a neural network based speech-to-text service that that can be accessed through Charsima.ai.
+- `browser`: Some browsers have built-in speech recognition, which can be used to provide speech-to-text functionality. **This is only available in browsers that support `SpeechRecognition`. Please refer to [this browser compatibility table](https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition#browser_compatibility) for more details.**
+
+### Speech-to-text
+
+#### audio.startListening()
+
+Starts listening for speech. This will call handleStartSTT() when the speech-to-text service starts.
+
+#### audio.stopListening()
+
+Stops listening for speech. This will call handleStopSTT() when the speech-to-text service stops.
+
+#### audio.connect(token: string)
+
+Connects the to the speech-to-text service using the playthrough token to validate. This is only needed when using the `charisma/deepgram` speech-to-text service.
+
+#### audio.resetTimeout(timeout: number)
+
+Resets the timeout for the speech-to-text service to `timeout` in milliseconds. If this is not run, the speech-to-text service will default to a timeout of 10 seconds.
+After the timeout, the speech-to-text service will automatically stop listening.
+
+#### audio.browserIsSupported(): boolean
+
+Returns true if the browser supports the `browser` speech recognition service.
+
+### Audio Outputs Service
+
+#### outputServicePlay(audio: ArrayBuffer, options: AudioOutputsServicePlayOptions): Promise<void>
 
 This plays the generated speech in the message event. Typically, you would want to use this in combination with a `message` conversation handler. You may also wish to pause the microphone while this happens.
 
@@ -383,24 +331,20 @@ This method can be used like this:
 ```js
 conversation.on("message", async (data) => {
   if (data.message.speech) {
-    microphone.stopListening();
-    await speaker.play(data.message.speech.audio, {
+    audio.stopListening();
+    await audio.outputServicePlay(data.message.speech.audio, {
       trackId: message.message.character?.id,
       interrupt: "track",
     });
-    microphone.startListening();
+    audio.startListening();
   }
 });
 ```
 
-#### speaker.on('start', () => { ... })
+### Media Audio
 
-Emitted when the speaker starts playing any audio.
+> Docs TBC
 
-#### speaker.on('stop', () => { ... })
-
-Emitted when the speaker finishes playing all audio.
-
-### Questions
+## Questions
 
 For further details or any questions, feel free to get in touch at [hello@charisma.ai](mailto:hello@charisma.ai), or head to the [Charisma docs](https://charisma.ai/docs)!

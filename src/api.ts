@@ -53,7 +53,8 @@ const fetchHelper = async <T>(
   return data as T;
 };
 
-let globalBaseUrl = "https://play.charisma.ai";
+// ! CHANGE THIS BACK TO https://play.charisma.ai
+let globalBaseUrl = "https://play-staging.charisma.ai";
 
 export const getGlobalBaseUrl = (): string => globalBaseUrl;
 

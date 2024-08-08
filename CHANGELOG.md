@@ -1,5 +1,10 @@
 # Changelog
 
+### vNext
+**BREAKING**
+- Added `AudioManager` class to handle audio input and output.
+- Removed `Microphone` and `Speaker` classes. Replaced with `AudioManager` methods.
+
 ### v4.0.5
 
 - Updated types SpeechRecognitionStartEvent, SpeechRecognitionResponse, SpeechRecognitionParameters with traceId.
