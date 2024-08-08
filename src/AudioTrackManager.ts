@@ -24,7 +24,6 @@ class AudioTrackManager {
         (currentAudio) => currentAudio.url === audioTrack.url,
       );
 
-      // If the track already exists in currentAudio
       if (index === -1) {
         const audio = new MediaAudio(audioTrack.url);
 
@@ -52,9 +51,7 @@ class AudioTrackManager {
 
         // Check if any tracks need to be restarted.
         if (audioTrack.behaviour === "restart") {
-          if (index !== -1) {
-            this.currentAudio[index].fastSeek(0);
-          }
+          this.currentAudio[index].fastSeek(0);
         }
       }
     });
