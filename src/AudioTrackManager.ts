@@ -29,7 +29,6 @@ class AudioTrackManager {
 
         audio.loop = audioTrack.loop;
         audio.volume = audioTrack.volume;
-        audio.originalVolume = audio.volume;
         audio.fastSeek(0);
         audio.play();
         audio.onended = () => {
