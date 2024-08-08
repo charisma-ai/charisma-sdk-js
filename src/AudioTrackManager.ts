@@ -19,20 +19,44 @@ class AudioTrackManager {
     audioTracks.forEach((audioTrack) => {
       if (!audioTrack.url) return;
 
-      const audio = new MediaAudio(audioTrack.url);
+      // Get the index of this current audio track if it exists.
+      const index = this.currentAudio.findIndex(
+        (currentAudio) => currentAudio.url === audioTrack.url,
+      );
 
-      audio.loop = audioTrack.loop;
-      audio.volume = audioTrack.volume;
-      audio.originalVolume = audio.volume;
-      audio.fastSeek(0);
-      audio.play();
-      audio.onended = () => {
-        this.currentAudio = this.currentAudio.filter(
-          (currentAudio) => currentAudio !== audio,
-        );
-      };
+      // If the track already exists in currentAudio
+      if (index === -1) {
+        const audio = new MediaAudio(audioTrack.url);
 
-      this.currentAudio.push(audio);
+        audio.loop = audioTrack.loop;
+        audio.volume = audioTrack.volume;
+        audio.originalVolume = audio.volume;
+        audio.fastSeek(0);
+        audio.play();
+        audio.onended = () => {
+          this.currentAudio = this.currentAudio.filter(
+            (currentAudio) => currentAudio !== audio,
+          );
+        };
+
+        this.currentAudio.push(audio);
+      } else {
+        // Check for tracks that need to stop playing.
+        if (audioTrack.stopPlaying) {
+          this.currentAudio[index].pause();
+          this.currentAudio = this.currentAudio.filter(
+            (currentAudio) => currentAudio.url !== audioTrack.url,
+          );
+          return;
+        }
+
+        // Check if any tracks need to be restarted.
+        if (audioTrack.behaviour === "restart") {
+          if (index !== -1) {
+            this.currentAudio[index].fastSeek(0);
+          }
+        }
+      }
     });
   }
 
@@ -61,7 +85,6 @@ class AudioTrackManager {
   public setVolume(volume: number): void {
     this.currentAudio.forEach((audio) => {
       // eslint-disable-next-line no-param-reassign
-      // audio.volume = volume;
       audio.setVolume(volume);
     });
   }
