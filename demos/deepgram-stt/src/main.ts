@@ -97,16 +97,12 @@ window.start = async function start() {
       });
     }
 
-    // Play background audio.
-    if (characterMessage.media.audioTracks.length > 0) {
-      audio.mediaSrc = characterMessage.media.audioTracks[0].url;
-      audio.mediaAudioFastSeek(0);
-      audio.mediaAudioPlay();
+    if (characterMessage.media.stopAllAudio) {
+      audio.mediaAudioStopAll();
     }
 
-    if (characterMessage.media.stopAllAudio) {
-      audio.mediaAudioPause();
-    }
+    // Play media audio if it exists in the node.
+    audio.mediaAudioPlay(characterMessage.media.audioTracks);
   });
 
   conversation.on("problem", console.warn);
@@ -168,5 +164,5 @@ window.toggleMicrophone = () => {
 };
 
 window.toggleMuteBackgroundAudio = () => {
-  audio.mediaMuted = !audio.mediaMuted;
+  audio.mediaAudioToggleMute();
 };

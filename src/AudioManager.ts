@@ -4,6 +4,7 @@ import AudioOutputsService, {
   AudioOutputsServicePlayOptions,
 } from "./AudioOutputsService";
 import AudioInputsBrowser from "./AudioInputsBrowser";
+import { AudioTrack } from "./types";
 
 export interface AudioManagerOptions {
   duckVolumeLevel?: number;
@@ -89,7 +90,7 @@ class AudioManager {
     }
 
     if (this.mediaAudio.isPlaying) {
-      this.mediaAudio.volume = this.duckVolumeLevel;
+      this.mediaAudio.setVolume(this.duckVolumeLevel);
     }
   };
 
@@ -101,7 +102,7 @@ class AudioManager {
     }
 
     if (this.mediaAudio.isPlaying) {
-      this.mediaAudio.volume = this.normalVolumeLevel;
+      this.mediaAudio.setVolume(this.normalVolumeLevel);
     }
   };
 
@@ -139,33 +140,21 @@ class AudioManager {
   // **
   // ** Media Audio ** //
   // **
-  public mediaAudioPlay = (): Promise<void> => {
-    return this.mediaAudio.play();
+  public mediaAudioPlay = (audioTracks: AudioTrack[]): void => {
+    return this.mediaAudio.play(audioTracks);
   };
 
-  public mediaAudioPause = (): void => {
-    this.mediaAudio.pause();
+  public mediaAudioSetVolume = (volume: number): void => {
+    this.mediaAudio.setVolume(volume);
   };
 
-  public mediaAudioFastSeek = (time: number): void => {
-    this.mediaAudio.fastSeek(time);
+  public mediaAudioToggleMute = (): void => {
+    this.mediaAudio.toggleMute();
   };
 
-  get mediaSrc() {
-    return this.mediaAudio.src;
-  }
-
-  set mediaSrc(value: string | null) {
-    this.mediaAudio.src = value ?? "";
-  }
-
-  get mediaMuted() {
-    return this.mediaAudio.muted;
-  }
-
-  set mediaMuted(value: boolean) {
-    this.mediaAudio.muted = value;
-  }
+  public mediaAudioStopAll = (): void => {
+    this.mediaAudio.stopAll();
+  };
 }
 
 export default AudioManager;
