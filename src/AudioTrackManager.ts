@@ -27,14 +27,9 @@ class AudioTrackManager {
       audio.fastSeek(0);
       audio.play();
       audio.onended = () => {
-        console.log("ended");
-        if (audioTrack.behaviour === "restart") {
-          audio.play();
-        } else {
-          this.currentAudio = this.currentAudio.filter(
-            (currentAudio) => currentAudio !== audio,
-          );
-        }
+        this.currentAudio = this.currentAudio.filter(
+          (currentAudio) => currentAudio !== audio,
+        );
       };
 
       this.currentAudio.push(audio);
