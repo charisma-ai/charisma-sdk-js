@@ -1,15 +1,21 @@
-export default class MockAudio {
+export default class MockMediaAudio {
+  static fastSeek = jest.fn();
+
+  static play = jest.fn();
+
+  static pause = jest.fn();
+
   public isPlaying = false;
 
-  public volume = 1;
+  static volume = 1;
 
   public src = "";
 
   public muted = false;
 
-  public play = jest.fn().mockResolvedValue(undefined);
+  static loop: boolean;
 
-  public pause = jest.fn();
-
-  public fastSeek = jest.fn();
+  static setVolume = jest.fn().mockImplementation((volume: number) => {
+    this.volume = volume;
+  });
 }

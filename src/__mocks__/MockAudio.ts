@@ -12,4 +12,6 @@ export default class MockAudio {
   public pause = jest.fn();
 
   public fastSeek = jest.fn();
+
+  public loop = false;
 }
