@@ -164,14 +164,6 @@ describe("AudioTrackManager", () => {
     // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(audioTrackManager.setVolume).toHaveBeenCalledTimes(1);
 
-    // expect(audioTrackManager["currentAudio"][0].volume).toBe(0.5);
-    // expect(audioTrackManager["currentAudio"][1].volume).toBe(0.4);
-
-    // audioTrackManager.setVolume(1);
-
-    // expect(audioTrackManager["currentAudio"][0].volume).toBe(1);
-    // expect(audioTrackManager["currentAudio"][1].volume).toBe(0.8);
-
     playStub.mockRestore();
   });
 
