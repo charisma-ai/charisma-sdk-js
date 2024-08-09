@@ -70,7 +70,7 @@ window.start = async function start() {
   conversation = playthrough.joinConversation(conversationUuid);
 
   conversation.setSpeechConfig({
-    encoding: ["ogg", "mp3"],
+    encoding: ["mp3", "ogg"],
     output: "buffer",
   });
 
