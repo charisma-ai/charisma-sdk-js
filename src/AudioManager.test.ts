@@ -1,15 +1,8 @@
 /* eslint-disable dot-notation */
-import MockMediaAudio from "./__mocks__/MockMediaAudio";
 import MockAudioInputsService from "./__mocks__/MockAudioInputsService";
 import MockAudioInputsBrowser from "./__mocks__/MockAudioInputsBrowser";
-import MockAudioOutputsService from "./__mocks__/MockAudioOutputsService";
 
 import AudioManager, { AudioManagerOptions } from "./AudioManager";
-
-jest.mock("./MediaAudio", () => ({
-  __esModule: true,
-  default: jest.fn().mockImplementation(() => MockMediaAudio),
-}));
 
 jest.mock("./AudioInputsService", () => ({
   __esModule: true,
@@ -19,11 +12,6 @@ jest.mock("./AudioInputsService", () => ({
 jest.mock("./AudioInputsBrowser", () => ({
   __esModule: true,
   default: MockAudioInputsBrowser,
-}));
-
-jest.mock("./AudioOutputsService", () => ({
-  __esModule: true,
-  default: jest.fn().mockImplementation(() => MockAudioOutputsService),
 }));
 
 describe("AudioManager", () => {
