@@ -29,7 +29,7 @@ class AudioTrackManager {
 
         audio.loop = audioTrack.loop;
         audio.volume = audioTrack.volume;
-        audio.fastSeek(0);
+        audio.currentTime = 0;
         audio.play();
         audio.onended = () => {
           this.currentAudio = this.currentAudio.filter(
@@ -50,7 +50,7 @@ class AudioTrackManager {
 
         // Check if any tracks need to be restarted.
         if (audioTrack.behaviour === "restart") {
-          this.currentAudio[index].fastSeek(0);
+          this.currentAudio[index].currentTime = 0;
         }
       }
     });
@@ -80,7 +80,6 @@ class AudioTrackManager {
 
   public setVolume(volume: number): void {
     this.currentAudio.forEach((audio) => {
-      // eslint-disable-next-line no-param-reassign
       audio.setVolume(volume);
     });
   }

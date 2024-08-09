@@ -1,6 +1,4 @@
 export default class MockMediaAudio {
-  static fastSeek = jest.fn();
-
   static play = jest.fn();
 
   static pause = jest.fn();
