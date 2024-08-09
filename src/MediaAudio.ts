@@ -3,10 +3,11 @@ class MediaAudio extends Audio {
 
   public url: string;
 
-  constructor(url: string) {
+  constructor(url: string, originalVolume: number) {
     super(url);
-    this.originalVolume = this.volume;
     this.url = url;
+    this.originalVolume = originalVolume;
+    this.volume = originalVolume;
   }
 
   public setVolume(volume: number): void {

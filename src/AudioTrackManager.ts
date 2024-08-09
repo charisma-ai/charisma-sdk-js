@@ -25,10 +25,9 @@ class AudioTrackManager {
       );
 
       if (index === -1) {
-        const audio = new MediaAudio(audioTrack.url);
+        const audio = new MediaAudio(audioTrack.url, audioTrack.volume);
 
         audio.loop = audioTrack.loop;
-        audio.volume = audioTrack.volume;
         audio.currentTime = 0;
         audio.play();
         audio.onended = () => {
