@@ -1,6 +1,6 @@
 export default {
   preset: "ts-jest",
-  testEnvironment: "node",
+  testEnvironment: "jsdom",
   testMatch: ["**/?(*.)+(spec|test).[tj]s?(x)"],
   moduleFileExtensions: ["ts", "js", "json", "node"],
   globals: {

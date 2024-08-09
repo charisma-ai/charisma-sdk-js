@@ -1,19 +1,18 @@
 class MediaAudio extends Audio {
-  public isPlaying: boolean;
+  public originalVolume: number;
 
-  constructor() {
-    super();
-    this.isPlaying = false;
+  public url: string;
+
+  constructor(url: string, originalVolume: number) {
+    super(url);
+    this.url = url;
+    this.originalVolume = originalVolume;
+    this.volume = originalVolume;
   }
 
-  public async play(): Promise<void> {
-    this.isPlaying = true;
-    await super.play();
-  }
-
-  public pause(): void {
-    this.isPlaying = false;
-    super.pause();
+  public setVolume(volume: number): void {
+    // Sets the volume relative to the original volume set in the graph editor.
+    this.volume = this.originalVolume * volume;
   }
 }
 
