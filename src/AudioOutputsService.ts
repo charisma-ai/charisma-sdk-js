@@ -35,6 +35,8 @@ type AudioOutputsServiceSource = {
 class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
   private audioContext: AudioContext | undefined;
 
+  private gainNode: GainNode | undefined;
+
   private currentSources: AudioOutputsServiceSource[] = [];
 
   public getAudioContext = (): AudioContext => {
@@ -48,9 +50,14 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
       throw new Error("AudioContext isn't supported in this browser.");
     }
 
-    const audioContext = new AudioContextClass();
-    this.audioContext = audioContext;
-    return audioContext;
+    this.audioContext = new AudioContextClass();
+
+    // Create and store the gain node.
+    this.gainNode = this.audioContext.createGain();
+    this.gainNode.gain.value = 1;
+    this.gainNode.connect(this.audioContext.destination);
+
+    return this.audioContext;
   };
 
   public play = async (
@@ -69,8 +76,14 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
     const { interrupt = "none", trackId } = options;
 
     const audioContext = this.getAudioContext();
+
+    // Assert that gainNode is not undefined
+    if (!this.gainNode) {
+      throw new Error("GainNode is not initialized.");
+    }
+
     const source = audioContext.createBufferSource();
-    source.connect(audioContext.destination);
+    source.connect(this.gainNode);
     source.buffer = await new Promise((resolve, reject): void => {
       audioContext.decodeAudioData(audio, resolve, reject);
     });
@@ -101,6 +114,12 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
       this.currentSources.push({ sourceNode: source, trackId });
       source.start();
     });
+  };
+
+  public setVolume = (volume: number): void => {
+    if (!this.gainNode) return;
+
+    this.gainNode.gain.value = volume;
   };
 }
 

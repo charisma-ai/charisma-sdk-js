@@ -32,6 +32,8 @@ class AudioManager {
 
   private sttService: "browser" | "charisma/deepgram";
 
+  private microphoneIsOn = false;
+
   constructor(options: AudioManagerOptions) {
     this.duckVolumeLevel = options.duckVolumeLevel ?? 0;
     this.normalVolumeLevel = options.normalVolumeLevel ?? 1;
@@ -77,6 +79,22 @@ class AudioManager {
         (() => console.error("handleTranscript() is not setup")),
     );
     this.audioInputsBrowser.on("error", options.handleError ?? console.error);
+
+    // Listen to events from the AudioOutputsService
+    this.audioOutputsService.on("start", () => {
+      if (this.microphoneIsOn) {
+        this.audioOutputsService.setVolume(0);
+      } else {
+        this.audioOutputsService.setVolume(1);
+      }
+    });
+    this.audioOutputsService.on("stop", () => {
+      if (this.microphoneIsOn) {
+        this.audioOutputsService.setVolume(0);
+      } else {
+        this.audioOutputsService.setVolume(1);
+      }
+    });
   }
 
   // **
@@ -89,6 +107,9 @@ class AudioManager {
       this.audioInputsService.startListening();
     }
 
+    this.microphoneIsOn = true;
+    this.audioOutputsService.setVolume(0);
+
     if (this.audioTrackManager.isPlaying) {
       this.audioTrackManager.setVolume(this.duckVolumeLevel);
     }
@@ -100,6 +121,8 @@ class AudioManager {
     } else if (this.sttService === "charisma/deepgram") {
       this.audioInputsService.stopListening();
     }
+
+    this.microphoneIsOn = false;
 
     if (this.audioTrackManager.isPlaying) {
       this.audioTrackManager.setVolume(this.normalVolumeLevel);
