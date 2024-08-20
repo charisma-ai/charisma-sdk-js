@@ -89,6 +89,19 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
       return;
     }
 
+    if (this.timeoutId !== undefined) {
+      clearTimeout(this.timeoutId);
+    }
+
+    if (timeout !== undefined) {
+      this.timeoutId = window.setTimeout(this.onTimeout, timeout);
+    }
+
+    if (this.microphone.state === "paused") {
+      this.microphone.resume();
+      return;
+    }
+
     this.microphone.ondataavailable = (event) => {
       if (!this.socket || event.data.size === 0) return;
 
@@ -103,15 +116,20 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
       this.emit("stop");
     };
 
+    this.microphone.onpause = () => {
+      this.emit("stop");
+    };
+
+    this.microphone.onresume = () => {
+      this.emit("start");
+    };
+
+    this.microphone.addEventListener("error", (error) => {
+      this.emit("error", error.toString());
+      this.stopListening();
+    });
+
     this.microphone.start(this.streamTimeslice);
-
-    if (this.timeoutId !== undefined) {
-      clearTimeout(this.timeoutId);
-    }
-
-    if (timeout !== undefined) {
-      this.timeoutId = window.setTimeout(this.onTimeout, timeout);
-    }
   };
 
   public stopListening = (): void => {
@@ -121,7 +139,7 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
 
     if (!this.microphone) return;
 
-    this.microphone.stop();
+    this.microphone.pause();
   };
 
   public resetTimeout = (timeout: number): void => {
