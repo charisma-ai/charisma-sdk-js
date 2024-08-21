@@ -49,3 +49,12 @@ button:hover {
 .message {
   margin: 0.5em;
 }
+
+.story-id-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.story-id-container input {
+  margin-bottom: 0.5em;
+}
