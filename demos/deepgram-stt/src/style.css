@@ -34,11 +34,7 @@ button {
   margin: 0.5em;
 }
 button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  background-color: #f2f2f2;
 }
 
 #messages {
