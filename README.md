@@ -274,7 +274,8 @@ const audio = new AudioManager({
 | `handleTranscript` | `(transcript: string) => void` | | Callback to handle transcripts.
 | `handleStartSTT` | `() => void` | | Callback to handle when speech-to-text starts. Can be used to update the UI.
 | `handleStopSTT` | `() => void` | | Callback to handle when speech-to-text stops.
-| `handleError` | `(error: string) => void` | `console.error(error)` |Callback to handle errors.
+| `handleError` | `(error: string) => void` | `console.error(error)` | Callback to handle errors.
+| `handleDisconnect` | `() => void` | `console.error("Transcription service disconnected")` | Callback to handle when the transcription service disconnects.
 
 There are currently two speech-to-text services available:
 - `charisma/deepgram`: Deepgram is a neural network based speech-to-text service that that can be accessed through Charsima.ai.
