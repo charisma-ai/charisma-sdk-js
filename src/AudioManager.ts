@@ -15,6 +15,7 @@ export interface AudioManagerOptions {
   handleStopSTT?: () => void;
   handleTranscript?: (transcript: string) => void;
   handleError?: (error: string) => void;
+  handleDisconnect?: () => void;
 }
 
 class AudioManager {
@@ -61,6 +62,13 @@ class AudioManager {
         (() => console.error("handleTranscript() is not setup.")),
     );
     this.audioInputsService.on("error", options.handleError ?? console.error);
+    this.audioInputsService.on(
+      "disconnect",
+      options.handleDisconnect ??
+        (() => {
+          console.error("Transcription service disconnected");
+        }),
+    );
 
     // Listen to events from the AudioInputsBrowser
     this.audioInputsBrowser.on(

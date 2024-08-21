@@ -11,6 +11,7 @@ type AudioInputsServiceEvents = {
   timeout: [];
   start: [];
   stop: [];
+  disconnect: [];
 };
 
 const setupMicrophone = async (): Promise<MediaRecorder> => {
@@ -62,6 +63,10 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
         if (transcript) {
           this.emit("transcript", transcript);
         }
+      });
+
+      this.socket.on("disconnect", () => {
+        this.emit("disconnect");
       });
 
       this.socket.on("connect", () => {

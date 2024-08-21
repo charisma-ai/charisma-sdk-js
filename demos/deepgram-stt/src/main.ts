@@ -44,6 +44,10 @@ const handleTranscript = (transcript: string) => {
   }
 };
 
+const handleDisconnect = () => {
+  messagesDiv?.appendChild(document.createTextNode("Disconnected."));
+};
+
 // Setup the audio manager.
 const audio = new AudioManager({
   duckVolumeLevel: 0.1,
@@ -53,6 +57,7 @@ const audio = new AudioManager({
   handleTranscript,
   handleStartSTT,
   handleStopSTT,
+  handleDisconnect,
 });
 
 let playthrough: Playthrough;
