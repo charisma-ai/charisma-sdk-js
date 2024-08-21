@@ -59,10 +59,17 @@ let playthrough: Playthrough;
 let conversation: Conversation;
 
 window.start = async function start() {
+  const storyIdInput = <HTMLInputElement>document.getElementById("story-id");
+  const storyId = storyIdInput.value;
+  const storyApiKeyInput = <HTMLInputElement>(
+    document.getElementById("story-api-key")
+  );
+  const storyApiKey = storyApiKeyInput.value;
+
   const { token } = await createPlaythroughToken({
-    storyId: Number(import.meta.env.VITE_STORY_ID),
-    apiKey: import.meta.env.VITE_STORY_API_KEY as string,
-    version: -1, // -1 refers to the current draft version
+    storyId: Number(storyId),
+    apiKey: storyApiKey,
+    version: -1,
   });
 
   const { conversationUuid } = await createConversation(token);
