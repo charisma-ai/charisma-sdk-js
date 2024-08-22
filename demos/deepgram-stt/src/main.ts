@@ -21,11 +21,18 @@ declare global {
   }
 }
 
-// Keep track of the recording statuses of the microphone so we can update the UI accordingly.
-let recordingStatus: "recording" | "off" | "starting" = "off";
-
 const messagesDiv = document.getElementById("messages");
 const recordButton = document.getElementById("record-button");
+
+const appendMessage = (message: string, className: string, name?: string) => {
+  const div = document.createElement("div");
+  div.classList.add(className, "message");
+  div.innerHTML = `${name ? `<b>${name}</b>:` : ""} ${message}`;
+  messagesDiv?.appendChild(div);
+};
+
+// Keep track of the recording statuses of the microphone so we can update the UI accordingly.
+let recordingStatus: "recording" | "off" | "starting" = "off";
 
 const handleStartSTT = () => {
   recordingStatus = "recording";
@@ -44,12 +51,6 @@ const handleTranscript = (transcript: string) => {
   }
 };
 
-const handleDisconnect = () => {
-  messagesDiv?.appendChild(
-    document.createTextNode("Disconnected from STT server."),
-  );
-};
-
 // Setup the audio manager.
 const audio = new AudioManager({
   duckVolumeLevel: 0.1,
@@ -59,7 +60,10 @@ const audio = new AudioManager({
   handleTranscript,
   handleStartSTT,
   handleStopSTT,
-  handleDisconnect,
+  handleDisconnect: () =>
+    appendMessage("Disconnected from STT server.", "disconnected-message"),
+  handleConnect: () =>
+    appendMessage("Connected to STT server.", "connected-message"),
 });
 
 let playthrough: Playthrough;
@@ -96,12 +100,11 @@ window.start = async function start() {
     if (!characterMessage) return;
 
     // Put the character message on the page.
-    const div = document.createElement("div");
-    div.classList.add("message", "character");
-    div.innerHTML = `<b>${characterMessage.character?.name || "???"}</b>: ${
-      characterMessage.text
-    }`;
-    messagesDiv?.appendChild(div);
+    appendMessage(
+      characterMessage.text,
+      "character-message",
+      characterMessage.character?.name,
+    );
 
     // Play character speech.
     if (characterMessage.speech) {
@@ -138,6 +141,9 @@ window.start = async function start() {
 const reply = () => {
   if (!playthrough || !conversation) return;
 
+  // Stop listening when you send a message.
+  audio.stopListening();
+
   const replyInput = <HTMLInputElement>document.getElementById("reply-input");
   const text = replyInput.value;
 
@@ -147,10 +153,7 @@ const reply = () => {
   replyInput.value = "";
 
   // Put player message on the page.
-  const div = document.createElement("div");
-  div.classList.add("message", "player");
-  div.innerHTML = `<b>You</b>: ${text}`;
-  messagesDiv?.appendChild(div);
+  appendMessage(text, "player-message", "You");
 };
 
 // Handle the Enter key press.

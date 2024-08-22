@@ -12,6 +12,7 @@ type AudioInputsServiceEvents = {
   start: [];
   stop: [];
   disconnect: [];
+  connect: [];
 };
 
 const setupMicrophone = async (): Promise<MediaRecorder> => {
@@ -34,13 +35,37 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
 
   private ready = false;
 
+  private playthroughToken?: string;
+
   constructor(streamTimeslice: number | undefined) {
     super();
 
     this.streamTimeslice = streamTimeslice ?? 100;
+
+    window.addEventListener("offline", () => {
+      this.emit("disconnect");
+      this.ready = false;
+
+      if (this.socket) {
+        this.socket.close();
+        this.socket = undefined;
+      }
+
+      this.microphone = undefined;
+    });
+
+    window.addEventListener("online", () => {
+      this.emit("connect");
+
+      if (!this.socket && this.playthroughToken) {
+        this.connect(this.playthroughToken);
+      }
+    });
   }
 
   public connect = (token: string): Promise<void> => {
+    this.playthroughToken = token;
+
     return new Promise((resolve, reject) => {
       if (this.socket) {
         console.log("Socket already connected");
@@ -50,6 +75,7 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
       this.socket = io(STT_URL, {
         transports: ["websocket"],
         query: { token },
+        reconnection: false,
       });
 
       this.socket.on("error", (error: string) => {
@@ -65,11 +91,9 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
         }
       });
 
-      this.socket.on("disconnect", () => {
-        this.emit("disconnect");
-      });
-
       this.socket.on("connect", () => {
+        this.emit("connect");
+
         // Deepgram requires a short interval before data is sent.
         setTimeout(() => {
           this.ready = true;
@@ -80,6 +104,7 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
   };
 
   public startListening = async (timeout = 10000): Promise<void> => {
+    console.log("ready:", this.ready);
     if (!this.ready) {
       return;
     }

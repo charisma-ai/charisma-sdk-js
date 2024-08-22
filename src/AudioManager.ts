@@ -16,6 +16,7 @@ export interface AudioManagerOptions {
   handleTranscript?: (transcript: string) => void;
   handleError?: (error: string) => void;
   handleDisconnect?: () => void;
+  handleConnect?: () => void;
 }
 
 class AudioManager {
@@ -67,6 +68,13 @@ class AudioManager {
       options.handleDisconnect ??
         (() => {
           console.error("Transcription service disconnected");
+        }),
+    );
+    this.audioInputsService.on(
+      "connect",
+      options.handleConnect ??
+        (() => {
+          console.log("Transcription service connected");
         }),
     );
 
