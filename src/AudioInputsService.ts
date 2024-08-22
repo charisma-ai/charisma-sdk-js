@@ -11,8 +11,8 @@ type AudioInputsServiceEvents = {
   timeout: [];
   start: [];
   stop: [];
-  disconnect: [];
-  connect: [];
+  disconnect: [string];
+  connect: [string];
 };
 
 const setupMicrophone = async (): Promise<MediaRecorder> => {
@@ -43,7 +43,7 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
     this.streamTimeslice = streamTimeslice ?? 100;
 
     window.addEventListener("offline", () => {
-      this.emit("disconnect");
+      this.emit("disconnect", "Disconnected from Charisma.");
       this.ready = false;
 
       if (this.socket) {
@@ -55,7 +55,7 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
     });
 
     window.addEventListener("online", () => {
-      this.emit("connect");
+      this.emit("connect", "Connected to Charisma.");
 
       if (!this.socket && this.playthroughToken) {
         this.connect(this.playthroughToken);
@@ -115,7 +115,7 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
         console.log("Socket disconnected. Reason:", reason);
         if (!window.navigator.onLine) return;
 
-        this.emit("disconnect");
+        this.emit("disconnect", "Disconnected from speech-to-text server.");
         this.ready = false;
 
         if (this.socket) {
@@ -129,7 +129,7 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
       });
 
       this.socket.on("connect", () => {
-        this.emit("connect");
+        this.emit("connect", "Connected.");
 
         // Deepgram requires a short interval before data is sent.
         setTimeout(() => {

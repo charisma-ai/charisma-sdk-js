@@ -60,10 +60,10 @@ const audio = new AudioManager({
   handleTranscript,
   handleStartSTT,
   handleStopSTT,
-  handleDisconnect: () =>
-    appendMessage("Disconnected from STT server.", "disconnected-message"),
-  handleConnect: () =>
-    appendMessage("Connected to STT server.", "connected-message"),
+  handleDisconnect: (message: string) =>
+    appendMessage(message, "disconnected-message"),
+  handleConnect: (message: string) =>
+    appendMessage(message, "connected-message"),
 });
 
 let playthrough: Playthrough;
