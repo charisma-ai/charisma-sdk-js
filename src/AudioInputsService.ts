@@ -63,6 +63,25 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
     });
   }
 
+  private attemptReconnect = (): void => {
+    if (this.playthroughToken === undefined) return;
+    const reconnectInterval = 3000;
+
+    let shouldTryAgain = true;
+
+    const tryReconnect = () => {
+      this.connect(this.playthroughToken as string).then(() => {
+        shouldTryAgain = false;
+      });
+
+      if (shouldTryAgain) {
+        setTimeout(tryReconnect, reconnectInterval);
+      }
+    };
+
+    tryReconnect();
+  };
+
   public connect = (token: string): Promise<void> => {
     this.playthroughToken = token;
 
@@ -89,6 +108,24 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
         if (transcript) {
           this.emit("transcript", transcript);
         }
+      });
+
+      // Attempts to reconnect to the stt server if the connection is lost and we DO have internet.
+      this.socket.on("disconnect", (reason) => {
+        console.log("Socket disconnected. Reason:", reason);
+        if (!window.navigator.onLine) return;
+
+        this.emit("disconnect");
+        this.ready = false;
+
+        if (this.socket) {
+          this.socket.close();
+          this.socket = undefined;
+        }
+
+        this.microphone = undefined;
+
+        this.attemptReconnect();
       });
 
       this.socket.on("connect", () => {
