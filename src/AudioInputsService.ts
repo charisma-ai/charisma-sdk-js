@@ -41,26 +41,6 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
     super();
 
     this.streamTimeslice = streamTimeslice ?? 100;
-
-    window.addEventListener("offline", () => {
-      this.emit("disconnect", "Disconnected from Charisma.");
-      this.ready = false;
-
-      if (this.socket) {
-        this.socket.close();
-        this.socket = undefined;
-      }
-
-      this.microphone = undefined;
-    });
-
-    window.addEventListener("online", () => {
-      this.emit("connect", "Connected to Charisma.");
-
-      if (!this.socket && this.playthroughToken) {
-        this.connect(this.playthroughToken);
-      }
-    });
   }
 
   private attemptReconnect = (): void => {
@@ -113,7 +93,6 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
       // Attempts to reconnect to the stt server if the connection is lost and we DO have internet.
       this.socket.on("disconnect", (reason) => {
         console.log("Socket disconnected. Reason:", reason);
-        if (!window.navigator.onLine) return;
 
         this.emit("disconnect", "Disconnected from speech-to-text server.");
         this.ready = false;
@@ -129,7 +108,7 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
       });
 
       this.socket.on("connect", () => {
-        this.emit("connect", "Connected.");
+        this.emit("connect", "Connected to speech-to-text service.");
 
         // Deepgram requires a short interval before data is sent.
         setTimeout(() => {
