@@ -11,6 +11,7 @@ export interface AudioManagerOptions {
   normalVolumeLevel?: number;
   sttService?: "browser" | "charisma/deepgram";
   streamTimeslice?: number;
+  reconnectAttemptsTimeout?: number;
   handleStartSTT?: () => void;
   handleStopSTT?: () => void;
   handleTranscript?: (transcript: string) => void;
@@ -41,7 +42,10 @@ class AudioManager {
     this.normalVolumeLevel = options.normalVolumeLevel ?? 1;
     this.sttService = options.sttService ?? "charisma/deepgram";
 
-    this.audioInputsService = new AudioInputsService(options.streamTimeslice);
+    this.audioInputsService = new AudioInputsService(
+      options.streamTimeslice,
+      options.reconnectAttemptsTimeout,
+    );
     this.audioInputsBrowser = new AudioInputsBrowser();
     this.audioOutputsService = new AudioOutputsService();
     this.audioTrackManager = new AudioTrackManager();

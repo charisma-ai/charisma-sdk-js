@@ -33,14 +33,20 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
 
   private streamTimeslice: number;
 
+  private reconnectAttemptsTimeout: number;
+
   private ready = false;
 
   private playthroughToken?: string;
 
-  constructor(streamTimeslice: number | undefined) {
+  constructor(
+    streamTimeslice: number | undefined,
+    reconnectAttemptsTimeout: number | undefined,
+  ) {
     super();
 
     this.streamTimeslice = streamTimeslice ?? 100;
+    this.reconnectAttemptsTimeout = reconnectAttemptsTimeout ?? 60 * 1000;
   }
 
   private attemptReconnect = (): void => {
@@ -49,9 +55,13 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
 
     let shouldTryAgain = true;
 
+    const endReconnect = () => {
+      shouldTryAgain = false;
+    };
+
     const tryReconnect = () => {
       this.connect(this.playthroughToken as string).then(() => {
-        shouldTryAgain = false;
+        endReconnect();
       });
 
       if (shouldTryAgain) {
@@ -60,6 +70,11 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
     };
 
     tryReconnect();
+
+    setTimeout(() => {
+      this.emit("error", "Reconnect attempts timed out.");
+      endReconnect();
+    }, this.reconnectAttemptsTimeout);
   };
 
   public connect = (token: string): Promise<void> => {
