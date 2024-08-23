@@ -6,6 +6,8 @@ class AudioTrackManager {
 
   private currentAudio: MediaAudio[];
 
+  private muted = false;
+
   constructor() {
     this.isPlaying = false;
     this.currentAudio = [];
@@ -71,9 +73,11 @@ class AudioTrackManager {
   }
 
   public toggleMute(): void {
+    this.muted = !this.muted;
+
     this.currentAudio.forEach((audio) => {
       // eslint-disable-next-line no-param-reassign
-      audio.muted = !audio.muted;
+      audio.muted = this.muted;
     });
   }
 
