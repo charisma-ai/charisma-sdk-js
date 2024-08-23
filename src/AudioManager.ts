@@ -11,10 +11,13 @@ export interface AudioManagerOptions {
   normalVolumeLevel?: number;
   sttService?: "browser" | "charisma/deepgram";
   streamTimeslice?: number;
+  reconnectAttemptsTimeout?: number;
   handleStartSTT?: () => void;
   handleStopSTT?: () => void;
   handleTranscript?: (transcript: string) => void;
   handleError?: (error: string) => void;
+  handleDisconnect?: (message: string) => void;
+  handleConnect?: (message: string) => void;
 }
 
 class AudioManager {
@@ -39,7 +42,10 @@ class AudioManager {
     this.normalVolumeLevel = options.normalVolumeLevel ?? 1;
     this.sttService = options.sttService ?? "charisma/deepgram";
 
-    this.audioInputsService = new AudioInputsService(options.streamTimeslice);
+    this.audioInputsService = new AudioInputsService(
+      options.streamTimeslice,
+      options.reconnectAttemptsTimeout,
+    );
     this.audioInputsBrowser = new AudioInputsBrowser();
     this.audioOutputsService = new AudioOutputsService();
     this.audioTrackManager = new AudioTrackManager();
@@ -61,6 +67,11 @@ class AudioManager {
         (() => console.error("handleTranscript() is not setup.")),
     );
     this.audioInputsService.on("error", options.handleError ?? console.error);
+    this.audioInputsService.on(
+      "disconnect",
+      options.handleDisconnect ?? console.error,
+    );
+    this.audioInputsService.on("connect", options.handleConnect ?? console.log);
 
     // Listen to events from the AudioInputsBrowser
     this.audioInputsBrowser.on(

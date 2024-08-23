@@ -11,6 +11,8 @@ type AudioInputsServiceEvents = {
   timeout: [];
   start: [];
   stop: [];
+  disconnect: [string];
+  connect: [string];
 };
 
 const setupMicrophone = async (): Promise<MediaRecorder> => {
@@ -31,15 +33,53 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
 
   private streamTimeslice: number;
 
+  private reconnectAttemptsTimeout: number;
+
   private ready = false;
 
-  constructor(streamTimeslice: number | undefined) {
+  private playthroughToken?: string;
+
+  constructor(
+    streamTimeslice: number | undefined,
+    reconnectAttemptsTimeout: number | undefined,
+  ) {
     super();
 
     this.streamTimeslice = streamTimeslice ?? 100;
+    this.reconnectAttemptsTimeout = reconnectAttemptsTimeout ?? 60 * 1000;
   }
 
+  private attemptReconnect = (): void => {
+    if (this.playthroughToken === undefined) return;
+    const reconnectInterval = 3000;
+
+    let shouldTryAgain = true;
+
+    const endReconnect = () => {
+      shouldTryAgain = false;
+    };
+
+    const tryReconnect = () => {
+      this.connect(this.playthroughToken as string).then(() => {
+        endReconnect();
+      });
+
+      if (shouldTryAgain) {
+        setTimeout(tryReconnect, reconnectInterval);
+      }
+    };
+
+    tryReconnect();
+
+    setTimeout(() => {
+      this.emit("error", "Reconnect attempts timed out.");
+      endReconnect();
+    }, this.reconnectAttemptsTimeout);
+  };
+
   public connect = (token: string): Promise<void> => {
+    this.playthroughToken = token;
+
     return new Promise((resolve, reject) => {
       if (this.socket) {
         console.log("Socket already connected");
@@ -49,6 +89,7 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
       this.socket = io(STT_URL, {
         transports: ["websocket"],
         query: { token },
+        reconnection: false,
       });
 
       this.socket.on("error", (error: string) => {
@@ -64,7 +105,26 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
         }
       });
 
+      // Attempts to reconnect to the stt server if the connection is lost and we DO have internet.
+      this.socket.on("disconnect", (reason) => {
+        console.log("Socket disconnected. Reason:", reason);
+
+        this.emit("disconnect", "Disconnected from speech-to-text server.");
+        this.ready = false;
+
+        if (this.socket) {
+          this.socket.close();
+          this.socket = undefined;
+        }
+
+        this.microphone = undefined;
+
+        this.attemptReconnect();
+      });
+
       this.socket.on("connect", () => {
+        this.emit("connect", "Connected to speech-to-text service.");
+
         // Deepgram requires a short interval before data is sent.
         setTimeout(() => {
           this.ready = true;
@@ -75,6 +135,7 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
   };
 
   public startListening = async (timeout = 10000): Promise<void> => {
+    console.log("ready:", this.ready);
     if (!this.ready) {
       return;
     }

@@ -50,6 +50,18 @@ button:hover {
   margin: 0.5em;
 }
 
+.connected-message {
+  color: green;
+  font-size: 0.8em;
+  padding-left: 0.5em;
+}
+
+.disconnected-message {
+  color: red;
+  font-size: 0.8em;
+  padding-left: 0.5em;
+}
+
 .story-id-container {
   display: flex;
   flex-direction: column;
