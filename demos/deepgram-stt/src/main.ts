@@ -127,6 +127,11 @@ window.start = async function start() {
   // Listen for the playthrough to connect and start the conversation when it does.
   let started = false;
   playthrough.on("connection-status", (status) => {
+    appendMessage(
+      status,
+      status === "disconnected" ? "disconnected-message" : "connected-message",
+    );
+
     if (status === "connected" && !started) {
       conversation.start();
       started = true;
