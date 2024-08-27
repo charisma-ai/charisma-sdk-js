@@ -183,7 +183,7 @@ class AudioManager {
   // ** Audio Track Manager ** //
   // **
   public mediaAudioPlay = (audioTracks: AudioTrack[]): void => {
-    return this.audioTrackManager.play(audioTracks);
+    this.audioTrackManager.play(audioTracks);
   };
 
   public mediaAudioSetVolume = (volume: number): void => {

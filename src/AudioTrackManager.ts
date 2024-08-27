@@ -20,6 +20,7 @@ class AudioTrackManager {
     source: AudioBufferSourceNode;
     gainNode: GainNode;
     url: string;
+    originalVolume: number;
   }[];
 
   private muted = false;
@@ -37,30 +38,33 @@ class AudioTrackManager {
     return this.audioContext.decodeAudioData(arrayBuffer);
   }
 
-  private playNewSource(audioTrack: AudioTrack): void {
+  private async playNewSource(audioTrack: AudioTrack): Promise<void> {
     if (!audioTrack.url) return;
 
-    this.loadAudioBuffer(audioTrack.url).then((audioBuffer) => {
-      if (this.audioContext === undefined) return;
-      const gainNode = this.audioContext.createGain();
-      gainNode.gain.value = audioTrack.volume;
+    const audioBuffer = await this.loadAudioBuffer(audioTrack.url);
+    if (this.audioContext === undefined) return;
 
-      const source = this.audioContext.createBufferSource();
-      if (audioBuffer === undefined) return;
+    const gainNode = this.audioContext.createGain();
+    gainNode.gain.value = audioTrack.volume;
 
-      source.buffer = audioBuffer;
-      source.loop = audioTrack.loop;
-      source.connect(gainNode).connect(this.audioContext.destination);
-      source.start(0);
+    const source = this.audioContext.createBufferSource();
+    if (audioBuffer === undefined) return;
+    source.buffer = audioBuffer;
+    source.loop = audioTrack.loop;
+    source.connect(gainNode).connect(this.audioContext.destination);
+    source.start(0);
 
-      source.onended = () => {
-        this.currentAudio = this.currentAudio.filter(
-          (currentAudio) => currentAudio.source !== source,
-        );
-      };
+    source.onended = () => {
+      this.currentAudio = this.currentAudio.filter(
+        (currentAudio) => currentAudio.source !== source,
+      );
+    };
 
-      if (!audioTrack.url) return;
-      this.currentAudio.push({ source, gainNode, url: audioTrack.url });
+    this.currentAudio.push({
+      source,
+      gainNode,
+      url: audioTrack.url,
+      originalVolume: audioTrack.volume,
     });
   }
 
@@ -80,7 +84,7 @@ class AudioTrackManager {
     return this.audioContext;
   };
 
-  public play(audioTracks: AudioTrack[]) {
+  public async play(audioTracks: AudioTrack[]): Promise<void> {
     if (audioTracks.length === 0) return;
     if (this.audioContext === undefined) {
       this.getAudioContext();
@@ -88,33 +92,35 @@ class AudioTrackManager {
 
     this.isPlaying = true;
 
-    audioTracks.forEach((audioTrack) => {
-      if (!audioTrack.url) return;
+    await Promise.all(
+      audioTracks.map(async (audioTrack) => {
+        if (!audioTrack.url) return;
 
-      const index = this.currentAudio.findIndex(
-        (currentAudio) => currentAudio.url === audioTrack.url,
-      );
+        const index = this.currentAudio.findIndex(
+          (currentAudio) => currentAudio.url === audioTrack.url,
+        );
 
-      if (index === -1) {
-        this.playNewSource(audioTrack);
-      } else {
-        if (audioTrack.stopPlaying) {
-          this.currentAudio[index].source.stop();
-          this.currentAudio = this.currentAudio.filter(
-            (currentAudio) => currentAudio.url !== audioTrack.url,
-          );
-          return;
+        if (index === -1) {
+          await this.playNewSource(audioTrack);
+        } else {
+          if (audioTrack.stopPlaying) {
+            this.currentAudio[index].source.stop();
+            this.currentAudio = this.currentAudio.filter(
+              (currentAudio) => currentAudio.url !== audioTrack.url,
+            );
+            return;
+          }
+
+          if (audioTrack.behaviour === "restart") {
+            this.currentAudio[index].source.stop();
+            this.currentAudio = this.currentAudio.filter(
+              (currentAudio) => currentAudio.url !== audioTrack.url,
+            );
+            await this.playNewSource(audioTrack);
+          }
         }
-
-        if (audioTrack.behaviour === "restart") {
-          this.currentAudio[index].source.stop();
-          this.currentAudio = this.currentAudio.filter(
-            (currentAudio) => currentAudio.url !== audioTrack.url,
-          );
-          this.playNewSource(audioTrack);
-        }
-      }
-    });
+      }),
+    );
   }
 
   public pause(): void {
@@ -142,9 +148,9 @@ class AudioTrackManager {
   }
 
   public setVolume(volume: number): void {
-    this.currentAudio.forEach(({ gainNode }) => {
+    this.currentAudio.forEach(({ gainNode, originalVolume }) => {
       // eslint-disable-next-line no-param-reassign
-      gainNode.gain.value = volume;
+      gainNode.gain.value = originalVolume * volume;
     });
   }
 }
