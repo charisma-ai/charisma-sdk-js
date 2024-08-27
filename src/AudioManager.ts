@@ -162,6 +162,14 @@ class AudioManager {
   };
 
   // **
+  // ** Initialise Audio
+  // **
+  public initialise = (): void => {
+    this.audioOutputsService.getAudioContext();
+    this.audioTrackManager.getAudioContext();
+  };
+
+  // **
   // ** Audio Outputs Service ** //
   // **
   public outputServicePlay = (

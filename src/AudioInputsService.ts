@@ -135,7 +135,6 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
   };
 
   public startListening = async (timeout = 10000): Promise<void> => {
-    console.log("ready:", this.ready);
     if (!this.ready) {
       return;
     }

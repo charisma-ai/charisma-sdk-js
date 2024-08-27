@@ -21,17 +21,6 @@ declare global {
   }
 }
 
-// In some browsers, a user interaction is needed to play audio.
-// This function will play a silent mp3 when the 'Start' button is pressed.
-// This will tell the browser that audio can be played.
-const unlockAudio = () => {
-  const sound =
-    "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
-  const audioElement = new Audio();
-  audioElement.src = sound;
-  audioElement.play();
-};
-
 const messagesDiv = document.getElementById("messages");
 const recordButton = document.getElementById("record-button");
 
@@ -81,7 +70,10 @@ let playthrough: Playthrough;
 let conversation: Conversation;
 
 window.start = async function start() {
-  unlockAudio();
+  // In order to play audio, this method must be called by a user interaction.
+  // This is due to a security restriction in some browsers.
+  audio.initialise();
+
   const storyIdInput = <HTMLInputElement>document.getElementById("story-id");
   const storyId = storyIdInput.value;
   const storyApiKeyInput = <HTMLInputElement>(
