@@ -4,6 +4,7 @@
 **BREAKING**
 - Added `AudioManager` class to handle audio input and output.
 - Removed `Microphone` and `Speaker` classes. Replaced with `AudioManager` methods.
+- Use AudioContext API for better browser compatibility.
 
 ### v4.0.5
 

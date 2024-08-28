@@ -31,7 +31,7 @@ async function start() {
 
   // Handle messages in the conversation.
   conversation.on("message", (message) => {
-    console.log(message.message.text)
+    console.log(message.message.text);
   });
 
   conversation.on("problem", console.warn);
@@ -105,7 +105,7 @@ const { conversationUuid } = await createConversation(token);
 
 Create a new `Playthrough` instance to connect to a playthrough and interact with the chat engine.
 
-- `playthroughToken` (`number`): The `token` generated in `createPlaythroughToken`.
+- `playthroughToken` (`string`): The `token` generated in `createPlaythroughToken`.
 
 #### Playthrough.joinConversation
 
@@ -271,11 +271,13 @@ const audio = new AudioManager({
 | `duckVolumeLevel` | `number` | 0 | Volume level when ducking (0 to 1) |
 | `normalVolumeLevel` | `number` | 1 | Regular volume level (0 to 1)
 | `sttService` | `"charisma/deepgram" \| "browser"` | `"charisma/deepgram"` |Speech-to-text service to use (see below).
+| `streamTimeslice` | `number` | 100 | The number of milliseconds to record into each Blob. See https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder/start#timeslice
 | `handleTranscript` | `(transcript: string) => void` | | Callback to handle transcripts.
 | `handleStartSTT` | `() => void` | | Callback to handle when speech-to-text starts. Can be used to update the UI.
 | `handleStopSTT` | `() => void` | | Callback to handle when speech-to-text stops.
 | `handleError` | `(error: string) => void` | `console.error(error)` | Callback to handle errors.
-| `handleDisconnect` | `() => void` | `console.error("Transcription service disconnected")` | Callback to handle when the transcription service disconnects.
+| `handleDisconnect` | `(message: string) => void` | `console.error(message)` | Callback to handle when the transcription service disconnects.
+| `handleConnect` | `(message: string) => void` | `console.log(message)` | Callback to handle when the transcription service connects.
 
 There are currently two speech-to-text services available:
 - `charisma/deepgram`: Deepgram is a neural network based speech-to-text service that that can be accessed through Charsima.ai.
@@ -302,13 +304,19 @@ After the timeout, the speech-to-text service will automatically stop listening.
 
 #### audio.browserIsSupported(): boolean
 
-Returns true if the browser supports the `browser` speech recognition service.
+Returns `true` if the browser supports the `browser` speech recognition service.
 
 ### Audio Outputs Service
 
-#### outputServicePlay(audio: ArrayBuffer, options: AudioOutputsServicePlayOptions): Promise<void>
+#### audio.initialise()
 
-This plays the generated speech in the message event. Typically, you would want to use this in combination with a `message` conversation handler. You may also wish to pause the microphone while this happens.
+Initialises the audio for characters and media. This method _must_ be called before attempting to play audio from media nodes or character speech.
+
+This method _must_ also be called from a user interaction event, such as a click or a keypress. This is due to a security restriction in some browsers. We recommend adding it to the "start" button the sets up your playthrough. See the demos for an example.
+
+#### audio.outputServicePlay(audio: ArrayBuffer, options: AudioOutputsServicePlayOptions): Promise<void>
+
+This plays the generated speech in the message event. Typically, you would want to use this in combination with a `message` conversation handler.
 
 Returns a Promise that resolves once the speech has ended.
 
@@ -327,24 +335,25 @@ type SpeakerPlayOptions = {
 };
 ```
 
-This method can be used like this:
+### Media Track Audio
 
-```js
-conversation.on("message", async (data) => {
-  if (data.message.speech) {
-    audio.stopListening();
-    await audio.outputServicePlay(data.message.speech.audio, {
-      trackId: message.message.character?.id,
-      interrupt: "track",
-    });
-    audio.startListening();
-  }
-});
-```
+#### audio.mediaAudioPlay(audioTracks: AudioTrack[]): void
 
-### Media Audio
+Will play the audio tracks in a message event. An empty array can also be passed here so it can be called on every message event.
 
-> Docs TBC
+#### audio.mediaAudioSetVolume(volume: number): void
+
+Sets the volume of all media audio tracks. Must be a number between 0 and 1.
+
+The volume set here will be multiplied by the volume set in the graph editor for each track. For example, if you set the graph editor volume to 0.5 and the SDK volume to 1, the final volume will be 0.5. If you set the graph editor volume to 0.5 and the SDK volume to 0.5, the final volume will be 0.25.
+
+#### audio.mediaAudioToggleMute()
+
+Will mute and unmute all media audio tracks.
+
+#### audio.mediaAudioStopAll()
+
+Will stop all media audio tracks.
 
 ## Questions
 
