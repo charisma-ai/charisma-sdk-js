@@ -33,8 +33,8 @@ class AudioTrackManager {
   private async loadAudioBuffer(url: string): Promise<AudioBuffer | undefined> {
     if (this.audioContext === undefined) return undefined;
 
-    const response = fetch(url);
-    const arrayBuffer = await (await response).arrayBuffer();
+    const response = await fetch(url);
+    const arrayBuffer = await response.arrayBuffer();
     return this.audioContext.decodeAudioData(arrayBuffer);
   }
 
