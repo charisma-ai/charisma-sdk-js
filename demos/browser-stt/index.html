@@ -7,23 +7,27 @@
   </head>
   <body>
     <div id="app">
+      <div class="story-id-container">
+        Story ID:
+        <input
+          type="text"
+          id="story-id"
+          placeholder="Published Story ID (17221)"
+        />
+        Story API Key:
+        <input type="text" id="story-api-key" placeholder="Story API Key" />
+      </div>
       <button onclick="start()">Start</button>
       <div id="messages"></div>
+      <button id="record-button" onclick="toggleMicrophone(event)">
+        Record
+      </button>
       <input
         onkeypress="onKeyPress(event)"
         placeholder="Type a message..."
         id="reply-input"
       />
       <button onclick="reply()">Send</button>
-      Record:
-      <input
-        type="checkbox"
-        id="record"
-        class="mic-checkbox"
-        onclick="toggleMicrophone(event)"
-      />
-      <br />
-      <div id="transcript"></div>
     </div>
     <div>
       <button onclick="toggleMuteBackgroundAudio()">

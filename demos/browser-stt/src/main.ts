@@ -1,4 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+
 import "./style.css";
 import {
   Playthrough,
@@ -6,9 +7,10 @@ import {
   createPlaythroughToken,
   createConversation,
   Conversation,
-  MessageCharacter,
+  Message,
 } from "@charisma-ai/sdk";
 
+// In this demo, we'll extend the global "window" with the functions we need so we can call them from the HTML.
 declare global {
   interface Window {
     start: () => Promise<void>;
@@ -19,40 +21,99 @@ declare global {
   }
 }
 
+const messagesDiv = document.getElementById("messages");
+const recordButton = document.getElementById("record-button");
+
+const appendMessage = (message: string, className: string, name?: string) => {
+  const div = document.createElement("div");
+  div.classList.add(className, "message");
+  div.innerHTML = `${name ? `<b>${name}</b>:` : ""} ${message}`;
+  messagesDiv?.appendChild(div);
+};
+
+// Keep track of the recording statuses of the microphone so we can update the UI accordingly.
+let recordingStatus: "recording" | "off" | "starting" = "off";
+
+const handleStartSTT = () => {
+  recordingStatus = "recording";
+  if (recordButton) recordButton.innerHTML = "Stop";
+};
+
+const handleStopSTT = () => {
+  recordingStatus = "off";
+  if (recordButton) recordButton.innerHTML = "Record";
+};
+
+const handleTranscript = (transcript: string) => {
+  const replyInput = <HTMLInputElement>document.getElementById("reply-input");
+  if (replyInput) {
+    replyInput.value = transcript;
+  }
+};
+
+// Setup the audio manager.
 const audio = new AudioManager({
   duckVolumeLevel: 0.1,
   normalVolumeLevel: 1,
   sttService: "browser",
   streamTimeslice: 100,
+  handleTranscript,
+  handleStartSTT,
+  handleStopSTT,
 });
+
+if (!audio.browserIsSupported()) {
+  appendMessage(
+    "Your browser does not support the browser STT service.",
+    "error-message",
+  );
+}
 
 let playthrough: Playthrough;
 let conversation: Conversation;
 
-const messagesDiv = document.getElementById("messages");
-
 window.start = async function start() {
+  // In order to play audio, this method must be called by a user interaction.
+  // This is due to a security restriction in some browsers.
+  audio.initialise();
+
+  const storyIdInput = <HTMLInputElement>document.getElementById("story-id");
+  const storyId = storyIdInput.value;
+  const storyApiKeyInput = <HTMLInputElement>(
+    document.getElementById("story-api-key")
+  );
+  const storyApiKey = storyApiKeyInput.value;
+
   const { token } = await createPlaythroughToken({
-    storyId: Number(import.meta.env.VITE_STORY_ID),
-    apiKey: import.meta.env.VITE_STORY_API_KEY as string,
-    version: -1, // -1 refers to the current draft version
+    storyId: Number(storyId),
+    apiKey: storyApiKey,
+    version: -1,
   });
 
   const { conversationUuid } = await createConversation(token);
   playthrough = new Playthrough(token);
   conversation = playthrough.joinConversation(conversationUuid);
 
-  conversation.on("message", (message) => {
-    const characterMessage: MessageCharacter = message.message;
+  conversation.setSpeechConfig({
+    encoding: ["mp3", "wav"],
+    output: "buffer",
+  });
 
-    // Put character message on the page.
-    const div = document.createElement("div");
-    div.classList.add("message", "character");
-    div.innerHTML = `<b>${characterMessage.character?.name || "???"}</b>: ${
-      characterMessage.text
-    }`;
-    messagesDiv?.appendChild(div);
+  conversation.on("message", (message: Message) => {
+    const characterMessage =
+      message.type === "character" ? message.message : null;
 
+    // For this demo, we only care about character messages.
+    if (!characterMessage) return;
+
+    // Put the character message on the page.
+    appendMessage(
+      characterMessage.text,
+      "character-message",
+      characterMessage.character?.name,
+    );
+
+    // Play character speech.
     if (characterMessage.speech) {
       audio.outputServicePlay(characterMessage.speech.audio as ArrayBuffer, {
         trackId: String(characterMessage.character?.id),
@@ -60,24 +121,24 @@ window.start = async function start() {
       });
     }
 
-    // Play background audio.
-    if (characterMessage.media.audioTracks.length > 0) {
-      audio.mediaAudio.src = characterMessage.media.audioTracks[0].url;
-      audio.mediaAudioFastSeek(0);
-      audio.mediaAudioPlay();
+    if (characterMessage.media.stopAllAudio) {
+      audio.mediaAudioStopAll();
     }
+
+    // Play media audio if it exists in the node.
+    audio.mediaAudioPlay(characterMessage.media.audioTracks);
   });
 
   conversation.on("problem", console.warn);
-  conversation.setSpeechConfig({
-    encoding: ["ogg", "mp3"],
-    output: "buffer",
-  });
 
-  conversation.start();
-
+  // Listen for the playthrough to connect and start the conversation when it does.
   let started = false;
   playthrough.on("connection-status", (status) => {
+    appendMessage(
+      status,
+      status === "disconnected" ? "disconnected-message" : "connected-message",
+    );
+
     if (status === "connected" && !started) {
       conversation.start();
       started = true;
@@ -90,18 +151,22 @@ window.start = async function start() {
 const reply = () => {
   if (!playthrough || !conversation) return;
 
+  // Stop listening when you send a message.
+  audio.stopListening();
+
   const replyInput = <HTMLInputElement>document.getElementById("reply-input");
   const text = replyInput.value;
+
+  if (text.trim() === "") return;
+
   conversation.reply({ text });
   replyInput.value = "";
 
   // Put player message on the page.
-  const div = document.createElement("div");
-  div.classList.add("message", "player");
-  div.innerHTML = `<b>You</b>: ${text}`;
-  messagesDiv?.appendChild(div);
+  appendMessage(text, "player-message", "You");
 };
 
+// Handle the Enter key press.
 window.onKeyPress = function onKeyPress(event) {
   if (!event || !event.currentTarget) return;
   if (event.key === "Enter") {
@@ -111,23 +176,21 @@ window.onKeyPress = function onKeyPress(event) {
 
 window.reply = reply;
 
-window.toggleMicrophone = (event) => {
-  if ((<HTMLInputElement>event.currentTarget).checked) {
-    audio.inputServiceStartListening();
-  } else {
-    audio.inputServiceStopListening();
+// Toggling the microphone will request the stt service to connect.
+window.toggleMicrophone = () => {
+  if (!recordButton) return;
+
+  if (recordingStatus === "off") {
+    audio.startListening();
+    recordingStatus = "starting";
+    recordButton.innerHTML = "...";
+  } else if (recordingStatus === "recording") {
+    audio.stopListening();
+    recordingStatus = "off";
+    recordButton.innerHTML = "Record";
   }
 };
 
 window.toggleMuteBackgroundAudio = () => {
-  audio.mediaAudio.muted = !audio.mediaAudio.muted;
+  audio.mediaAudioToggleMute();
 };
-
-// Gets the transcript.
-audio.audioInputsService.on("transcript", (transcript) => {
-  console.log("Recognised Transcript:", transcript);
-  const replyInput = <HTMLInputElement>document.getElementById("reply-input");
-  if (replyInput) {
-    replyInput.value = transcript;
-  }
-});
