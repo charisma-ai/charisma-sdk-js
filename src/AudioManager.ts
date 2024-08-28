@@ -162,6 +162,14 @@ class AudioManager {
   };
 
   // **
+  // ** Initialise Audio
+  // **
+  public initialise = (): void => {
+    this.audioOutputsService.getAudioContext();
+    this.audioTrackManager.getAudioContext();
+  };
+
+  // **
   // ** Audio Outputs Service ** //
   // **
   public outputServicePlay = (
@@ -175,7 +183,7 @@ class AudioManager {
   // ** Audio Track Manager ** //
   // **
   public mediaAudioPlay = (audioTracks: AudioTrack[]): void => {
-    return this.audioTrackManager.play(audioTracks);
+    this.audioTrackManager.play(audioTracks);
   };
 
   public mediaAudioSetVolume = (volume: number): void => {

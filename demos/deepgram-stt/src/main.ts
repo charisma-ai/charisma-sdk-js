@@ -70,6 +70,10 @@ let playthrough: Playthrough;
 let conversation: Conversation;
 
 window.start = async function start() {
+  // In order to play audio, this method must be called by a user interaction.
+  // This is due to a security restriction in some browsers.
+  audio.initialise();
+
   const storyIdInput = <HTMLInputElement>document.getElementById("story-id");
   const storyId = storyIdInput.value;
   const storyApiKeyInput = <HTMLInputElement>(

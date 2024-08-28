@@ -1,85 +1,156 @@
 import { AudioTrack } from "./types";
-import MediaAudio from "./MediaAudio";
+
+interface Constructable<T> {
+  new (): T;
+}
+
+interface WindowWithAudioContext extends Window {
+  AudioContext?: Constructable<AudioContext>;
+  webkitAudioContext?: Constructable<AudioContext>;
+}
+
+declare const window: WindowWithAudioContext;
 
 class AudioTrackManager {
+  private audioContext: AudioContext | undefined;
+
   public isPlaying: boolean;
 
-  private currentAudio: MediaAudio[];
+  private currentAudio: {
+    source: AudioBufferSourceNode;
+    gainNode: GainNode;
+    url: string;
+    originalVolume: number;
+  }[];
+
+  private muted = false;
 
   constructor() {
     this.isPlaying = false;
     this.currentAudio = [];
   }
 
-  public play(audioTracks: AudioTrack[]): void {
+  private async loadAudioBuffer(url: string): Promise<AudioBuffer | undefined> {
+    if (this.audioContext === undefined) return undefined;
+
+    const response = await fetch(url);
+    const arrayBuffer = await response.arrayBuffer();
+    return this.audioContext.decodeAudioData(arrayBuffer);
+  }
+
+  private async playNewSource(audioTrack: AudioTrack): Promise<void> {
+    if (!audioTrack.url) return;
+
+    const audioBuffer = await this.loadAudioBuffer(audioTrack.url);
+    if (this.audioContext === undefined) return;
+
+    const gainNode = this.audioContext.createGain();
+    gainNode.gain.value = audioTrack.volume;
+
+    const source = this.audioContext.createBufferSource();
+    if (audioBuffer === undefined) return;
+    source.buffer = audioBuffer;
+    source.loop = audioTrack.loop;
+    source.connect(gainNode).connect(this.audioContext.destination);
+    source.start(0);
+
+    source.onended = () => {
+      this.currentAudio = this.currentAudio.filter(
+        (currentAudio) => currentAudio.source !== source,
+      );
+    };
+
+    this.currentAudio.push({
+      source,
+      gainNode,
+      url: audioTrack.url,
+      originalVolume: audioTrack.volume,
+    });
+  }
+
+  public getAudioContext = (): AudioContext => {
+    if (this.audioContext) {
+      return this.audioContext;
+    }
+
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+
+    if (!AudioContextClass) {
+      throw new Error("AudioContext isn't supported in this browser.");
+    }
+
+    this.audioContext = new AudioContextClass();
+
+    return this.audioContext;
+  };
+
+  public async play(audioTracks: AudioTrack[]): Promise<void> {
     if (audioTracks.length === 0) return;
+    if (this.audioContext === undefined) {
+      this.getAudioContext();
+    }
 
     this.isPlaying = true;
 
-    audioTracks.forEach((audioTrack) => {
-      if (!audioTrack.url) return;
+    await Promise.all(
+      audioTracks.map(async (audioTrack) => {
+        if (!audioTrack.url) return;
 
-      // Get the index of this current audio track if it exists.
-      const index = this.currentAudio.findIndex(
-        (currentAudio) => currentAudio.url === audioTrack.url,
-      );
+        const index = this.currentAudio.findIndex(
+          (currentAudio) => currentAudio.url === audioTrack.url,
+        );
 
-      if (index === -1) {
-        const audio = new MediaAudio(audioTrack.url, audioTrack.volume);
+        if (index === -1) {
+          await this.playNewSource(audioTrack);
+        } else {
+          if (audioTrack.stopPlaying) {
+            this.currentAudio[index].source.stop();
+            this.currentAudio = this.currentAudio.filter(
+              (currentAudio) => currentAudio.url !== audioTrack.url,
+            );
+            return;
+          }
 
-        audio.loop = audioTrack.loop;
-        audio.currentTime = 0;
-        audio.play();
-        audio.onended = () => {
-          this.currentAudio = this.currentAudio.filter(
-            (currentAudio) => currentAudio !== audio,
-          );
-        };
-
-        this.currentAudio.push(audio);
-      } else {
-        // Check for tracks that need to stop playing.
-        if (audioTrack.stopPlaying) {
-          this.currentAudio[index].pause();
-          this.currentAudio = this.currentAudio.filter(
-            (currentAudio) => currentAudio.url !== audioTrack.url,
-          );
-          return;
+          if (audioTrack.behaviour === "restart") {
+            this.currentAudio[index].source.stop();
+            this.currentAudio = this.currentAudio.filter(
+              (currentAudio) => currentAudio.url !== audioTrack.url,
+            );
+            await this.playNewSource(audioTrack);
+          }
         }
-
-        // Check if any tracks need to be restarted.
-        if (audioTrack.behaviour === "restart") {
-          this.currentAudio[index].currentTime = 0;
-        }
-      }
-    });
+      }),
+    );
   }
 
   public pause(): void {
     this.isPlaying = false;
-    this.currentAudio.forEach((audio) => {
-      audio.pause();
+    this.currentAudio.forEach(({ source }) => {
+      source.stop();
     });
   }
 
   public stopAll(): void {
-    this.currentAudio.forEach((audio) => {
-      audio.pause();
+    this.currentAudio.forEach(({ source }) => {
+      source.stop();
     });
     this.currentAudio = [];
     this.isPlaying = false;
   }
 
   public toggleMute(): void {
-    this.currentAudio.forEach((audio) => {
+    this.muted = !this.muted;
+
+    this.currentAudio.forEach(({ gainNode }) => {
       // eslint-disable-next-line no-param-reassign
-      audio.muted = !audio.muted;
+      gainNode.gain.value = this.muted ? 0 : 1;
     });
   }
 
   public setVolume(volume: number): void {
-    this.currentAudio.forEach((audio) => {
-      audio.setVolume(volume);
+    this.currentAudio.forEach(({ gainNode, originalVolume }) => {
+      // eslint-disable-next-line no-param-reassign
+      gainNode.gain.value = originalVolume * volume;
     });
   }
 }
