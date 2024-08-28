@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Charisma JS SDK Demo</title>
+  </head>
+  <body>
+    <div id="app">
+      <div class="story-id-container">
+        Story ID:
+        <input type="text" id="story-id" placeholder="Published Story ID" />
+        Story API Key:
+        <input type="text" id="story-api-key" placeholder="Story API Key" />
+      </div>
+      <button onclick="start()">Start</button>
+      <div id="messages"></div>
+      <input
+        onkeypress="onKeyPress(event)"
+        placeholder="Type a message..."
+        id="reply-input"
+      />
+      <button onclick="reply()">Send</button>
+    </div>
+    <div>
+      <button onclick="toggleMuteBackgroundAudio()">
+        Mute Background Audio
+      </button>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

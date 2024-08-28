@@ -1,0 +1,77 @@
+body {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  margin: 0;
+  display: flex;
+  place-items: center;
+  flex-direction: column;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+#app {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.25s;
+  background-color: #f9f9f9;
+  margin: 0.5em;
+}
+button:hover {
+  background-color: #f2f2f2;
+}
+
+#messages {
+  margin: 1em;
+  border: 1px solid #ccc;
+  padding: 1em;
+  max-height: 200px;
+  overflow-y: scroll;
+  text-align: left;
+}
+
+.message {
+  margin: 0.5em;
+}
+
+.connected-message {
+  color: green;
+  font-size: 0.8em;
+  padding-left: 0.5em;
+}
+
+.disconnected-message {
+  color: red;
+  font-size: 0.8em;
+  padding-left: 0.5em;
+}
+
+.error-message {
+  color: red;
+  padding-left: 0.5em;
+}
+
+.story-id-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.story-id-container input {
+  margin-bottom: 0.5em;
+}
