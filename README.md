@@ -310,9 +310,9 @@ Returns `true` if the browser supports the `browser` speech recognition service.
 
 #### audio.initialise()
 
-Initialises the audio for characters and media. This method _must_ be called from a user interaction event, such as a click or a keypress. This is due to a security restriction in some browsers.
+Initialises the audio for characters and media. This method _must_ be called before attempting to play audio from media nodes or character speech.
 
-We recommend adding it to the "start" button the sets up your playthrough. See the demos for an example.
+This method _must_ also be called from a user interaction event, such as a click or a keypress. This is due to a security restriction in some browsers. We recommend adding it to the "start" button the sets up your playthrough. See the demos for an example.
 
 #### audio.outputServicePlay(audio: ArrayBuffer, options: AudioOutputsServicePlayOptions): Promise<void>
 
