@@ -51,6 +51,8 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
 
   private activeConversations = new Map<string, Conversation>();
 
+  public playerSessionId?: string;
+
   public constructor(token: string, baseUrl?: string) {
     super();
 
@@ -64,6 +66,19 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
     this.uuid = playthroughUuid;
 
     this.baseUrl = baseUrl;
+  }
+
+  public async getPlayerSessionId(): Promise<string> {
+    return new Promise((resolve, _reject) => {
+      const loop = () => {
+        if (this.playerSessionId !== undefined) {
+          resolve(this.playerSessionId);
+        } else {
+          setTimeout(loop, 100);
+        }
+      };
+      loop();
+    });
   }
 
   public createConversation(): ReturnType<typeof api.createConversation> {
@@ -187,7 +202,7 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
     }
   };
 
-  public connect = async (): Promise<void> => {
+  public connect = async (): Promise<{ playerSessionId: string }> => {
     const baseUrl = this.baseUrl || api.getGlobalBaseUrl();
 
     if (!this.client) {
@@ -203,6 +218,10 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
     this.attachRoomHandlers(this.room);
 
     this.shouldReconnect = true;
+
+    const playerSessionId = await this.getPlayerSessionId();
+
+    return { playerSessionId };
   };
 
   public pause = (): void => {
@@ -226,6 +245,9 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
     room.onMessage("resume", this.onResume);
     room.onMessage("start", this.onStart);
     room.onMessage("tap", this.onTap);
+    room.onMessage("player-session-id", (playerSessionId: string) => {
+      this.playerSessionId = playerSessionId;
+    });
 
     room.onError(this.onError);
 

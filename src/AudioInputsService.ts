@@ -39,6 +39,8 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
 
   private playthroughToken?: string;
 
+  private playerSessionId?: string;
+
   constructor(
     streamTimeslice: number | undefined,
     reconnectAttemptsTimeout: number | undefined,
@@ -60,7 +62,10 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
     };
 
     const tryReconnect = () => {
-      this.connect(this.playthroughToken as string).then(() => {
+      this.connect(
+        this.playthroughToken as string,
+        this.playerSessionId as string,
+      ).then(() => {
         endReconnect();
       });
 
@@ -77,8 +82,9 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
     }, this.reconnectAttemptsTimeout);
   };
 
-  public connect = (token: string): Promise<void> => {
+  public connect = (token: string, playerSessionId: string): Promise<void> => {
     this.playthroughToken = token;
+    this.playerSessionId = playerSessionId;
 
     return new Promise((resolve, reject) => {
       if (this.socket) {
@@ -88,7 +94,10 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
 
       this.socket = io(STT_URL, {
         transports: ["websocket"],
-        query: { token },
+        query: {
+          token,
+          playerSessionId,
+        },
         reconnection: false,
       });
 

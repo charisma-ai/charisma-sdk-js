@@ -215,8 +215,9 @@ describe("AudioManager", () => {
     (audioManager as any).audioInputsService = mockAudioInputsServiceInstance;
 
     const token = "test-token";
+    const playerSessionId = "test-player-session-id";
 
-    audioManager.connect(token);
+    audioManager.connect(token, playerSessionId);
 
     expect(mockAudioInputsServiceInstance.connect).toHaveBeenCalledWith(token);
   });
