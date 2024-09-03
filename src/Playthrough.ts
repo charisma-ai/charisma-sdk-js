@@ -69,16 +69,23 @@ class Playthrough extends EventEmitter<PlaythroughEvents> {
   }
 
   public async getPlayerSessionId(): Promise<string> {
-    return new Promise((resolve, _reject) => {
-      const loop = () => {
-        if (this.playerSessionId !== undefined) {
-          resolve(this.playerSessionId);
-        } else {
-          setTimeout(loop, 100);
-        }
-      };
-      loop();
-    });
+    const DELAY = 100;
+    const MAX_ATTEMPTS = 100;
+
+    for (let attempts = 0; attempts < MAX_ATTEMPTS; attempts += 1) {
+      if (this.playerSessionId !== undefined) {
+        return this.playerSessionId;
+      }
+
+      // eslint-disable-next-line no-await-in-loop
+      await new Promise((resolve) => {
+        setTimeout(resolve, DELAY);
+      });
+    }
+
+    throw new Error(
+      `Could not get player session id after ${MAX_ATTEMPTS} attempts.`,
+    );
   }
 
   public createConversation(): ReturnType<typeof api.createConversation> {
