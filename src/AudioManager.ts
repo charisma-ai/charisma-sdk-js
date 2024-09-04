@@ -140,9 +140,9 @@ class AudioManager {
     }
   };
 
-  public connect = (token: string): void => {
+  public connect = (token: string, playerSessionId: string): void => {
     if (this.sttService === "charisma/deepgram") {
-      this.audioInputsService.connect(token);
+      this.audioInputsService.connect(token, playerSessionId);
     }
   };
 

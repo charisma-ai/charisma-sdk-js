@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-
 import "./style.css";
 import {
   Playthrough,
@@ -142,8 +140,8 @@ window.start = async function start() {
     }
   });
 
-  await playthrough.connect();
-  audio.connect(token);
+  const { playerSessionId } = await playthrough.connect();
+  audio.connect(token, playerSessionId);
 };
 
 const reply = () => {

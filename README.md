@@ -123,6 +123,8 @@ playthrough.joinConversation(conversationUuid);
 
 This is what kicks off the connection to the chat engine. Call this once you're ready to start sending and receiving events.
 
+Returns an object with a `playerSessionId` property.
+
 ```js
 await playthrough.connect();
 ```
@@ -293,9 +295,11 @@ Starts listening for speech. This will call handleStartSTT() when the speech-to-
 
 Stops listening for speech. This will call handleStopSTT() when the speech-to-text service stops.
 
-#### audio.connect(token: string)
+#### audio.connect(token: string, playerSessionId: string)
 
-Connects the to the speech-to-text service using the playthrough token to validate. This is only needed when using the `charisma/deepgram` speech-to-text service.
+Connects the to the speech-to-text service using the playthrough token and player session id to validate. This is only needed when using the `charisma/deepgram` speech-to-text service.
+
+The `playerSessionId` is returned from `playthrough.connect()`. See the `deepgram-stt` demo for an example.
 
 #### audio.resetTimeout(timeout: number)
 
