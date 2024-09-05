@@ -2,7 +2,7 @@ import { EventEmitter } from "eventemitter3";
 import { io, type Socket } from "socket.io-client";
 import type { SpeechRecognitionEvent } from "./speech-types.js";
 
-const STT_URL = "https://stt-staging.charisma.ai";
+const STT_URL = "https://stt.charisma.ai";
 
 type AudioInputsServiceEvents = {
   result: [SpeechRecognitionEvent];
