@@ -1,6 +1,6 @@
 # Changelog
 
-### vNext
+### v5.0.0
 **BREAKING**
 - Added `AudioManager` class to handle audio input and output.
 - Removed `Microphone` and `Speaker` classes. Replaced with `AudioManager` methods.
