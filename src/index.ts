@@ -7,6 +7,9 @@ export {
 } from "./Playthrough.js";
 
 export { default as AudioManager } from "./AudioManager.js";
+export type { AudioManagerOptions } from "./AudioManager.js";
+
+export type { AudioOutputsServicePlayOptions } from "./AudioOutputsService.js";
 
 export {
   Conversation,
