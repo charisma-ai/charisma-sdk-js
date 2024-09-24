@@ -1,5 +1,8 @@
 # Changelog
 
+### v5.0.1
+- Add exports for `AudioManagerOptions` and `AudioOutputsServicePlayOptions`.
+
 ### v5.0.0
 **BREAKING**
 - Added `AudioManager` class to handle audio input and output.
