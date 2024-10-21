@@ -1,4 +1,4 @@
-import { AudioTrack } from "./types";
+import { AudioTrack } from "./types.js";
 
 interface Constructable<T> {
   new (): T;
