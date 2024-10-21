@@ -1,10 +1,10 @@
-import AudioTrackManager from "./AudioTrackManager";
-import AudioInputsService from "./AudioInputsService";
+import AudioTrackManager from "./AudioTrackManager.js";
+import AudioInputsService from "./AudioInputsService.js";
 import AudioOutputsService, {
   AudioOutputsServicePlayOptions,
-} from "./AudioOutputsService";
-import AudioInputsBrowser from "./AudioInputsBrowser";
-import { AudioTrack } from "./types";
+} from "./AudioOutputsService.js";
+import AudioInputsBrowser from "./AudioInputsBrowser.js";
+import { AudioTrack } from "./types.js";
 
 export interface AudioManagerOptions {
   duckVolumeLevel?: number;
