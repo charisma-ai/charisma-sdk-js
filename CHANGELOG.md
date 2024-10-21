@@ -1,5 +1,8 @@
 # Changelog
 
+### v5.0.2
+- Add missing file extensions
+
 ### v5.0.1
 - Add exports for `AudioManagerOptions` and `AudioOutputsServicePlayOptions`.
 
