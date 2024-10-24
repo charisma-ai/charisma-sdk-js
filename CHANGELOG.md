@@ -1,5 +1,8 @@
 # Changelog
 
+### v5.0.3
+- Add sttUrl to AudioManagerOptions.
+
 ### v5.0.2
 - Add missing file extensions
 
