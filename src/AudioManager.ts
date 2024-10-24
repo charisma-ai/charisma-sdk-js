@@ -98,14 +98,18 @@ class AudioManager {
       if (this.microphoneIsOn) {
         this.audioOutputsService.setVolume(0);
       } else {
-        this.audioOutputsService.setVolume(1);
+        this.audioOutputsService.setVolume(
+          this.audioOutputsService.currentVolume,
+        );
       }
     });
     this.audioOutputsService.on("stop", () => {
       if (this.microphoneIsOn) {
         this.audioOutputsService.setVolume(0);
       } else {
-        this.audioOutputsService.setVolume(1);
+        this.audioOutputsService.setVolume(
+          this.audioOutputsService.currentVolume,
+        );
       }
     });
   }
@@ -179,6 +183,10 @@ class AudioManager {
     options: boolean | AudioOutputsServicePlayOptions,
   ): Promise<void> => {
     return this.audioOutputsService.play(audio, options);
+  };
+
+  public outputServiceSetVolume = (volume: number): void => {
+    this.audioOutputsService.setVolume(volume);
   };
 
   // **

@@ -39,6 +39,8 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
 
   private currentSources: AudioOutputsServiceSource[] = [];
 
+  public currentVolume = 1;
+
   public getAudioContext = (): AudioContext => {
     if (this.audioContext) {
       return this.audioContext;
@@ -54,7 +56,7 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
 
     // Create and store the gain node.
     this.gainNode = this.audioContext.createGain();
-    this.gainNode.gain.value = 1;
+    this.gainNode.gain.value = this.currentVolume;
     this.gainNode.connect(this.audioContext.destination);
 
     return this.audioContext;
@@ -119,7 +121,18 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
   public setVolume = (volume: number): void => {
     if (!this.gainNode) return;
 
-    this.gainNode.gain.value = volume;
+    // Clamp the volume to the range [0, 1]
+    const clampedVolume = Math.max(0, Math.min(1, volume));
+
+    // Store the volume value
+    this.currentVolume = clampedVolume;
+
+    // Set the gain value
+    this.gainNode.gain.value = clampedVolume;
+  };
+
+  public getVolume = (): number => {
+    return this.currentVolume;
   };
 }
 

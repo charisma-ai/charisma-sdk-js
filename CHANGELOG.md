@@ -1,5 +1,8 @@
 # Changelog
 
+### v5.0.4
+- Add `audio.outputServiceSetVolume` to set the volume of character speech.
+
 ### v5.0.3
 - Add sttUrl to AudioManagerOptions.
 
