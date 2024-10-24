@@ -340,6 +340,10 @@ type SpeakerPlayOptions = {
 };
 ```
 
+#### audio.outputServiceSetVolume(volume: number): void
+
+Sets the volume of the character speech. Must be a number between 0 and 1.
+
 ### Media Track Audio
 
 #### audio.mediaAudioPlay(audioTracks: AudioTrack[]): void
