@@ -2,8 +2,6 @@ import { EventEmitter } from "eventemitter3";
 import { io, type Socket } from "socket.io-client";
 import type { SpeechRecognitionEvent } from "./speech-types.js";
 
-const STT_URL = "https://stt.charisma.ai";
-
 type AudioInputsServiceEvents = {
   result: [SpeechRecognitionEvent];
   transcript: [string];
@@ -41,14 +39,18 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
 
   private playerSessionId?: string;
 
+  private sttUrl: string;
+
   constructor(
     streamTimeslice: number | undefined,
     reconnectAttemptsTimeout: number | undefined,
+    sttUrl: string | undefined,
   ) {
     super();
 
     this.streamTimeslice = streamTimeslice ?? 100;
     this.reconnectAttemptsTimeout = reconnectAttemptsTimeout ?? 60 * 1000;
+    this.sttUrl = sttUrl ?? "https://stt.charisma.ai";
   }
 
   private attemptReconnect = (): void => {
@@ -92,7 +94,7 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
         resolve();
       }
 
-      this.socket = io(STT_URL, {
+      this.socket = io(this.sttUrl, {
         transports: ["websocket"],
         query: {
           token,
