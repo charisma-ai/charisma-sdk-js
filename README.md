@@ -273,6 +273,7 @@ const audio = new AudioManager({
 | `duckVolumeLevel` | `number` | 0 | Volume level when ducking (0 to 1) |
 | `normalVolumeLevel` | `number` | 1 | Regular volume level (0 to 1)
 | `sttService` | `"charisma/deepgram" \| "browser"` | `"charisma/deepgram"` |Speech-to-text service to use (see below).
+| `sttUrl` | `string` | `"https://stt.charisma.ai"` | Speech-to-text service URL.
 | `streamTimeslice` | `number` | 100 | The number of milliseconds to record into each Blob. See https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder/start#timeslice
 | `handleTranscript` | `(transcript: string) => void` | | Callback to handle transcripts.
 | `handleStartSTT` | `() => void` | | Callback to handle when speech-to-text starts. Can be used to update the UI.

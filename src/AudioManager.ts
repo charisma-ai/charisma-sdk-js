@@ -12,6 +12,7 @@ export interface AudioManagerOptions {
   sttService?: "browser" | "charisma/deepgram";
   streamTimeslice?: number;
   reconnectAttemptsTimeout?: number;
+  sttUrl?: string;
   handleStartSTT?: () => void;
   handleStopSTT?: () => void;
   handleTranscript?: (transcript: string) => void;
@@ -45,6 +46,7 @@ class AudioManager {
     this.audioInputsService = new AudioInputsService(
       options.streamTimeslice,
       options.reconnectAttemptsTimeout,
+      options.sttUrl,
     );
     this.audioInputsBrowser = new AudioInputsBrowser();
     this.audioOutputsService = new AudioOutputsService();
