@@ -53,30 +53,57 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
     this.sttUrl = sttUrl ?? "https://stt.charisma.ai";
   }
 
-  private attemptReconnect = (): void => {
-    if (this.playthroughToken === undefined) return;
-    const reconnectInterval = 3000;
+  private isReconnecting = false;
 
+  private attemptReconnect = (): void => {
+    if (this.playthroughToken === undefined || this.isReconnecting) return;
+
+    const reconnectIntervalBase = 2000;
+    const maxAttempts = 5;
+
+    const reconnectAttempts = 0;
     let shouldTryAgain = true;
+
+    this.isReconnecting = true;
 
     const endReconnect = () => {
       shouldTryAgain = false;
+      this.isReconnecting = false;
     };
 
-    const tryReconnect = () => {
+    const tryReconnect = (attempt: number) => {
+      if (!shouldTryAgain) return;
+
+      if (attempt >= maxAttempts) {
+        this.emit("error", "Maximum reconnect attempts reached.");
+        endReconnect();
+        return;
+      }
+
       this.connect(
         this.playthroughToken as string,
         this.playerSessionId as string,
-      ).then(() => {
-        endReconnect();
-      });
+      )
+        .then(() => {
+          console.log("Reconnected successfully!");
+          endReconnect();
+        })
+        .catch(() => {
+          // Exponentially back off the next reconnection attempt
+          const nextInterval = reconnectIntervalBase * 2 ** attempt;
+          console.log(
+            `Reconnect attempt failed. Trying again in ${
+              nextInterval / 1000
+            } seconds...`,
+          );
 
-      if (shouldTryAgain) {
-        setTimeout(tryReconnect, reconnectInterval);
-      }
+          if (shouldTryAgain) {
+            setTimeout(() => tryReconnect(attempt + 1), nextInterval);
+          }
+        });
     };
 
-    tryReconnect();
+    tryReconnect(reconnectAttempts);
 
     setTimeout(() => {
       this.emit("error", "Reconnect attempts timed out.");
