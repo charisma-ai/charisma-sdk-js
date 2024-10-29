@@ -1,5 +1,8 @@
 # Changelog
 
+### v5.0.5
+- Fix reconnection logic with a timer between attempts.
+
 ### v5.0.4
 - Add `audio.outputServiceSetVolume` to set the volume of character speech.
 
