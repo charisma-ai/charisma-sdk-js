@@ -117,11 +117,11 @@ class AudioManager {
   // **
   // ** Audio Input ** //
   // **
-  public startListening = (): void => {
+  public startListening = (timeout?: number): void => {
     if (this.sttService === "browser") {
-      this.audioInputsBrowser.startListening();
+      this.audioInputsBrowser.startListening(timeout);
     } else if (this.sttService === "charisma/deepgram") {
-      this.audioInputsService.startListening();
+      this.audioInputsService.startListening(timeout);
     }
 
     this.microphoneIsOn = true;

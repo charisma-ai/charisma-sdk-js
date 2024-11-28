@@ -26,7 +26,6 @@ export interface SpeechRecognitionOptions {
   continuous?: boolean;
   interimResults?: boolean;
   lang?: string;
-  timeout?: number;
 }
 
 export interface SpeechRecognitionStopOptions {
@@ -52,12 +51,14 @@ class AudioInputsBrowser extends EventEmitter<AudioInputsBrowserEvents> {
 
   public isSupported = SpeechRecognitionClass !== undefined;
 
-  public startListening = ({
-    continuous = false,
-    interimResults = true,
-    lang = "en-GB",
-    timeout,
-  }: SpeechRecognitionOptions = {}): void => {
+  public startListening = (
+    timeout = 10000,
+    {
+      continuous = false,
+      interimResults = true,
+      lang = "en-GB",
+    }: SpeechRecognitionOptions = {},
+  ): void => {
     if (!this.recognition) {
       return;
     }

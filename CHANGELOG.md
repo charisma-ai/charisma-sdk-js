@@ -1,5 +1,8 @@
 # Changelog
 
+### v5.0.6
+- Add `timeout` argument to `startListening` methods.
+
 ### v5.0.5
 - Fix reconnection logic with a timer between attempts.
 
