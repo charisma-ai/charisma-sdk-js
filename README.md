@@ -288,9 +288,10 @@ There are currently two speech-to-text services available:
 
 ### Speech-to-text
 
-#### audio.startListening()
+#### audio.startListening(timeout?: number)
 
 Starts listening for speech. This will call handleStartSTT() when the speech-to-text service starts.
+Takes a `timeout` argument in milliseconds, which will automatically stop the speech-to-text service after the timeout. Defaults to 10000 (ten seconds) if not provided.
 
 #### audio.stopListening()
 
