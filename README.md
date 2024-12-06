@@ -303,6 +303,10 @@ Connects the to the speech-to-text service using the playthrough token and playe
 
 The `playerSessionId` is returned from `playthrough.connect()`. See the `deepgram-stt` demo for an example.
 
+#### audio.disconnect()
+
+Disconnects from the speech-to-text service.
+
 #### audio.resetTimeout(timeout: number)
 
 Resets the timeout for the speech-to-text service to `timeout` in milliseconds. If this is not run, the speech-to-text service will default to a timeout of 10 seconds.

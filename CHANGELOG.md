@@ -1,5 +1,8 @@
 # Changelog
 
+### v5.0.7
+- Add `disconnect` method to disconnect from the server.
+
 ### v5.0.6
 - Add `timeout` argument to `startListening` methods.
 
