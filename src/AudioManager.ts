@@ -152,6 +152,12 @@ class AudioManager {
     }
   };
 
+  public disconnect = (): void => {
+    if (this.sttService === "charisma/deepgram") {
+      this.audioInputsService.disconnect();
+    }
+  };
+
   public resetTimeout = (timeout: number): void => {
     if (this.sttService === "charisma/deepgram") {
       this.audioInputsService.resetTimeout(timeout);

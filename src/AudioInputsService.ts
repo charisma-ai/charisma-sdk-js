@@ -172,6 +172,18 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
     });
   };
 
+  public disconnect = () => {
+    this.emit("disconnect", "Disconnected from speech-to-text server.");
+    this.ready = false;
+
+    if (this.socket) {
+      this.socket.close();
+      this.socket = undefined;
+    }
+
+    this.microphone = undefined;
+  };
+
   public startListening = async (timeout = 10000): Promise<void> => {
     if (!this.ready) {
       return;
