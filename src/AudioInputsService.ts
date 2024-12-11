@@ -247,7 +247,10 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
       clearTimeout(this.timeoutId);
     }
 
-    if (!this.microphone) return;
+    if (!this.microphone) {
+      this.emit("stop");
+      return;
+    }
 
     this.microphone.pause();
   };
