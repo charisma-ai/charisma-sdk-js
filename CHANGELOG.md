@@ -1,5 +1,8 @@
 # Changelog
 
+### v5.0.8
+- Emit "stop" event when stopListening is called without a microphone.
+
 ### v5.0.7
 - Add `disconnect` method to disconnect from the server.
 
