@@ -41,12 +41,18 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
 
   private sttUrl: string;
 
+  private debugLogFunction: (message: string) => void;
+
   constructor(
     streamTimeslice: number | undefined,
     reconnectAttemptsTimeout: number | undefined,
     sttUrl: string | undefined,
+    debugLogFunction: (message: string) => void,
   ) {
     super();
+
+    this.debugLogFunction = debugLogFunction;
+    this.debugLogFunction("AudioInputsService running constructor");
 
     this.streamTimeslice = streamTimeslice ?? 100;
     this.reconnectAttemptsTimeout = reconnectAttemptsTimeout ?? 60 * 1000;
@@ -56,6 +62,7 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
   private isReconnecting = false;
 
   private attemptReconnect = (): void => {
+    this.debugLogFunction("AudioInputsService attemptReconnect");
     if (this.playthroughToken === undefined || this.isReconnecting) return;
 
     const reconnectIntervalBase = 2000;
@@ -72,6 +79,9 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
     };
 
     const tryReconnect = (attempt: number) => {
+      this.debugLogFunction(
+        `AudioInputsService tryReconnect attempt ${attempt}`,
+      );
       if (!shouldTryAgain) return;
 
       if (attempt >= maxAttempts) {
@@ -85,6 +95,7 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
         this.playerSessionId as string,
       )
         .then(() => {
+          this.debugLogFunction("Reconnected Successfully");
           console.log("Reconnected successfully!");
           endReconnect();
         })
@@ -106,17 +117,21 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
     tryReconnect(reconnectAttempts);
 
     setTimeout(() => {
+      this.debugLogFunction("Reconnect attempts timed out");
       this.emit("error", "Reconnect attempts timed out.");
       endReconnect();
     }, this.reconnectAttemptsTimeout);
   };
 
   public connect = (token: string, playerSessionId: string): Promise<void> => {
+    this.debugLogFunction(`AudioInputService connect to ${this.sttUrl}`);
+
     this.playthroughToken = token;
     this.playerSessionId = playerSessionId;
 
     return new Promise((resolve, reject) => {
       if (this.socket) {
+        this.debugLogFunction("Socket already connected");
         console.log("Socket already connected");
         resolve();
       }
@@ -131,12 +146,14 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
       });
 
       this.socket.on("error", (error: string) => {
+        this.debugLogFunction(`AudioInputService error: ${error}`);
         console.error(error);
         this.emit("error", error);
         reject(error);
       });
 
       this.socket.on("transcript", (transcript: string) => {
+        this.debugLogFunction(`AudioInputService transcript: ${transcript}`);
         console.log("Received transcript:", transcript);
         if (transcript) {
           this.emit("transcript", transcript);
@@ -145,6 +162,7 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
 
       // Attempts to reconnect to the stt server if the connection is lost and we DO have internet.
       this.socket.on("disconnect", (reason) => {
+        this.debugLogFunction(`AudioInputService disconnect. ${reason}`);
         console.log("Socket disconnected. Reason:", reason);
 
         this.emit("disconnect", "Disconnected from speech-to-text server.");
@@ -161,6 +179,9 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
       });
 
       this.socket.on("connect", () => {
+        this.debugLogFunction(
+          "AudioInputService connected to speech-to-text service.",
+        );
         this.emit("connect", "Connected to speech-to-text service.");
 
         // Deepgram requires a short interval before data is sent.
@@ -173,6 +194,7 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
   };
 
   public disconnect = () => {
+    this.debugLogFunction("AudioInputService disconnect");
     this.ready = false;
 
     if (this.socket) {
@@ -181,19 +203,30 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
     }
 
     this.microphone = undefined;
+    this.debugLogFunction(
+      "AudioInputService disconnected from speech-to-text server.",
+    );
     this.emit("disconnect", "Disconnected from speech-to-text server.");
   };
 
   public startListening = async (timeout = 10000): Promise<void> => {
+    this.debugLogFunction("AudioInputService startListening");
     if (!this.ready) {
+      this.debugLogFunction("AudioInputService startListening not ready");
       return;
     }
 
     try {
       if (!this.microphone) {
+        this.debugLogFunction(
+          "AudioInputService startListening setting up microphone",
+        );
         this.microphone = await setupMicrophone();
       }
     } catch (error) {
+      this.debugLogFunction(
+        "AudioInputService startListening failed to access microphone",
+      );
       console.error("Failed to access microphone:", error);
       this.emit("error", "Failed to access microphone");
       return;
@@ -243,6 +276,7 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
   };
 
   public stopListening = (): void => {
+    this.debugLogFunction("AudioInputService stopListening");
     if (this.timeoutId !== undefined) {
       clearTimeout(this.timeoutId);
     }
@@ -256,6 +290,7 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
   };
 
   public resetTimeout = (timeout: number): void => {
+    this.debugLogFunction("AudioInputService resetTimeout");
     if (this.timeoutId !== undefined) {
       clearTimeout(this.timeoutId);
     }
@@ -264,6 +299,7 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
   };
 
   private onTimeout = (): void => {
+    this.debugLogFunction("AudioInputService onTimeout");
     this.timeoutId = undefined;
     this.emit("timeout");
     this.stopListening();
