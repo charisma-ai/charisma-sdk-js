@@ -129,7 +129,7 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
   };
 
   public setVolume = (volume: number): void => {
-    this.debugLogFunction("AudioOutputsService setVolume");
+    this.debugLogFunction(`AudioOutputsService setVolume ${volume}`);
     if (!this.gainNode) return;
 
     // Clamp the volume to the range [0, 1]
