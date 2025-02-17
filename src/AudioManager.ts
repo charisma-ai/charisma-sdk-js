@@ -19,6 +19,7 @@ export interface AudioManagerOptions {
   handleError?: (error: string) => void;
   handleDisconnect?: (message: string) => void;
   handleConnect?: (message: string) => void;
+  debugLogFunction?: (message: string) => void;
 }
 
 class AudioManager {
@@ -38,7 +39,12 @@ class AudioManager {
 
   private microphoneIsOn = false;
 
+  private debugLogFunction: (message: string) => void;
+
   constructor(options: AudioManagerOptions) {
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    this.debugLogFunction = options.debugLogFunction || (() => {});
+    this.debugLogFunction("AudioManager running constructor");
     this.duckVolumeLevel = options.duckVolumeLevel ?? 0;
     this.normalVolumeLevel = options.normalVolumeLevel ?? 1;
     this.sttService = options.sttService ?? "charisma/deepgram";
@@ -47,9 +53,10 @@ class AudioManager {
       options.streamTimeslice,
       options.reconnectAttemptsTimeout,
       options.sttUrl,
+      this.debugLogFunction,
     );
     this.audioInputsBrowser = new AudioInputsBrowser();
-    this.audioOutputsService = new AudioOutputsService();
+    this.audioOutputsService = new AudioOutputsService(this.debugLogFunction);
     this.audioTrackManager = new AudioTrackManager();
 
     // Listen to events from the AudioInputsService
@@ -112,12 +119,14 @@ class AudioManager {
         );
       }
     });
+    this.debugLogFunction("AudioManager finished constructor");
   }
 
   // **
   // ** Audio Input ** //
   // **
   public startListening = (timeout?: number): void => {
+    this.debugLogFunction("AudioManager startListening");
     if (this.sttService === "browser") {
       this.audioInputsBrowser.startListening(timeout);
     } else if (this.sttService === "charisma/deepgram") {
@@ -133,6 +142,7 @@ class AudioManager {
   };
 
   public stopListening = (): void => {
+    this.debugLogFunction("AudioManager stopListening");
     if (this.sttService === "browser") {
       this.audioInputsBrowser.stopListening();
     } else if (this.sttService === "charisma/deepgram") {
@@ -147,18 +157,21 @@ class AudioManager {
   };
 
   public connect = (token: string, playerSessionId: string): void => {
+    this.debugLogFunction("AudioManager connect");
     if (this.sttService === "charisma/deepgram") {
       this.audioInputsService.connect(token, playerSessionId);
     }
   };
 
   public disconnect = (): void => {
+    this.debugLogFunction("AudioManager disconnect");
     if (this.sttService === "charisma/deepgram") {
       this.audioInputsService.disconnect();
     }
   };
 
   public resetTimeout = (timeout: number): void => {
+    this.debugLogFunction("AudioManager resetTimeout");
     if (this.sttService === "charisma/deepgram") {
       this.audioInputsService.resetTimeout(timeout);
     } else {
@@ -170,6 +183,7 @@ class AudioManager {
   // ** Browser STT Service ** //
   // **
   public browserIsSupported = (): boolean => {
+    this.debugLogFunction("AudioManager browserIsSupported");
     return this.audioInputsBrowser.isSupported;
   };
 
@@ -177,6 +191,7 @@ class AudioManager {
   // ** Initialise Audio
   // **
   public initialise = (): void => {
+    this.debugLogFunction("AudioManager initialise");
     this.audioOutputsService.getAudioContext();
     this.audioTrackManager.getAudioContext();
   };
@@ -188,10 +203,12 @@ class AudioManager {
     audio: ArrayBuffer,
     options: boolean | AudioOutputsServicePlayOptions,
   ): Promise<void> => {
+    this.debugLogFunction("AudioManager outputServicePlay");
     return this.audioOutputsService.play(audio, options);
   };
 
   public outputServiceSetVolume = (volume: number): void => {
+    this.debugLogFunction("AudioManager outputServiceSetVolume");
     this.audioOutputsService.setVolume(volume);
   };
 
@@ -199,18 +216,22 @@ class AudioManager {
   // ** Audio Track Manager ** //
   // **
   public mediaAudioPlay = (audioTracks: AudioTrack[]): void => {
+    this.debugLogFunction("AudioManager mediaAudioPlay");
     this.audioTrackManager.play(audioTracks);
   };
 
   public mediaAudioSetVolume = (volume: number): void => {
+    this.debugLogFunction("AudioManager mediaAudioSetVolume");
     this.audioTrackManager.setVolume(volume);
   };
 
   public mediaAudioToggleMute = (): void => {
+    this.debugLogFunction("AudioManager mediaAudioToggleMute");
     this.audioTrackManager.toggleMute();
   };
 
   public mediaAudioStopAll = (): void => {
+    this.debugLogFunction("AudioManager mediaAudioStopAll");
     this.audioTrackManager.stopAll();
   };
 }

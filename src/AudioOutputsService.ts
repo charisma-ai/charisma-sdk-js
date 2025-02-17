@@ -39,9 +39,17 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
 
   private currentSources: AudioOutputsServiceSource[] = [];
 
+  private debugLogFunction: (message: string) => void;
+
   public currentVolume = 1;
 
+  constructor(debugLogFunction: (message: string) => void) {
+    super();
+    this.debugLogFunction = debugLogFunction;
+  }
+
   public getAudioContext = (): AudioContext => {
+    this.debugLogFunction("AudioOutputsService getAudioContext");
     if (this.audioContext) {
       return this.audioContext;
     }
@@ -66,6 +74,8 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
     audio: ArrayBuffer,
     options: boolean | AudioOutputsServicePlayOptions = {},
   ): Promise<void> => {
+    this.debugLogFunction("AudioOutputsService play");
+
     // Backwards-compatible with the old boolean `interrupt` parameter
     if (typeof options === "boolean") {
       console.warn(
@@ -119,6 +129,7 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
   };
 
   public setVolume = (volume: number): void => {
+    this.debugLogFunction(`AudioOutputsService setVolume ${volume}`);
     if (!this.gainNode) return;
 
     // Clamp the volume to the range [0, 1]
@@ -132,6 +143,7 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
   };
 
   public getVolume = (): number => {
+    this.debugLogFunction("AudioOutputsService getVolume");
     return this.currentVolume;
   };
 }

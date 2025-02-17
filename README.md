@@ -35,7 +35,7 @@ async function start() {
   });
 
   conversation.on("problem", console.warn);
-  
+
   // Prepare the listener to start the conversation when the playthrough is connected.
   playthrough.on("connection-status", (status) => {
     if (status === "connected") {
@@ -262,27 +262,30 @@ import { AudioManager } from "@charisma-ai/sdk";
 const audio = new AudioManager({
   // AudioManager options
   handleTranscript: (transcript: string) => {
-    console.log(transcript)
+    console.log(transcript);
   },
-})
+});
 ```
 
 #### AudioManager Options
-| Option | Type | Default | Description |
-| --- | --- | --- | --- |
-| `duckVolumeLevel` | `number` | 0 | Volume level when ducking (0 to 1) |
-| `normalVolumeLevel` | `number` | 1 | Regular volume level (0 to 1)
-| `sttService` | `"charisma/deepgram" \| "browser"` | `"charisma/deepgram"` |Speech-to-text service to use (see below).
-| `sttUrl` | `string` | `"https://stt.charisma.ai"` | Speech-to-text service URL.
-| `streamTimeslice` | `number` | 100 | The number of milliseconds to record into each Blob. See https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder/start#timeslice
-| `handleTranscript` | `(transcript: string) => void` | | Callback to handle transcripts.
-| `handleStartSTT` | `() => void` | | Callback to handle when speech-to-text starts. Can be used to update the UI.
-| `handleStopSTT` | `() => void` | | Callback to handle when speech-to-text stops.
-| `handleError` | `(error: string) => void` | `console.error(error)` | Callback to handle errors.
-| `handleDisconnect` | `(message: string) => void` | `console.error(message)` | Callback to handle when the transcription service disconnects.
-| `handleConnect` | `(message: string) => void` | `console.log(message)` | Callback to handle when the transcription service connects.
+
+| Option              | Type                               | Default                     | Description                                                                                                                             |
+| ------------------- | ---------------------------------- | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `duckVolumeLevel`   | `number`                           | 0                           | Volume level when ducking (0 to 1)                                                                                                      |
+| `normalVolumeLevel` | `number`                           | 1                           | Regular volume level (0 to 1)                                                                                                           |
+| `sttService`        | `"charisma/deepgram" \| "browser"` | `"charisma/deepgram"`       | Speech-to-text service to use (see below).                                                                                              |
+| `sttUrl`            | `string`                           | `"https://stt.charisma.ai"` | Speech-to-text service URL.                                                                                                             |
+| `streamTimeslice`   | `number`                           | 100                         | The number of milliseconds to record into each Blob. See https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder/start#timeslice |
+| `handleTranscript`  | `(transcript: string) => void`     |                             | Callback to handle transcripts.                                                                                                         |
+| `handleStartSTT`    | `() => void`                       |                             | Callback to handle when speech-to-text starts. Can be used to update the UI.                                                            |
+| `handleStopSTT`     | `() => void`                       |                             | Callback to handle when speech-to-text stops.                                                                                           |
+| `handleError`       | `(error: string) => void`          | `console.error(error)`      | Callback to handle errors.                                                                                                              |
+| `handleDisconnect`  | `(message: string) => void`        | `console.error(message)`    | Callback to handle when the transcription service disconnects.                                                                          |
+| `handleConnect`     | `(message: string) => void`        | `console.log(message)`      | Callback to handle when the transcription service connects.                                                                             |
+| `debugLogFunction`  | `(message: string) => void`        | `() => {}`                  | Callback to handle log messages for debugging.                                                                                          |
 
 There are currently two speech-to-text services available:
+
 - `charisma/deepgram`: Deepgram is a neural network based speech-to-text service that that can be accessed through Charsima.ai.
 - `browser`: Some browsers have built-in speech recognition, which can be used to provide speech-to-text functionality. **This is only available in browsers that support `SpeechRecognition`. Please refer to [this browser compatibility table](https://developer.mozilla.org/en-US/docs/Web/API/SpeechRecognition#browser_compatibility) for more details.**
 

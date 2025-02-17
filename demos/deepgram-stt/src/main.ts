@@ -62,6 +62,10 @@ const audio = new AudioManager({
     appendMessage(message, "disconnected-message"),
   handleConnect: (message: string) =>
     appendMessage(message, "connected-message"),
+  debugLogFunction: (message: string) =>
+    console.log(
+      `${new Date().toISOString().split("T")[1].slice(0, 12)} ${message}`,
+    ),
 });
 
 let playthrough: Playthrough;
@@ -82,7 +86,7 @@ window.start = async function start() {
   const { token } = await createPlaythroughToken({
     storyId: Number(storyId),
     apiKey: storyApiKey,
-    version: -1,
+    version: undefined,
   });
 
   const { conversationUuid } = await createConversation(token);
@@ -110,6 +114,7 @@ window.start = async function start() {
 
     // Play character speech.
     if (characterMessage.speech) {
+      audio.outputServiceSetVolume(1);
       audio.outputServicePlay(characterMessage.speech.audio as ArrayBuffer, {
         trackId: String(characterMessage.character?.id),
         interrupt: "track",
@@ -182,6 +187,7 @@ window.toggleMicrophone = () => {
     recordButton.innerHTML = "...";
   } else if (recordingStatus === "recording") {
     audio.stopListening();
+    // audio.outputServiceSetVolume(1); // doesn't work when stt time ends
     recordingStatus = "off";
     recordButton.innerHTML = "Record";
   }
