@@ -15,7 +15,11 @@ type AudioInputsServiceEvents = {
 
 const setupMicrophone = async (): Promise<MediaRecorder> => {
   const userMedia = await navigator.mediaDevices.getUserMedia({
-    audio: true,
+    audio: {
+      echoCancellation: true,
+      noiseSuppression: true,
+      autoGainControl: true,
+    },
   });
 
   const mediaRecorder = new MediaRecorder(userMedia);
