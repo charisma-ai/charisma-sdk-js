@@ -1,31 +1,46 @@
 # Changelog
 
+### vNext
+
+- Add interim transcripts from the STT service
+- Update the deepgram-stt demo to use interim transcripts
+
 ### v5.0.8
+
 - Emit "stop" event when stopListening is called without a microphone.
 
 ### v5.0.7
+
 - Add `disconnect` method to disconnect from the server.
 
 ### v5.0.6
+
 - Add `timeout` argument to `startListening` methods.
 
 ### v5.0.5
+
 - Fix reconnection logic with a timer between attempts.
 
 ### v5.0.4
+
 - Add `audio.outputServiceSetVolume` to set the volume of character speech.
 
 ### v5.0.3
+
 - Add sttUrl to AudioManagerOptions.
 
 ### v5.0.2
+
 - Add missing file extensions
 
 ### v5.0.1
+
 - Add exports for `AudioManagerOptions` and `AudioOutputsServicePlayOptions`.
 
 ### v5.0.0
+
 **BREAKING**
+
 - Added `AudioManager` class to handle audio input and output.
 - Removed `Microphone` and `Speaker` classes. Replaced with `AudioManager` methods.
 - Use AudioContext API for better browser compatibility.
