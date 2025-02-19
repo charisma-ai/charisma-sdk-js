@@ -16,6 +16,7 @@ export interface AudioManagerOptions {
   handleStartSTT?: () => void;
   handleStopSTT?: () => void;
   handleTranscript?: (transcript: string) => void;
+  handleInterimTranscript?: (transcript: string) => void;
   handleError?: (error: string) => void;
   handleDisconnect?: (message: string) => void;
   handleConnect?: (message: string) => void;
@@ -75,6 +76,11 @@ class AudioManager {
       options.handleTranscript ??
         (() => console.error("handleTranscript() is not setup.")),
     );
+    this.audioInputsService.on(
+      "transcript-interim",
+      options.handleInterimTranscript ??
+        (() => console.log("handleInterimTranscript() is not setup.")),
+    );
     this.audioInputsService.on("error", options.handleError ?? console.error);
     this.audioInputsService.on(
       "disconnect",
@@ -97,6 +103,11 @@ class AudioManager {
       "transcript",
       options.handleTranscript ??
         (() => console.error("handleTranscript() is not setup")),
+    );
+    this.audioInputsBrowser.on(
+      "transcript-interim",
+      options.handleInterimTranscript ??
+        (() => console.log("handleInterimTranscript() is not setup")),
     );
     this.audioInputsBrowser.on("error", options.handleError ?? console.error);
 

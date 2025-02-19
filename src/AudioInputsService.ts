@@ -5,6 +5,7 @@ import type { SpeechRecognitionEvent } from "./speech-types.js";
 type AudioInputsServiceEvents = {
   result: [SpeechRecognitionEvent];
   transcript: [string];
+  "transcript-interim": [string];
   error: [string];
   timeout: [];
   start: [];
@@ -158,9 +159,17 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
 
       this.socket.on("transcript", (transcript: string) => {
         this.debugLogFunction(`AudioInputService transcript: ${transcript}`);
-        console.log("Received transcript:", transcript);
         if (transcript) {
           this.emit("transcript", transcript);
+        }
+      });
+
+      this.socket.on("transcript-interim", (transcript: string) => {
+        this.debugLogFunction(
+          `AudioInputService interim transcript: ${transcript}`,
+        );
+        if (transcript) {
+          this.emit("transcript-interim", transcript);
         }
       });
 

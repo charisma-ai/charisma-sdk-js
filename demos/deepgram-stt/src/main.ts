@@ -31,6 +31,8 @@ const appendMessage = (message: string, className: string, name?: string) => {
 
 // Keep track of the recording statuses of the microphone so we can update the UI accordingly.
 let recordingStatus: "recording" | "off" | "starting" = "off";
+let confirmedText = "";
+let volatileText = "";
 
 const handleStartSTT = () => {
   recordingStatus = "recording";
@@ -43,9 +45,19 @@ const handleStopSTT = () => {
 };
 
 const handleTranscript = (transcript: string) => {
+  confirmedText += transcript;
+  volatileText = "";
   const replyInput = <HTMLInputElement>document.getElementById("reply-input");
   if (replyInput) {
-    replyInput.value = transcript;
+    replyInput.value = `${confirmedText} ${volatileText}`;
+  }
+};
+
+const handleInterimTranscript = (transcript: string) => {
+  volatileText = transcript;
+  const replyInput = <HTMLInputElement>document.getElementById("reply-input");
+  if (replyInput) {
+    replyInput.value = `${confirmedText} ${volatileText}`;
   }
 };
 
@@ -56,6 +68,7 @@ const audio = new AudioManager({
   sttService: "charisma/deepgram",
   streamTimeslice: 100,
   handleTranscript,
+  handleInterimTranscript,
   handleStartSTT,
   handleStopSTT,
   handleDisconnect: (message: string) =>
@@ -165,6 +178,8 @@ const reply = () => {
 
   // Put player message on the page.
   appendMessage(text, "player-message", "You");
+  confirmedText = "";
+  volatileText = "";
 };
 
 // Handle the Enter key press.
