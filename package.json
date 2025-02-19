@@ -1,6 +1,6 @@
 {
   "name": "@charisma-ai/sdk",
-  "version": "5.0.8",
+  "version": "5.0.9-alpha.1",
   "description": "Charisma.ai SDK for Javascript (browser)",
   "source": "src/index.ts",
   "type": "module",
