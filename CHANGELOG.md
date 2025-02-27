@@ -4,6 +4,7 @@
 
 - Add interim transcripts from the STT service
 - Update the deepgram-stt demo to use interim transcripts
+- Stop the microphone and emit end-current-transcription, and start the microphone again for next transcription. This uses new functionality on our STT server so the same playthrough-validated socket is kept but new downstream connections to the STT service can be triggered. Without this the results from from earlier recordings can bleed into the current transcription.
 
 ### v5.0.8
 
