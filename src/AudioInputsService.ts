@@ -253,11 +253,6 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
       this.timeoutId = window.setTimeout(this.onTimeout, timeout);
     }
 
-    if (this.microphone.state === "paused") {
-      this.microphone.resume();
-      return;
-    }
-
     this.microphone.ondataavailable = (event) => {
       if (!this.socket || event.data.size === 0) return;
 
@@ -295,11 +290,18 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
     }
 
     if (!this.microphone) {
+      this.debugLogFunction("AudioInputService stopListening !this.microphone");
       this.emit("stop");
       return;
     }
 
-    this.microphone.pause();
+    this.microphone.stop();
+
+    if (!this.socket) {
+      return;
+    }
+    this.debugLogFunction("end-current-transcription");
+    this.socket.emit("end-current-transcription");
   };
 
   public resetTimeout = (timeout: number): void => {

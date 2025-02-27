@@ -37,6 +37,11 @@ let volatileText = "";
 const handleStartSTT = () => {
   recordingStatus = "recording";
   if (recordButton) recordButton.innerHTML = "Stop";
+  const replyInput = <HTMLInputElement>document.getElementById("reply-input");
+
+  if (replyInput) {
+    replyInput.value = "";
+  }
 };
 
 const handleStopSTT = () => {
@@ -45,16 +50,16 @@ const handleStopSTT = () => {
 };
 
 const handleTranscript = (transcript: string) => {
-  confirmedText += transcript;
+  confirmedText = `${confirmedText} ${transcript}`;
   volatileText = "";
   const replyInput = <HTMLInputElement>document.getElementById("reply-input");
   if (replyInput) {
-    replyInput.value = `${confirmedText} ${volatileText}`;
+    replyInput.value = confirmedText;
   }
 };
 
-const handleInterimTranscript = (transcript: string) => {
-  volatileText = transcript;
+const handleInterimTranscript = (interimTranscript: string) => {
+  volatileText = interimTranscript;
   const replyInput = <HTMLInputElement>document.getElementById("reply-input");
   if (replyInput) {
     replyInput.value = `${confirmedText} ${volatileText}`;
@@ -174,12 +179,10 @@ const reply = () => {
   if (text.trim() === "") return;
 
   conversation.reply({ text });
-  replyInput.value = "";
 
   // Put player message on the page.
   appendMessage(text, "player-message", "You");
-  confirmedText = "";
-  volatileText = "";
+  replyInput.value = "";
 };
 
 // Handle the Enter key press.
@@ -198,6 +201,8 @@ window.toggleMicrophone = () => {
 
   if (recordingStatus === "off") {
     audio.startListening();
+    confirmedText = "";
+    volatileText = "";
     recordingStatus = "starting";
     recordButton.innerHTML = "...";
   } else if (recordingStatus === "recording") {
