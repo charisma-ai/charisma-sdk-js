@@ -41,7 +41,7 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
 
   private debugLogFunction: (message: string) => void;
 
-  public currentVolume = 1;
+  public normalCharacterVolume = 1;
 
   constructor(debugLogFunction: (message: string) => void) {
     super();
@@ -64,7 +64,7 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
 
     // Create and store the gain node.
     this.gainNode = this.audioContext.createGain();
-    this.gainNode.gain.value = this.currentVolume;
+    this.gainNode.gain.value = this.normalCharacterVolume;
     this.gainNode.connect(this.audioContext.destination);
 
     return this.audioContext;
@@ -128,23 +128,31 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
     });
   };
 
-  public setVolume = (volume: number): void => {
-    this.debugLogFunction(`AudioOutputsService setVolume ${volume}`);
+  public setNormalVolume = (volume: number): void => {
+    this.debugLogFunction(`AudioOutputsService setNormalVolume ${volume}`);
     if (!this.gainNode) return;
 
     // Clamp the volume to the range [0, 1]
     const clampedVolume = Math.max(0, Math.min(1, volume));
 
     // Store the volume value
-    this.currentVolume = clampedVolume;
-
-    // Set the gain value
-    this.gainNode.gain.value = clampedVolume;
+    this.normalCharacterVolume = clampedVolume;
   };
 
-  public getVolume = (): number => {
-    this.debugLogFunction("AudioOutputsService getVolume");
-    return this.currentVolume;
+  public beginMuting = (): void => {
+    this.debugLogFunction(`AudioOutputsService beginMuting`);
+    if (!this.gainNode) return;
+
+    // Set the gain value
+    this.gainNode.gain.value = 0;
+  };
+
+  public endMuting = (): void => {
+    this.debugLogFunction(`AudioOutputsService endMuting`);
+    if (!this.gainNode) return;
+
+    // Set the gain value
+    this.gainNode.gain.value = this.normalCharacterVolume;
   };
 }
 

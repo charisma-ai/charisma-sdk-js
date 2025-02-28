@@ -77,17 +77,21 @@ window.start = async function start() {
   // This is due to a security restriction in some browsers.
   audio.initialise();
 
-  const storyIdInput = <HTMLInputElement>document.getElementById("story-id");
-  const storyId = storyIdInput.value;
-  const storyApiKeyInput = <HTMLInputElement>(
-    document.getElementById("story-api-key")
-  );
+  const storyIdInput = document.getElementById("story-id");
+  const storyId = Number(storyIdInput.value);
+  const storyApiKeyInput = document.getElementById("story-api-key");
   const storyApiKey = storyApiKeyInput.value;
+  const storyVersionInput = document.getElementById("version");
+  const storyVersion = Number(storyVersionInput.value) || undefined;
+  const StartGraphReferenceIdInput = document.getElementById(
+    "startGraphReferenceId",
+  );
+  const startGraphReferenceId = StartGraphReferenceIdInput.value;
 
   const { token } = await createPlaythroughToken({
-    storyId: Number(storyId),
+    storyId,
     apiKey: storyApiKey,
-    version: -1,
+    version: storyVersion,
   });
 
   const { conversationUuid } = await createConversation(token);
@@ -115,18 +119,20 @@ window.start = async function start() {
 
     // Play character speech.
     if (characterMessage.speech) {
-      audio.outputServicePlay(characterMessage.speech.audio as ArrayBuffer, {
+      audio.playCharacterSpeech(characterMessage.speech.audio as ArrayBuffer, {
         trackId: String(characterMessage.character?.id),
         interrupt: "track",
       });
     }
 
-    if (characterMessage.media.stopAllAudio) {
-      audio.mediaAudioStopAll();
-    }
+    if (characterMessage.media) {
+      if (characterMessage.media.stopAllAudio) {
+        audio.mediaAudioStopAll();
+      }
 
-    // Play media audio if it exists in the node.
-    audio.mediaAudioPlay(characterMessage.media.audioTracks);
+      // Play media audio if it exists in the node.
+      audio.mediaAudioPlay(characterMessage.media.audioTracks);
+    }
   });
 
   conversation.on("problem", console.warn);
@@ -140,7 +146,10 @@ window.start = async function start() {
     );
 
     if (status === "connected" && !started) {
-      conversation.start();
+      const conversationParameters = startGraphReferenceId
+        ? { startGraphReferenceId }
+        : undefined;
+      conversation.start(conversationParameters);
       started = true;
     }
   });
