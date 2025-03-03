@@ -219,7 +219,10 @@ describe("AudioManager", () => {
 
     audioManager.connect(token, playerSessionId);
 
-    expect(mockAudioInputsServiceInstance.connect).toHaveBeenCalledWith(token);
+    expect(mockAudioInputsServiceInstance.connect).toHaveBeenCalledWith(
+      token,
+      playerSessionId,
+    );
   });
 
   test("browserIsSupported should return the value from AudioInputsBrowser", () => {
