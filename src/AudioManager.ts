@@ -16,6 +16,7 @@ export interface AudioManagerOptions {
   handleStartSTT?: () => void;
   handleStopSTT?: () => void;
   handleTranscript?: (transcript: string) => void;
+  handleInterimTranscript?: (transcript: string) => void;
   handleError?: (error: string) => void;
   handleDisconnect?: (message: string) => void;
   handleConnect?: (message: string) => void;
@@ -75,6 +76,11 @@ class AudioManager {
       options.handleTranscript ??
         (() => console.error("handleTranscript() is not setup.")),
     );
+    this.audioInputsService.on(
+      "transcript-interim",
+      options.handleInterimTranscript ??
+        (() => console.log("handleInterimTranscript() is not setup.")),
+    );
     this.audioInputsService.on("error", options.handleError ?? console.error);
     this.audioInputsService.on(
       "disconnect",
@@ -98,25 +104,26 @@ class AudioManager {
       options.handleTranscript ??
         (() => console.error("handleTranscript() is not setup")),
     );
+    this.audioInputsBrowser.on(
+      "transcript-interim",
+      options.handleInterimTranscript ??
+        (() => console.log("handleInterimTranscript() is not setup")),
+    );
     this.audioInputsBrowser.on("error", options.handleError ?? console.error);
 
     // Listen to events from the AudioOutputsService
     this.audioOutputsService.on("start", () => {
       if (this.microphoneIsOn) {
-        this.audioOutputsService.setVolume(0);
+        this.audioOutputsService.beginMuting();
       } else {
-        this.audioOutputsService.setVolume(
-          this.audioOutputsService.currentVolume,
-        );
+        this.audioOutputsService.endMuting();
       }
     });
     this.audioOutputsService.on("stop", () => {
       if (this.microphoneIsOn) {
-        this.audioOutputsService.setVolume(0);
+        this.audioOutputsService.beginMuting();
       } else {
-        this.audioOutputsService.setVolume(
-          this.audioOutputsService.currentVolume,
-        );
+        this.audioOutputsService.endMuting();
       }
     });
     this.debugLogFunction("AudioManager finished constructor");
@@ -134,7 +141,7 @@ class AudioManager {
     }
 
     this.microphoneIsOn = true;
-    this.audioOutputsService.setVolume(0);
+    this.audioOutputsService.beginMuting();
 
     if (this.audioTrackManager.isPlaying) {
       this.audioTrackManager.setVolume(this.duckVolumeLevel);
@@ -150,6 +157,8 @@ class AudioManager {
     }
 
     this.microphoneIsOn = false;
+
+    this.audioOutputsService.endMuting();
 
     if (this.audioTrackManager.isPlaying) {
       this.audioTrackManager.setVolume(this.normalVolumeLevel);
@@ -199,17 +208,17 @@ class AudioManager {
   // **
   // ** Audio Outputs Service ** //
   // **
-  public outputServicePlay = (
+  public playCharacterSpeech = (
     audio: ArrayBuffer,
     options: boolean | AudioOutputsServicePlayOptions,
   ): Promise<void> => {
-    this.debugLogFunction("AudioManager outputServicePlay");
+    this.debugLogFunction("AudioManager playCharacterSpeech");
     return this.audioOutputsService.play(audio, options);
   };
 
-  public outputServiceSetVolume = (volume: number): void => {
+  public setCharacterSpeechVolume = (volume: number): void => {
     this.debugLogFunction("AudioManager outputServiceSetVolume");
-    this.audioOutputsService.setVolume(volume);
+    this.audioOutputsService.setNormalVolume(volume);
   };
 
   // **
