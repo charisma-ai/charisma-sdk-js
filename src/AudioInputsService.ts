@@ -160,7 +160,7 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
       this.socket.on("transcript", (transcript: string) => {
         this.debugLogFunction(`AudioInputService transcript: ${transcript}`);
         if (transcript) {
-          this.emit("transcript", transcript);
+          queueMicrotask(() => this.emit("transcript", transcript));
         }
       });
 
@@ -169,7 +169,7 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
           `AudioInputService interim transcript: ${transcript}`,
         );
         if (transcript) {
-          this.emit("transcript-interim", transcript);
+          queueMicrotask(() => this.emit("transcript-interim", transcript));
         }
       });
 
@@ -254,8 +254,9 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
     }
 
     this.microphone.ondataavailable = (event) => {
-      if (!this.socket || event.data.size === 0) return;
-
+      if (!this.socket || event.data.size === 0) {
+        return;
+      }
       this.socket.emit("packet-sent", event.data);
     };
 
