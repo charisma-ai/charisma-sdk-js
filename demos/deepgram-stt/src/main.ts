@@ -67,7 +67,7 @@ const handleInterimTranscript = (interimTranscript: string) => {
 };
 
 // Setup the audio manager.
-const audio = new AudioManager({
+const audioManager = new AudioManager({
   duckVolumeLevel: 0.1,
   normalVolumeLevel: 1,
   sttService: "charisma/deepgram",
@@ -92,7 +92,7 @@ let conversation: Conversation;
 window.start = async function start() {
   // In order to play audio, this method must be called by a user interaction.
   // This is due to a security restriction in some browsers.
-  audio.initialise();
+  audioManager.initialise();
 
   const storyIdInput = <HTMLInputElement>document.getElementById("story-id");
   const storyId = Number(storyIdInput.value);
@@ -138,19 +138,22 @@ window.start = async function start() {
 
     // Play character speech.
     if (characterMessage.speech) {
-      audio.playCharacterSpeech(characterMessage.speech.audio as ArrayBuffer, {
-        trackId: String(characterMessage.character?.id),
-        interrupt: "track",
-      });
+      audioManager.playCharacterSpeech(
+        characterMessage.speech.audio as ArrayBuffer,
+        {
+          trackId: String(characterMessage.character?.id),
+          interrupt: "track",
+        },
+      );
     }
 
     if (characterMessage.media) {
       if (characterMessage.media.stopAllAudio) {
-        audio.mediaAudioStopAll();
+        audioManager.mediaAudioStopAll();
       }
 
       // Play media audio if it exists in the node.
-      audio.mediaAudioPlay(characterMessage.media.audioTracks);
+      audioManager.mediaAudioPlay(characterMessage.media.audioTracks);
     }
   });
 
@@ -174,14 +177,14 @@ window.start = async function start() {
   });
 
   const { playerSessionId } = await playthrough.connect();
-  audio.connect(token, playerSessionId);
+  audioManager.connect(token, playerSessionId);
 };
 
 const reply = () => {
   if (!playthrough || !conversation) return;
 
   // Stop listening when you send a message.
-  audio.stopListening();
+  audioManager.stopListening();
 
   const replyInput = <HTMLInputElement>document.getElementById("reply-input");
   const text = replyInput.value;
@@ -210,18 +213,18 @@ window.toggleMicrophone = () => {
   if (!recordButton) return;
 
   if (recordingStatus === "off") {
-    audio.startListening();
+    audioManager.startListening();
     confirmedText = "";
     volatileText = "";
     recordingStatus = "starting";
     recordButton.innerHTML = "...";
   } else if (recordingStatus === "recording") {
-    audio.stopListening();
+    audioManager.stopListening();
     recordingStatus = "off";
     recordButton.innerHTML = "Record";
   }
 };
 
 window.toggleMuteBackgroundAudio = () => {
-  audio.mediaAudioToggleMute();
+  audioManager.mediaAudioToggleMute();
 };
