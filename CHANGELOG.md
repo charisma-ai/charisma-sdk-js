@@ -5,7 +5,8 @@
 - Add interim transcripts from the STT service
 - Update the deepgram-stt demo to use interim transcripts
 - Stop the microphone and emit end-current-transcription, and start the microphone again for next transcription. This uses new functionality on our STT server so the same playthrough-validated socket is kept but new downstream connections to the STT service can be triggered. Without this the results from from earlier recordings can bleed into the current transcription.
-- rename and rework character speech. No longer use audioManager outputServicePlay and now use audioManager playCharacterSpeech and volume will automatically go back to normal level after interruption from microphone.
+- **BREAKING** rename and rework character speech. No longer use audioManager outputServicePlay and now use audioManager playCharacterSpeech and volume will automatically go back to normal level after interruption from microphone.
+- **BREAKING** use characterSpeechVolume get and set rather than having a setCharacterSpeechVolume
 
 ### v5.0.8
 

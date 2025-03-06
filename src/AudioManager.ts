@@ -216,10 +216,14 @@ class AudioManager {
     return this.audioOutputsService.play(audio, options);
   };
 
-  public setCharacterSpeechVolume = (volume: number): void => {
+  public get characterSpeechVolume(): number {
+    return this.audioOutputsService.normalCharacterVolume;
+  }
+
+  public set characterSpeechVolume(volume: number) {
     this.debugLogFunction("AudioManager outputServiceSetVolume");
     this.audioOutputsService.setNormalVolume(volume);
-  };
+  }
 
   // **
   // ** Audio Track Manager ** //

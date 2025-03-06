@@ -348,9 +348,9 @@ type SpeakerPlayOptions = {
 };
 ```
 
-#### audio.setCharacterSpeechVolume(volume: number): void
+#### audio.characterSpeechVolume
 
-Sets the volume of the character speech. Must be a number between 0 and 1.
+Get or set the volume of the character speech. Must be a number between 0 and 1.
 
 ### Media Track Audio
 
