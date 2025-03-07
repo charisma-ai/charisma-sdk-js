@@ -68,8 +68,11 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
     this.muteGainNode = this.audioContext.createGain();
     this.volumeGainNode = this.audioContext.createGain();
 
-    this.muteGainNode.gain.value = 1;
-    this.volumeGainNode.gain.value = 1;
+    this.muteGainNode.gain.setValueAtTime(1, this.audioContext.currentTime);
+    this.volumeGainNode.gain.setValueAtTime(
+      this.normalVolume,
+      this.audioContext.currentTime,
+    );
 
     this.volumeGainNode.connect(this.muteGainNode);
     this.muteGainNode.connect(this.audioContext.destination);

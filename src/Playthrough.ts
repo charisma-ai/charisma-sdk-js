@@ -24,7 +24,7 @@ export type ConnectionStatus = "disconnected" | "connecting" | "connected";
 
 const sdkInfo = {
   sdkId: "js",
-  sdkVersion: "6.0.0-alpha.5",
+  sdkVersion: "6.0.0-alpha.7",
   protocolVersion: 2,
 };
 
