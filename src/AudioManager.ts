@@ -201,8 +201,14 @@ class AudioManager {
   // **
   public initialise = (): void => {
     this.debugLogFunction("AudioManager initialise");
-    this.audioOutputsService.getAudioContext();
-    this.audioTrackManager.getAudioContext();
+    const outputContext = this.audioOutputsService.getAudioContext();
+    const trackContext = this.audioTrackManager.getAudioContext();
+    const resumeAudio = () => {
+      outputContext.resume();
+      trackContext.resume();
+    };
+    document.addEventListener("pointerdown", resumeAudio, { once: true });
+    document.addEventListener("keydown", resumeAudio, { once: true });
   };
 
   // **
@@ -217,7 +223,7 @@ class AudioManager {
   };
 
   public get characterSpeechVolume(): number {
-    return this.audioOutputsService.normalCharacterVolume;
+    return this.audioOutputsService.normalVolume;
   }
 
   public set characterSpeechVolume(volume: number) {

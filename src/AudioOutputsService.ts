@@ -35,13 +35,15 @@ type AudioOutputsServiceSource = {
 class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
   private audioContext: AudioContext | undefined;
 
-  private gainNode: GainNode | undefined;
+  private muteGainNode: GainNode | null = null;
+
+  private volumeGainNode: GainNode | null = null;
+
+  public normalVolume = 1;
 
   private currentSources: AudioOutputsServiceSource[] = [];
 
   private debugLogFunction: (message: string) => void;
-
-  public normalCharacterVolume = 1;
 
   constructor(debugLogFunction: (message: string) => void) {
     super();
@@ -63,9 +65,14 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
     this.audioContext = new AudioContextClass();
 
     // Create and store the gain node.
-    this.gainNode = this.audioContext.createGain();
-    this.gainNode.gain.value = this.normalCharacterVolume;
-    this.gainNode.connect(this.audioContext.destination);
+    this.muteGainNode = this.audioContext.createGain();
+    this.volumeGainNode = this.audioContext.createGain();
+
+    this.muteGainNode.gain.value = 1;
+    this.volumeGainNode.gain.value = 1;
+
+    this.volumeGainNode.connect(this.muteGainNode);
+    this.muteGainNode.connect(this.audioContext.destination);
 
     return this.audioContext;
   };
@@ -89,13 +96,12 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
 
     const audioContext = this.getAudioContext();
 
-    // Assert that gainNode is not undefined
-    if (!this.gainNode) {
-      throw new Error("GainNode is not initialized.");
+    if (!this.volumeGainNode) {
+      throw new Error("volumeGainNode is not initialized.");
     }
 
     const source = audioContext.createBufferSource();
-    source.connect(this.gainNode);
+    source.connect(this.volumeGainNode);
     source.buffer = await new Promise((resolve, reject): void => {
       audioContext.decodeAudioData(audio, resolve, reject);
     });
@@ -130,29 +136,53 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
 
   public setNormalVolume = (volume: number): void => {
     this.debugLogFunction(`AudioOutputsService setNormalVolume ${volume}`);
-    if (!this.gainNode) return;
+    if (!this.volumeGainNode || !this.audioContext) return;
 
     // Clamp the volume to the range [0, 1]
     const clampedVolume = Math.max(0, Math.min(1, volume));
 
-    // Store the volume value
-    this.normalCharacterVolume = clampedVolume;
+    // record volume on a variable in case volume is requested before ramp has finished
+    this.normalVolume = clampedVolume;
+
+    // smooth ramp to new value
+    this.volumeGainNode.gain.setValueAtTime(
+      this.volumeGainNode.gain.value,
+      this.audioContext.currentTime,
+    );
+    this.volumeGainNode.gain.linearRampToValueAtTime(
+      clampedVolume,
+      this.audioContext.currentTime + 0.1,
+    );
   };
 
   public beginMuting = (): void => {
     this.debugLogFunction(`AudioOutputsService beginMuting`);
-    if (!this.gainNode) return;
+    if (!this.muteGainNode || !this.audioContext) return;
 
-    // Set the gain value
-    this.gainNode.gain.value = 0;
+    // Fade out quickly
+    this.muteGainNode.gain.setValueAtTime(
+      this.muteGainNode.gain.value,
+      this.audioContext.currentTime,
+    );
+    this.muteGainNode.gain.linearRampToValueAtTime(
+      0,
+      this.audioContext.currentTime + 0.05,
+    );
   };
 
   public endMuting = (): void => {
     this.debugLogFunction(`AudioOutputsService endMuting`);
-    if (!this.gainNode) return;
+    if (!this.muteGainNode || !this.audioContext) return;
 
-    // Set the gain value
-    this.gainNode.gain.value = this.normalCharacterVolume;
+    // Fade in very quickly
+    this.muteGainNode.gain.setValueAtTime(
+      this.muteGainNode.gain.value,
+      this.audioContext.currentTime,
+    );
+    this.muteGainNode.gain.linearRampToValueAtTime(
+      1,
+      this.audioContext.currentTime + 0.01,
+    );
   };
 }
 
