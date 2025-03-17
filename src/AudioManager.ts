@@ -234,6 +234,25 @@ class AudioManager {
     this.debugLogFunction("AudioManager mediaAudioStopAll");
     this.audioTrackManager.stopAll();
   };
+
+  /**
+   * Gets a MediaStream representing the current audio output.
+   * This can be used for visualization purposes.
+   * @returns MediaStream or null if audio context is not initialized
+   */
+  public getAudioStream = (): MediaStream | null => {
+    this.debugLogFunction("AudioManager getAudioStream");
+    return this.audioOutputsService.getAudioStream();
+  };
+
+  /**
+   * Disconnects a previously connected audio stream destination
+   * @param destination The AudioNode to disconnect
+   */
+  public disconnectAudioStream = (destination: AudioNode): void => {
+    this.debugLogFunction("AudioManager disconnectAudioStream");
+    this.audioOutputsService.disconnectAudioStream(destination);
+  };
 }
 
 export default AudioManager;

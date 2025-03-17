@@ -146,6 +146,34 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
     this.debugLogFunction("AudioOutputsService getVolume");
     return this.currentVolume;
   };
+
+  /**
+   * Gets a MediaStream representing the current audio output.
+   * This can be used for visualization purposes.
+   * @returns MediaStream or null if audio context or gain node is not initialized
+   */
+  public getAudioStream = (): MediaStream | null => {
+    this.debugLogFunction("AudioOutputsService getAudioStream");
+
+    if (!this.audioContext || !this.gainNode) return null;
+
+    // Create a MediaStreamDestination to capture the audio
+    const streamDestination = this.audioContext.createMediaStreamDestination();
+
+    // Connect the gain node (which all audio passes through) to the destination
+    this.gainNode.connect(streamDestination);
+
+    return streamDestination.stream;
+  };
+
+  // Also add this method to disconnect the stream when no longer needed
+  public disconnectAudioStream = (destination: AudioNode): void => {
+    this.debugLogFunction("AudioOutputsService disconnectAudioStream");
+
+    if (!this.gainNode) return;
+
+    this.gainNode.disconnect(destination);
+  };
 }
 
 export default AudioOutputsService;
