@@ -1,6 +1,6 @@
 # Changelog
 
-### vNext
+### v6.0.0
 
 - Add interim transcripts from the STT service
 - Update the deepgram-stt demo to use interim transcripts
