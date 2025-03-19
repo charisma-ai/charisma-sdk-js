@@ -37,6 +37,8 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
 
   private gainNode: GainNode | undefined;
 
+  private analyserNode: AnalyserNode | undefined;
+
   private currentSources: AudioOutputsServiceSource[] = [];
 
   private debugLogFunction: (message: string) => void;
@@ -65,9 +67,33 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
     // Create and store the gain node.
     this.gainNode = this.audioContext.createGain();
     this.gainNode.gain.value = this.currentVolume;
-    this.gainNode.connect(this.audioContext.destination);
+
+    // Create and store the analyser node
+    this.analyserNode = this.audioContext.createAnalyser();
+
+    // Connect the gain node to the analyser node and then to the destination
+    this.gainNode.connect(this.analyserNode);
+    this.analyserNode.connect(this.audioContext.destination);
 
     return this.audioContext;
+  };
+
+  /**
+   * Gets the analyser node that can be used for audio visualization
+   * @returns AnalyserNode or null if audio context is not initialized
+   */
+  public getAnalyserNode = (): AnalyserNode | null => {
+    this.debugLogFunction("AudioOutputsService getAnalyserNode");
+    if (!this.analyserNode) {
+      try {
+        // Try to initialize the audio context if it's not already initialized
+        this.getAudioContext();
+      } catch (error) {
+        console.error("Failed to initialize audio context:", error);
+        return null;
+      }
+    }
+    return this.analyserNode || null;
   };
 
   public play = async (
@@ -166,7 +192,7 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
     return streamDestination.stream;
   };
 
-  // Also add this method to disconnect the stream when no longer needed
+  // disconnect the gain node from a destination node
   public disconnectAudioStream = (destination: AudioNode): void => {
     this.debugLogFunction("AudioOutputsService disconnectAudioStream");
 

@@ -240,7 +240,7 @@ class AudioManager {
    * This can be used for visualization purposes.
    * @returns MediaStream or null if audio context is not initialized
    */
-  public getAudioStream = (): MediaStream | null => {
+  public getAudioStream = (): MediaStream | null | undefined => {
     this.debugLogFunction("AudioManager getAudioStream");
     return this.audioOutputsService.getAudioStream();
   };
@@ -252,6 +252,15 @@ class AudioManager {
   public disconnectAudioStream = (destination: AudioNode): void => {
     this.debugLogFunction("AudioManager disconnectAudioStream");
     this.audioOutputsService.disconnectAudioStream(destination);
+  };
+
+  /**
+   * Gets the analyser node that can be used for audio visualization
+   * @returns AnalyserNode or null if audio context is not initialized
+   */
+  public getAnalyserNode = (): AnalyserNode | null => {
+    this.debugLogFunction("AudioManager getAnalyserNode");
+    return this.audioOutputsService.getAnalyserNode();
   };
 }
 
