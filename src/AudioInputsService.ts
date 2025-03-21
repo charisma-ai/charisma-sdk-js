@@ -5,6 +5,7 @@ import type { SpeechRecognitionEvent } from "./speech-types.js";
 type AudioInputsServiceEvents = {
   result: [SpeechRecognitionEvent];
   transcript: [string];
+  "transcript-interim": [string];
   error: [string];
   timeout: [];
   start: [];
@@ -158,9 +159,17 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
 
       this.socket.on("transcript", (transcript: string) => {
         this.debugLogFunction(`AudioInputService transcript: ${transcript}`);
-        console.log("Received transcript:", transcript);
         if (transcript) {
-          this.emit("transcript", transcript);
+          queueMicrotask(() => this.emit("transcript", transcript));
+        }
+      });
+
+      this.socket.on("transcript-interim", (transcript: string) => {
+        this.debugLogFunction(
+          `AudioInputService interim transcript: ${transcript}`,
+        );
+        if (transcript) {
+          queueMicrotask(() => this.emit("transcript-interim", transcript));
         }
       });
 
@@ -244,14 +253,10 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
       this.timeoutId = window.setTimeout(this.onTimeout, timeout);
     }
 
-    if (this.microphone.state === "paused") {
-      this.microphone.resume();
-      return;
-    }
-
     this.microphone.ondataavailable = (event) => {
-      if (!this.socket || event.data.size === 0) return;
-
+      if (!this.socket || event.data.size === 0) {
+        return;
+      }
       this.socket.emit("packet-sent", event.data);
     };
 
@@ -286,11 +291,18 @@ class AudioInputsService extends EventEmitter<AudioInputsServiceEvents> {
     }
 
     if (!this.microphone) {
+      this.debugLogFunction("AudioInputService stopListening !this.microphone");
       this.emit("stop");
       return;
     }
 
-    this.microphone.pause();
+    this.microphone.stop();
+
+    if (!this.socket) {
+      return;
+    }
+    this.debugLogFunction("end-current-transcription");
+    this.socket.emit("end-current-transcription");
   };
 
   public resetTimeout = (timeout: number): void => {

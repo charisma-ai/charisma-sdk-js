@@ -31,10 +31,17 @@ const appendMessage = (message: string, className: string, name?: string) => {
 
 // Keep track of the recording statuses of the microphone so we can update the UI accordingly.
 let recordingStatus: "recording" | "off" | "starting" = "off";
+let confirmedText = "";
+let volatileText = "";
 
 const handleStartSTT = () => {
   recordingStatus = "recording";
   if (recordButton) recordButton.innerHTML = "Stop";
+  const replyInput = <HTMLInputElement>document.getElementById("reply-input");
+
+  if (replyInput) {
+    replyInput.value = "";
+  }
 };
 
 const handleStopSTT = () => {
@@ -43,19 +50,30 @@ const handleStopSTT = () => {
 };
 
 const handleTranscript = (transcript: string) => {
+  confirmedText = `${confirmedText} ${transcript}`;
+  volatileText = "";
   const replyInput = <HTMLInputElement>document.getElementById("reply-input");
   if (replyInput) {
-    replyInput.value = transcript;
+    replyInput.value = confirmedText;
+  }
+};
+
+const handleInterimTranscript = (interimTranscript: string) => {
+  volatileText = interimTranscript;
+  const replyInput = <HTMLInputElement>document.getElementById("reply-input");
+  if (replyInput) {
+    replyInput.value = `${confirmedText} ${volatileText}`;
   }
 };
 
 // Setup the audio manager.
-const audio = new AudioManager({
+const audioManager = new AudioManager({
   duckVolumeLevel: 0.1,
   normalVolumeLevel: 1,
   sttService: "charisma/deepgram",
   streamTimeslice: 100,
   handleTranscript,
+  handleInterimTranscript,
   handleStartSTT,
   handleStopSTT,
   handleDisconnect: (message: string) =>
@@ -74,19 +92,25 @@ let conversation: Conversation;
 window.start = async function start() {
   // In order to play audio, this method must be called by a user interaction.
   // This is due to a security restriction in some browsers.
-  audio.initialise();
+  audioManager.initialise();
 
   const storyIdInput = <HTMLInputElement>document.getElementById("story-id");
-  const storyId = storyIdInput.value;
+  const storyId = Number(storyIdInput.value);
   const storyApiKeyInput = <HTMLInputElement>(
     document.getElementById("story-api-key")
   );
   const storyApiKey = storyApiKeyInput.value;
+  const storyVersionInput = document.getElementById("version");
+  const storyVersion = Number(storyVersionInput.value) || undefined;
+  const StartGraphReferenceIdInput = document.getElementById(
+    "startGraphReferenceId",
+  );
+  const startGraphReferenceId = StartGraphReferenceIdInput.value;
 
   const { token } = await createPlaythroughToken({
-    storyId: Number(storyId),
+    storyId,
     apiKey: storyApiKey,
-    version: undefined,
+    version: storyVersion,
   });
 
   const { conversationUuid } = await createConversation(token);
@@ -114,19 +138,23 @@ window.start = async function start() {
 
     // Play character speech.
     if (characterMessage.speech) {
-      audio.outputServiceSetVolume(1);
-      audio.outputServicePlay(characterMessage.speech.audio as ArrayBuffer, {
-        trackId: String(characterMessage.character?.id),
-        interrupt: "track",
-      });
+      audioManager.playCharacterSpeech(
+        characterMessage.speech.audio as ArrayBuffer,
+        {
+          trackId: String(characterMessage.character?.id),
+          interrupt: "track",
+        },
+      );
     }
 
-    if (characterMessage.media.stopAllAudio) {
-      audio.mediaAudioStopAll();
-    }
+    if (characterMessage.media) {
+      if (characterMessage.media.stopAllAudio) {
+        audioManager.mediaAudioStopAll();
+      }
 
-    // Play media audio if it exists in the node.
-    audio.mediaAudioPlay(characterMessage.media.audioTracks);
+      // Play media audio if it exists in the node.
+      audioManager.mediaAudioPlay(characterMessage.media.audioTracks);
+    }
   });
 
   conversation.on("problem", console.warn);
@@ -140,20 +168,23 @@ window.start = async function start() {
     );
 
     if (status === "connected" && !started) {
-      conversation.start();
+      const conversationParameters = startGraphReferenceId
+        ? { startGraphReferenceId }
+        : undefined;
+      conversation.start(conversationParameters);
       started = true;
     }
   });
 
   const { playerSessionId } = await playthrough.connect();
-  audio.connect(token, playerSessionId);
+  audioManager.connect(token, playerSessionId);
 };
 
 const reply = () => {
   if (!playthrough || !conversation) return;
 
   // Stop listening when you send a message.
-  audio.stopListening();
+  audioManager.stopListening();
 
   const replyInput = <HTMLInputElement>document.getElementById("reply-input");
   const text = replyInput.value;
@@ -161,10 +192,10 @@ const reply = () => {
   if (text.trim() === "") return;
 
   conversation.reply({ text });
-  replyInput.value = "";
 
   // Put player message on the page.
   appendMessage(text, "player-message", "You");
+  replyInput.value = "";
 };
 
 // Handle the Enter key press.
@@ -182,17 +213,18 @@ window.toggleMicrophone = () => {
   if (!recordButton) return;
 
   if (recordingStatus === "off") {
-    audio.startListening();
+    audioManager.startListening();
+    confirmedText = "";
+    volatileText = "";
     recordingStatus = "starting";
     recordButton.innerHTML = "...";
   } else if (recordingStatus === "recording") {
-    audio.stopListening();
-    // audio.outputServiceSetVolume(1); // doesn't work when stt time ends
+    audioManager.stopListening();
     recordingStatus = "off";
     recordButton.innerHTML = "Record";
   }
 };
 
 window.toggleMuteBackgroundAudio = () => {
-  audio.mediaAudioToggleMute();
+  audioManager.mediaAudioToggleMute();
 };

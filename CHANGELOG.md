@@ -1,31 +1,49 @@
 # Changelog
 
+### v6.0.0
+
+- Add interim transcripts from the STT service
+- Update the deepgram-stt demo to use interim transcripts
+- Stop the microphone and emit end-current-transcription, and start the microphone again for next transcription. This uses new functionality on our STT server so the same playthrough-validated socket is kept but new downstream connections to the STT service can be triggered. Without this the results from from earlier recordings can bleed into the current transcription.
+- **BREAKING** rename and rework character speech. No longer use audioManager outputServicePlay and now use audioManager playCharacterSpeech and volume will automatically go back to normal level after interruption from microphone.
+- **BREAKING** use characterSpeechVolume get and set rather than having a setCharacterSpeechVolume
+
 ### v5.0.8
+
 - Emit "stop" event when stopListening is called without a microphone.
 
 ### v5.0.7
+
 - Add `disconnect` method to disconnect from the server.
 
 ### v5.0.6
+
 - Add `timeout` argument to `startListening` methods.
 
 ### v5.0.5
+
 - Fix reconnection logic with a timer between attempts.
 
 ### v5.0.4
+
 - Add `audio.outputServiceSetVolume` to set the volume of character speech.
 
 ### v5.0.3
+
 - Add sttUrl to AudioManagerOptions.
 
 ### v5.0.2
+
 - Add missing file extensions
 
 ### v5.0.1
+
 - Add exports for `AudioManagerOptions` and `AudioOutputsServicePlayOptions`.
 
 ### v5.0.0
+
 **BREAKING**
+
 - Added `AudioManager` class to handle audio input and output.
 - Removed `Microphone` and `Speaker` classes. Replaced with `AudioManager` methods.
 - Use AudioContext API for better browser compatibility.

@@ -52,7 +52,7 @@ const handleTranscript = (transcript: string) => {
 };
 
 // Setup the audio manager.
-const audio = new AudioManager({
+const audioManager = new AudioManager({
   duckVolumeLevel: 0.1,
   normalVolumeLevel: 1,
   sttService: "browser",
@@ -62,7 +62,7 @@ const audio = new AudioManager({
   handleStopSTT,
 });
 
-if (!audio.browserIsSupported()) {
+if (!audioManager.browserIsSupported()) {
   appendMessage(
     "Your browser does not support the browser STT service.",
     "error-message",
@@ -75,19 +75,23 @@ let conversation: Conversation;
 window.start = async function start() {
   // In order to play audio, this method must be called by a user interaction.
   // This is due to a security restriction in some browsers.
-  audio.initialise();
+  audioManager.initialise();
 
-  const storyIdInput = <HTMLInputElement>document.getElementById("story-id");
-  const storyId = storyIdInput.value;
-  const storyApiKeyInput = <HTMLInputElement>(
-    document.getElementById("story-api-key")
-  );
+  const storyIdInput = document.getElementById("story-id");
+  const storyId = Number(storyIdInput.value);
+  const storyApiKeyInput = document.getElementById("story-api-key");
   const storyApiKey = storyApiKeyInput.value;
+  const storyVersionInput = document.getElementById("version");
+  const storyVersion = Number(storyVersionInput.value) || undefined;
+  const StartGraphReferenceIdInput = document.getElementById(
+    "startGraphReferenceId",
+  );
+  const startGraphReferenceId = StartGraphReferenceIdInput.value;
 
   const { token } = await createPlaythroughToken({
-    storyId: Number(storyId),
+    storyId,
     apiKey: storyApiKey,
-    version: -1,
+    version: storyVersion,
   });
 
   const { conversationUuid } = await createConversation(token);
@@ -115,18 +119,23 @@ window.start = async function start() {
 
     // Play character speech.
     if (characterMessage.speech) {
-      audio.outputServicePlay(characterMessage.speech.audio as ArrayBuffer, {
-        trackId: String(characterMessage.character?.id),
-        interrupt: "track",
-      });
+      audioManager.playCharacterSpeech(
+        characterMessage.speech.audio as ArrayBuffer,
+        {
+          trackId: String(characterMessage.character?.id),
+          interrupt: "track",
+        },
+      );
     }
 
-    if (characterMessage.media.stopAllAudio) {
-      audio.mediaAudioStopAll();
-    }
+    if (characterMessage.media) {
+      if (characterMessage.media.stopAllAudio) {
+        audioManager.mediaAudioStopAll();
+      }
 
-    // Play media audio if it exists in the node.
-    audio.mediaAudioPlay(characterMessage.media.audioTracks);
+      // Play media audio if it exists in the node.
+      audioManager.mediaAudioPlay(characterMessage.media.audioTracks);
+    }
   });
 
   conversation.on("problem", console.warn);
@@ -140,7 +149,10 @@ window.start = async function start() {
     );
 
     if (status === "connected" && !started) {
-      conversation.start();
+      const conversationParameters = startGraphReferenceId
+        ? { startGraphReferenceId }
+        : undefined;
+      conversation.start(conversationParameters);
       started = true;
     }
   });
@@ -152,7 +164,7 @@ const reply = () => {
   if (!playthrough || !conversation) return;
 
   // Stop listening when you send a message.
-  audio.stopListening();
+  audioManager.stopListening();
 
   const replyInput = <HTMLInputElement>document.getElementById("reply-input");
   const text = replyInput.value;
@@ -181,16 +193,16 @@ window.toggleMicrophone = () => {
   if (!recordButton) return;
 
   if (recordingStatus === "off") {
-    audio.startListening();
+    audioManager.startListening();
     recordingStatus = "starting";
     recordButton.innerHTML = "...";
   } else if (recordingStatus === "recording") {
-    audio.stopListening();
+    audioManager.stopListening();
     recordingStatus = "off";
     recordButton.innerHTML = "Record";
   }
 };
 
 window.toggleMuteBackgroundAudio = () => {
-  audio.mediaAudioToggleMute();
+  audioManager.mediaAudioToggleMute();
 };

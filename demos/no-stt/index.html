@@ -7,26 +7,38 @@
   </head>
   <body>
     <div id="app">
-      <div class="story-id-container">
-        Story ID:
-        <input type="text" id="story-id" placeholder="Published Story ID" />
-        Story API Key:
-        <input type="text" id="story-api-key" placeholder="Story API Key" />
+      <div class="story-parameters-container">
+        Story ID
+        <input type="text" id="story-id" placeholder="12345" />
+        Story API Key
+        <span class="comment">
+          only needed for draft or unpublished versions
+        </span>
+        <input type="text" id="story-api-key" />
+        Version
+        <span class="comment">
+          use -1 for draft, or undefined for most recent published
+        </span>
+        <input id="version" />
+        StartGraphReferenceId
+        <span class="comment">only for pro stories</span>
+        <input type="text" id="startGraphReferenceId" />
       </div>
       <button onclick="start()">Start</button>
       <div id="messages"></div>
-      <input
-        onkeypress="onKeyPress(event)"
-        placeholder="Type a message..."
-        id="reply-input"
-      />
+      <div>
+        <input
+          onkeypress="onKeyPress(event)"
+          placeholder="Type a message..."
+          id="reply-input"
+        />
+      </div>
       <button onclick="reply()">Send</button>
-    </div>
-    <div>
-      <button onclick="toggleMuteBackgroundAudio()">
-        Mute Background Audio
-      </button>
-    </div>
+      <div >
+        <button onclick="toggleMuteBackgroundAudio()">
+          Mute Background Audio
+        </button>
+      </div>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

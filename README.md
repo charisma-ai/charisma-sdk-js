@@ -327,7 +327,7 @@ Initialises the audio for characters and media. This method _must_ be called bef
 
 This method _must_ also be called from a user interaction event, such as a click or a keypress. This is due to a security restriction in some browsers. We recommend adding it to the "start" button the sets up your playthrough. See the demos for an example.
 
-#### audio.outputServicePlay(audio: ArrayBuffer, options: AudioOutputsServicePlayOptions): Promise<void>
+#### audio.playCharacterSpeech(audio: ArrayBuffer, options: AudioOutputsServicePlayOptions): Promise<void>
 
 This plays the generated speech in the message event. Typically, you would want to use this in combination with a `message` conversation handler.
 
@@ -348,9 +348,9 @@ type SpeakerPlayOptions = {
 };
 ```
 
-#### audio.outputServiceSetVolume(volume: number): void
+#### audio.characterSpeechVolume
 
-Sets the volume of the character speech. Must be a number between 0 and 1.
+Get or set the volume of the character speech. Must be a number between 0 and 1.
 
 ### Media Track Audio
 
