@@ -36,7 +36,9 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
   private audioContext: AudioContext | undefined;
 
   private muteGainNode: GainNode | null = null;
+
   private volumeGainNode: GainNode | null = null;
+
   private analyserNode: AnalyserNode | null = null;
 
   public normalVolume = 1;
@@ -90,15 +92,6 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
    */
   public getAnalyserNode = (): AnalyserNode | null => {
     this.debugLogFunction("AudioOutputsService getAnalyserNode");
-    if (!this.analyserNode) {
-      try {
-        // Try to initialize the audio context if it's not already initialized
-        this.getAudioContext();
-      } catch (error) {
-        console.error("Failed to initialize audio context:", error);
-        return null;
-      }
-    }
     return this.analyserNode || null;
   };
 
@@ -208,34 +201,6 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
       1,
       this.audioContext.currentTime + 0.01,
     );
-  };
-
-  /**
-   * Gets a MediaStream representing the current audio output.
-   * This can be used for visualization purposes.
-   * @returns MediaStream or null if audio context or gain node is not initialized
-   */
-  public getAudioStream = (): MediaStream | null => {
-    this.debugLogFunction("AudioOutputsService getAudioStream");
-
-    if (!this.audioContext || !this.gainNode) return null;
-
-    // Create a MediaStreamDestination to capture the audio
-    const streamDestination = this.audioContext.createMediaStreamDestination();
-
-    // Connect the gain node (which all audio passes through) to the destination
-    this.gainNode.connect(streamDestination);
-
-    return streamDestination.stream;
-  };
-
-  // disconnect the gain node from a destination node
-  public disconnectAudioStream = (destination: AudioNode): void => {
-    this.debugLogFunction("AudioOutputsService disconnectAudioStream");
-
-    if (!this.gainNode) return;
-
-    this.gainNode.disconnect(destination);
   };
 }
 
