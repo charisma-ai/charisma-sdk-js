@@ -17,13 +17,7 @@ type AudioOutputsServiceEvents = {
 };
 
 export type AudioOutputsServicePlayOptions = {
-  /**
-   * Whether to interrupt the same track as the `trackId` passed (`track`), all currently playing audio (`all`), or not to interrupt anything (`none`). Default is `none`.
-   */
   interrupt?: "track" | "all" | "none";
-  /**
-   * If you want to prevent a particular character to speak over themselves, a `trackId` can be set to a unique string. When playing another speech clip, if the same `trackId` is passed and `interrupt` is set to `true`, then the previous clip will stop playing. Default is unset.
-   */
   trackId?: string;
 };
 
@@ -47,6 +41,11 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
 
   private debugLogFunction: (message: string) => void;
 
+  // NEW: Track start time and playing status
+  private startTime: number | null = null;
+
+  private isPlaying = false;
+
   constructor(debugLogFunction: (message: string) => void) {
     super();
     this.debugLogFunction = debugLogFunction;
@@ -66,11 +65,8 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
 
     this.audioContext = new AudioContextClass();
 
-    // Create and store the gain node.
     this.muteGainNode = this.audioContext.createGain();
     this.volumeGainNode = this.audioContext.createGain();
-
-    // Create and store the analyser node
     this.analyserNode = this.audioContext.createAnalyser();
 
     this.muteGainNode.gain.setValueAtTime(1, this.audioContext.currentTime);
@@ -86,13 +82,21 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
     return this.audioContext;
   };
 
-  /**
-   * Gets the analyser node that can be used for audio visualization
-   * @returns AnalyserNode or null if audio context is not initialized
-   */
   public getAnalyserNode = (): AnalyserNode | null => {
     this.debugLogFunction("AudioOutputsService getAnalyserNode");
     return this.analyserNode || null;
+  };
+
+  // NEW: Get the current playback time in seconds
+  public getCurrentPlaybackTime = (): number => {
+    if (!this.audioContext || this.startTime === null || !this.isPlaying)
+      return 0;
+    return this.audioContext.currentTime - this.startTime;
+  };
+
+  // NEW: Get the current playing status
+  public getIsPlaying = (): boolean => {
+    return this.isPlaying;
   };
 
   public play = async (
@@ -101,12 +105,10 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
   ): Promise<void> => {
     this.debugLogFunction("AudioOutputsService play");
 
-    // Backwards-compatible with the old boolean `interrupt` parameter
     if (typeof options === "boolean") {
       console.warn(
         "Passing a boolean as the second parameter to `speaker.play()` is deprecated, and should be updated to use an `options` object.",
       );
-      // eslint-disable-next-line no-param-reassign
       options = { interrupt: options ? "all" : "none" };
     }
 
@@ -131,9 +133,12 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
           (currentSource) => currentSource.sourceNode !== source,
         );
         if (this.currentSources.length === 0) {
+          this.isPlaying = false; // NEW: Reset playing flag
+          this.startTime = null; // NEW: Clear start time
           this.emit("stop");
         }
       };
+
       if (this.currentSources.length > 0 && interrupt !== "none") {
         this.currentSources.forEach((currentSource) => {
           if (
@@ -144,9 +149,13 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
           }
         });
       }
+
       if (this.currentSources.length === 0) {
+        this.startTime = audioContext.currentTime; // NEW: Track when playback starts
+        this.isPlaying = true; // NEW: Set playing flag
         this.emit("start");
       }
+
       this.currentSources.push({ sourceNode: source, trackId });
       source.start();
     });
@@ -156,13 +165,9 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
     this.debugLogFunction(`AudioOutputsService setNormalVolume ${volume}`);
     if (!this.volumeGainNode || !this.audioContext) return;
 
-    // Clamp the volume to the range [0, 1]
     const clampedVolume = Math.max(0, Math.min(1, volume));
-
-    // record volume on a variable in case volume is requested before ramp has finished
     this.normalVolume = clampedVolume;
 
-    // smooth ramp to new value
     this.volumeGainNode.gain.setValueAtTime(
       this.volumeGainNode.gain.value,
       this.audioContext.currentTime,
@@ -177,7 +182,6 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
     this.debugLogFunction(`AudioOutputsService beginMuting`);
     if (!this.muteGainNode || !this.audioContext) return;
 
-    // Fade out quickly
     this.muteGainNode.gain.setValueAtTime(
       this.muteGainNode.gain.value,
       this.audioContext.currentTime,
@@ -192,7 +196,6 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
     this.debugLogFunction(`AudioOutputsService endMuting`);
     if (!this.muteGainNode || !this.audioContext) return;
 
-    // Fade in very quickly
     this.muteGainNode.gain.setValueAtTime(
       this.muteGainNode.gain.value,
       this.audioContext.currentTime,

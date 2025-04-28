@@ -60,7 +60,6 @@ class AudioManager {
     this.audioOutputsService = new AudioOutputsService(this.debugLogFunction);
     this.audioTrackManager = new AudioTrackManager();
 
-    // Listen to events from the AudioInputsService
     this.audioInputsService.on(
       "start",
       options.handleStartSTT ??
@@ -88,7 +87,6 @@ class AudioManager {
     );
     this.audioInputsService.on("connect", options.handleConnect ?? console.log);
 
-    // Listen to events from the AudioInputsBrowser
     this.audioInputsBrowser.on(
       "start",
       options.handleStartSTT ??
@@ -111,7 +109,6 @@ class AudioManager {
     );
     this.audioInputsBrowser.on("error", options.handleError ?? console.error);
 
-    // Listen to events from the AudioOutputsService
     this.audioOutputsService.on("start", () => {
       if (this.microphoneIsOn) {
         this.audioOutputsService.beginMuting();
@@ -129,9 +126,7 @@ class AudioManager {
     this.debugLogFunction("AudioManager finished constructor");
   }
 
-  // **
-  // ** Audio Input ** //
-  // **
+  // Audio Input
   public startListening = (timeout?: number): void => {
     this.debugLogFunction("AudioManager startListening");
     if (this.sttService === "browser") {
@@ -188,17 +183,11 @@ class AudioManager {
     }
   };
 
-  // **
-  // ** Browser STT Service ** //
-  // **
   public browserIsSupported = (): boolean => {
     this.debugLogFunction("AudioManager browserIsSupported");
     return this.audioInputsBrowser.isSupported;
   };
 
-  // **
-  // ** Initialise Audio
-  // **
   public initialise = (): void => {
     this.debugLogFunction("AudioManager initialise");
     const outputContext = this.audioOutputsService.getAudioContext();
@@ -211,9 +200,7 @@ class AudioManager {
     document.addEventListener("keydown", resumeAudio, { once: true });
   };
 
-  // **
-  // ** Audio Outputs Service ** //
-  // **
+  // Audio Outputs Service
   public playCharacterSpeech = (
     audio: ArrayBuffer,
     options: boolean | AudioOutputsServicePlayOptions,
@@ -231,9 +218,18 @@ class AudioManager {
     this.audioOutputsService.setNormalVolume(volume);
   }
 
-  // **
-  // ** Audio Track Manager ** //
-  // **
+  // NEW: Playback tracking
+  public getCurrentPlaybackTime = (): number => {
+    this.debugLogFunction("AudioManager getCurrentPlaybackTime");
+    return this.audioOutputsService.getCurrentPlaybackTime();
+  };
+
+  public getIsPlaying = (): boolean => {
+    this.debugLogFunction("AudioManager getIsPlaying");
+    return this.audioOutputsService.getIsPlaying();
+  };
+
+  // Audio Track Manager
   public mediaAudioPlay = (audioTracks: AudioTrack[]): void => {
     this.debugLogFunction("AudioManager mediaAudioPlay");
     this.audioTrackManager.play(audioTracks);
@@ -253,7 +249,7 @@ class AudioManager {
     this.debugLogFunction("AudioManager mediaAudioStopAll");
     this.audioTrackManager.stopAll();
   };
-  
+
   public getAnalyserNode = (): AnalyserNode | null => {
     this.debugLogFunction("AudioManager getAnalyserNode");
     return this.audioOutputsService.getAnalyserNode();
