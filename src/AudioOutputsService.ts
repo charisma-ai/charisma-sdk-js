@@ -139,13 +139,14 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
 
   public setNormalVolume = (volume: number): void => {
     this.debugLogFunction(`AudioOutputsService setNormalVolume ${volume}`);
-    if (!this.volumeGainNode || !this.audioContext) return;
 
     // Clamp the volume to the range [0, 1]
     const clampedVolume = Math.max(0, Math.min(1, volume));
 
     // record volume on a variable in case volume is requested before ramp has finished
     this.normalVolume = clampedVolume;
+
+    if (!this.volumeGainNode || !this.audioContext) return;
 
     // smooth ramp to new value
     this.volumeGainNode.gain.setValueAtTime(
