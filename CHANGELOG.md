@@ -1,5 +1,9 @@
 # Changelog
 
+### v6.0.1
+
+- Fix volume not setting when set before audio starts
+
 ### v6.0.0
 
 - Add interim transcripts from the STT service
