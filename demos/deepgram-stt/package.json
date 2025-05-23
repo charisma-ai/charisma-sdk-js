@@ -1,7 +1,6 @@
 {
   "name": "test",
   "private": true,
-  "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite --port 3000",
