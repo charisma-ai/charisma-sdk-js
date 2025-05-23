@@ -16,7 +16,7 @@ declare global {
     start: () => Promise<void>;
     reply: () => void;
     onKeyPress: (event: KeyboardEvent) => void;
-    toggleMuteBackgroundAudio: () => void;
+    toggleBackgroundAudio: () => void;
     toggleMicrophone: (event: Event) => void;
   }
 }
@@ -203,6 +203,6 @@ window.toggleMicrophone = () => {
   }
 };
 
-window.toggleMuteBackgroundAudio = () => {
+window.toggleBackgroundAudio = () => {
   audioManager.mediaAudioToggleMute();
 };

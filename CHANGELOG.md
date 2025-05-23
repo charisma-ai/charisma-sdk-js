@@ -2,7 +2,7 @@
 
 ### v6.0.1
 
-- Fix volume not setting when set before audio starts
+- Add improved volume and mute controls for character and background audio outputs
 
 ### v6.0.0
 

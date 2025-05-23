@@ -81,3 +81,13 @@ button:hover {
   font-size: 0.6em;
   color: #999;
 }
+
+#volume-control {
+  display: flex;
+  justify-content: space-between;
+  border: 1px solid #ccc;
+}
+
+.volume-item {
+  margin: 0.8em;
+}

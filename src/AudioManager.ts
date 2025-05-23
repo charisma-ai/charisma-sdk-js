@@ -13,6 +13,7 @@ export interface AudioManagerOptions {
   streamTimeslice?: number;
   reconnectAttemptsTimeout?: number;
   sttUrl?: string;
+  muteCharacterAudio?: boolean;
   handleStartSTT?: () => void;
   handleStopSTT?: () => void;
   handleTranscript?: (transcript: string) => void;
@@ -57,7 +58,11 @@ class AudioManager {
       this.debugLogFunction,
     );
     this.audioInputsBrowser = new AudioInputsBrowser();
-    this.audioOutputsService = new AudioOutputsService(this.debugLogFunction);
+    const muteCharacterAudio = !!options.muteCharacterAudio;
+    this.audioOutputsService = new AudioOutputsService(
+      this.debugLogFunction,
+      muteCharacterAudio,
+    );
     this.audioTrackManager = new AudioTrackManager();
 
     // Listen to events from the AudioInputsService
@@ -114,16 +119,16 @@ class AudioManager {
     // Listen to events from the AudioOutputsService
     this.audioOutputsService.on("start", () => {
       if (this.microphoneIsOn) {
-        this.audioOutputsService.beginMuting();
+        this.audioOutputsService.beginMutingForMicrophone();
       } else {
-        this.audioOutputsService.endMuting();
+        this.audioOutputsService.endMutingForMicrophone();
       }
     });
     this.audioOutputsService.on("stop", () => {
       if (this.microphoneIsOn) {
-        this.audioOutputsService.beginMuting();
+        this.audioOutputsService.beginMutingForMicrophone();
       } else {
-        this.audioOutputsService.endMuting();
+        this.audioOutputsService.endMutingForMicrophone();
       }
     });
     this.debugLogFunction("AudioManager finished constructor");
@@ -141,7 +146,7 @@ class AudioManager {
     }
 
     this.microphoneIsOn = true;
-    this.audioOutputsService.beginMuting();
+    this.audioOutputsService.beginMutingForMicrophone();
 
     if (this.audioTrackManager.isPlaying) {
       this.audioTrackManager.setVolume(this.duckVolumeLevel);
@@ -158,7 +163,7 @@ class AudioManager {
 
     this.microphoneIsOn = false;
 
-    this.audioOutputsService.endMuting();
+    this.audioOutputsService.endMutingForMicrophone();
 
     if (this.audioTrackManager.isPlaying) {
       this.audioTrackManager.setVolume(this.normalVolumeLevel);
@@ -227,8 +232,16 @@ class AudioManager {
   }
 
   public set characterSpeechVolume(volume: number) {
-    this.debugLogFunction("AudioManager outputServiceSetVolume");
     this.audioOutputsService.setNormalVolume(volume);
+  }
+
+  public get characterSpeechIsMuted(): boolean {
+    return this.audioOutputsService.isMutedByClient;
+  }
+
+  public set characterSpeechIsMuted(value: boolean) {
+    this.debugLogFunction(`AudioManager characterSpeechIsMuted set ${value}`);
+    this.audioOutputsService.setIsMutedByClient(value);
   }
 
   // **
@@ -240,7 +253,6 @@ class AudioManager {
   };
 
   public mediaAudioSetVolume = (volume: number): void => {
-    this.debugLogFunction("AudioManager mediaAudioSetVolume");
     this.audioTrackManager.setVolume(volume);
   };
 

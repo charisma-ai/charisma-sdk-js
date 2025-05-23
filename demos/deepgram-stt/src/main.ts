@@ -14,8 +14,11 @@ declare global {
     start: () => Promise<void>;
     reply: () => void;
     onKeyPress: (event: KeyboardEvent) => void;
-    toggleMuteBackgroundAudio: () => void;
+    toggleBackgroundAudio: () => void;
+    toggleCharacterAudio: () => void;
     toggleMicrophone: (event: Event) => void;
+    setBackgroundAudioVolume: (volume: number) => void;
+    setCharacterAudioVolume: (volume: number) => void;
   }
 }
 
@@ -225,6 +228,23 @@ window.toggleMicrophone = () => {
   }
 };
 
-window.toggleMuteBackgroundAudio = () => {
+window.toggleBackgroundAudio = () => {
   audioManager.mediaAudioToggleMute();
 };
+
+window.setBackgroundAudioVolume = (volume: number) => {
+  audioManager.mediaAudioSetVolume(volume);
+}
+
+window.toggleCharacterAudio = () => {
+  if (audioManager.characterSpeechIsMuted) {
+    audioManager.characterSpeechIsMuted = false;
+  } else {
+    audioManager.characterSpeechIsMuted = true;
+
+  }
+};
+
+window.setCharacterAudioVolume = (volume: number) => {
+  audioManager.characterSpeechVolume = volume;
+}

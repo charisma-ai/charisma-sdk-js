@@ -37,10 +37,17 @@
         Record
       </button>
       <button onclick="reply()">Send</button>
-      <div >
-        <button onclick="toggleMuteBackgroundAudio()">
-          Mute Background Audio
-        </button>
+      <div id="volume-control">
+        <div class="volume-item">
+          <label for="backgroundMute">Background Audio</label>
+          <input type="checkbox" id="backgroundMute" checked onclick="toggleBackgroundAudio()">
+          <input type="range" min="0" max="1" step="0.01" value="1" oninput="setBackgroundAudioVolume(this.value)">
+        </div>
+        <div class="volume-item">
+          <label for="characterMute">Character Audio</label>
+          <input type="checkbox" id="characterMute" checked onclick="toggleCharacterAudio()">
+          <input type="range" min="0" max="1" step="0.01" value="1" oninput="setCharacterAudioVolume(this.value)">
+        </div>
       </div>
     <script type="module" src="/src/main.ts"></script>
   </body>

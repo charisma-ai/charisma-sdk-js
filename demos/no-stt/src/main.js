@@ -136,6 +136,6 @@ window.onKeyPress = function onKeyPress(event) {
 
 window.reply = reply;
 
-window.toggleMuteBackgroundAudio = () => {
+window.toggleBackgroundAudio = () => {
   audioManager.mediaAudioToggleMute();
 };
