@@ -42,6 +42,8 @@ class AudioManager {
 
   private debugLogFunction: (message: string) => void;
 
+  private onSpeechEndCallbacks: Array<() => void> = [];
+
   constructor(options: AudioManagerOptions) {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     this.debugLogFunction = options.debugLogFunction || (() => {});
@@ -122,6 +124,8 @@ class AudioManager {
       } else {
         this.audioOutputsService.endMuting();
       }
+
+      this.onSpeechEndCallbacks.forEach((callback) => callback());
     });
     this.debugLogFunction("AudioManager finished constructor");
   }
@@ -208,6 +212,10 @@ class AudioManager {
     this.debugLogFunction("AudioManager playCharacterSpeech");
     return this.audioOutputsService.play(audio, options);
   };
+
+  public onCharacterSpeechEnd(callback: () => void): void {
+    this.onSpeechEndCallbacks.push(callback);
+  }
 
   public get characterSpeechVolume(): number {
     return this.audioOutputsService.normalVolume;
