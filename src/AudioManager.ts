@@ -261,7 +261,7 @@ class AudioManager {
   }
 
   public set mediaAudioIsMuted(value: boolean) {
-    this.debugLogFunction(`AudioManager characterSpeechIsMuted set ${value}`);
+    this.debugLogFunction(`AudioManager mediaAudioIsMuted set ${value}`);
     this.audioTrackManager.isMutedByClient = value;
   }
 

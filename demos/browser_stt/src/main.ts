@@ -4,42 +4,88 @@ import {
   AudioManager,
   createPlaythroughToken,
   createConversation,
+  Conversation,
+  Message,
 } from "@charisma-ai/sdk";
 
-const messagesDiv = document.getElementById("messages");
+// In this demo, we'll extend the global "window" with the functions we need so we can call them from the HTML.
+declare global {
+  interface Window {
+    start: () => Promise<void>;
+    reply: () => void;
+    onKeyPress: (event: KeyboardEvent) => void;
+    toggleMicrophone: (event: Event) => void;
+  }
+}
 
-const appendMessage = (message, className, name) => {
+const messagesDiv = document.getElementById("messages");
+const recordButton = document.getElementById("record-button");
+
+const appendMessage = (message: string, className: string, name?: string) => {
   const div = document.createElement("div");
   div.classList.add(className, "message");
   div.innerHTML = `${name ? `<b>${name}</b>:` : ""} ${message}`;
   messagesDiv?.appendChild(div);
 };
 
+// Keep track of the recording statuses of the microphone so we can update the UI accordingly.
+let recordingStatus: "recording" | "off" | "starting" = "off";
+
+const handleStartSTT = () => {
+  recordingStatus = "recording";
+  if (recordButton) recordButton.innerHTML = "Stop";
+};
+
+const handleStopSTT = () => {
+  recordingStatus = "off";
+  if (recordButton) recordButton.innerHTML = "Record";
+};
+
+const handleTranscript = (transcript: string) => {
+  const replyInput = <HTMLInputElement>document.getElementById("reply-input");
+  if (replyInput) {
+    replyInput.value = transcript;
+  }
+};
+
 // Setup the audio manager.
 const audioManager = new AudioManager({
   duckVolumeLevel: 0.1,
-  normalVolumeLevel: 1,
   sttService: "browser",
   streamTimeslice: 100,
+  handleTranscript,
+  handleStartSTT,
+  handleStopSTT,
 });
 
-let playthrough;
-let conversation;
+if (!audioManager.browserIsSupported()) {
+  appendMessage(
+    "Your browser does not support the browser STT service.",
+    "error-message",
+  );
+}
+
+let playthrough: Playthrough;
+let conversation: Conversation;
 
 window.start = async function start() {
   // In order to play audio, this method must be called by a user interaction.
   // This is due to a security restriction in some browsers.
   audioManager.initialise();
 
-  const storyIdInput = document.getElementById("story-id");
+  const storyIdInput = document.getElementById("story-id") as HTMLInputElement;
   const storyId = Number(storyIdInput.value);
-  const storyApiKeyInput = document.getElementById("story-api-key");
+  const storyApiKeyInput = document.getElementById(
+    "story-api-key",
+  ) as HTMLInputElement;
   const storyApiKey = storyApiKeyInput.value;
-  const storyVersionInput = document.getElementById("version");
+  const storyVersionInput = document.getElementById(
+    "version",
+  ) as HTMLInputElement;
   const storyVersion = Number(storyVersionInput.value) || undefined;
   const StartGraphReferenceIdInput = document.getElementById(
     "startGraphReferenceId",
-  );
+  ) as HTMLInputElement;
   const startGraphReferenceId = StartGraphReferenceIdInput.value;
 
   const { token } = await createPlaythroughToken({
@@ -57,7 +103,7 @@ window.start = async function start() {
     output: "buffer",
   });
 
-  conversation.on("message", (message) => {
+  conversation.on("message", (message: Message) => {
     const characterMessage =
       message.type === "character" ? message.message : null;
 
@@ -73,10 +119,13 @@ window.start = async function start() {
 
     // Play character speech.
     if (characterMessage.speech) {
-      audioManager.playCharacterSpeech(characterMessage.speech.audio, {
-        trackId: String(characterMessage.character?.id),
-        interrupt: "track",
-      });
+      audioManager.playCharacterSpeech(
+        characterMessage.speech.audio as ArrayBuffer,
+        {
+          trackId: String(characterMessage.character?.id),
+          interrupt: "track",
+        },
+      );
     }
 
     if (characterMessage.media) {
@@ -114,7 +163,10 @@ window.start = async function start() {
 const reply = () => {
   if (!playthrough || !conversation) return;
 
-  const replyInput = document.getElementById("reply-input");
+  // Stop listening when you send a message.
+  audioManager.stopListening();
+
+  const replyInput = <HTMLInputElement>document.getElementById("reply-input");
   const text = replyInput.value;
 
   if (text.trim() === "") return;
@@ -136,6 +188,17 @@ window.onKeyPress = function onKeyPress(event) {
 
 window.reply = reply;
 
-window.toggleBackgroundAudio = () => {
-  audioManager.mediaAudioToggleMute();
+// Toggling the microphone will request the stt service to connect.
+window.toggleMicrophone = () => {
+  if (!recordButton) return;
+
+  if (recordingStatus === "off") {
+    audioManager.startListening();
+    recordingStatus = "starting";
+    recordButton.innerHTML = "...";
+  } else if (recordingStatus === "recording") {
+    audioManager.stopListening();
+    recordingStatus = "off";
+    recordButton.innerHTML = "Record";
+  }
 };

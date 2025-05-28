@@ -14,8 +14,8 @@ declare global {
     start: () => Promise<void>;
     reply: () => void;
     onKeyPress: (event: KeyboardEvent) => void;
-    toggleBackgroundAudio: () => void;
-    toggleCharacterAudio: () => void;
+    setBackgroundAudio: (audioOn: boolean) => void;
+    setCharacterAudio: (audioOn: boolean) => void;
     toggleMicrophone: (event: Event) => void;
     setBackgroundAudioVolume: (volume: number) => void;
     setCharacterAudioVolume: (volume: number) => void;
@@ -72,7 +72,6 @@ const handleInterimTranscript = (interimTranscript: string) => {
 // Setup the audio manager.
 const audioManager = new AudioManager({
   duckVolumeLevel: 0.1,
-  normalVolumeLevel: 1,
   sttService: "charisma/deepgram",
   streamTimeslice: 100,
   handleTranscript,
@@ -97,17 +96,19 @@ window.start = async function start() {
   // This is due to a security restriction in some browsers.
   audioManager.initialise();
 
-  const storyIdInput = <HTMLInputElement>document.getElementById("story-id");
+  const storyIdInput = document.getElementById("story-id") as HTMLInputElement;
   const storyId = Number(storyIdInput.value);
-  const storyApiKeyInput = <HTMLInputElement>(
-    document.getElementById("story-api-key")
-  );
+  const storyApiKeyInput = document.getElementById(
+    "story-api-key",
+  ) as HTMLInputElement;
   const storyApiKey = storyApiKeyInput.value;
-  const storyVersionInput = document.getElementById("version");
+  const storyVersionInput = document.getElementById(
+    "version",
+  ) as HTMLInputElement;
   const storyVersion = Number(storyVersionInput.value) || undefined;
   const StartGraphReferenceIdInput = document.getElementById(
     "startGraphReferenceId",
-  );
+  ) as HTMLInputElement;
   const startGraphReferenceId = StartGraphReferenceIdInput.value;
 
   const { token } = await createPlaythroughToken({
@@ -228,23 +229,19 @@ window.toggleMicrophone = () => {
   }
 };
 
-window.toggleBackgroundAudio = () => {
-  audioManager.mediaAudioToggleMute();
+window.setBackgroundAudio = (audioOn: boolean) => {
+  console.log(audioOn);
+  audioManager.mediaAudioIsMuted = !audioOn;
 };
 
 window.setBackgroundAudioVolume = (volume: number) => {
-  audioManager.mediaAudioSetVolume(volume);
-}
+  audioManager.mediaAudioVolume = volume;
+};
 
-window.toggleCharacterAudio = () => {
-  if (audioManager.characterSpeechIsMuted) {
-    audioManager.characterSpeechIsMuted = false;
-  } else {
-    audioManager.characterSpeechIsMuted = true;
-
-  }
+window.setCharacterAudio = (audioOn: boolean) => {
+  audioManager.characterSpeechIsMuted = !audioOn;
 };
 
 window.setCharacterAudioVolume = (volume: number) => {
   audioManager.characterSpeechVolume = volume;
-}
+};
