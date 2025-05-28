@@ -8,7 +8,6 @@ import { AudioTrack } from "./types.js";
 
 export interface AudioManagerOptions {
   duckVolumeLevel?: number;
-  normalVolumeLevel?: number;
   sttService?: "browser" | "charisma/deepgram";
   streamTimeslice?: number;
   reconnectAttemptsTimeout?: number;
@@ -35,8 +34,6 @@ class AudioManager {
 
   private duckVolumeLevel: number;
 
-  private normalVolumeLevel: number;
-
   private sttService: "browser" | "charisma/deepgram";
 
   private microphoneIsOn = false;
@@ -48,7 +45,6 @@ class AudioManager {
     this.debugLogFunction = options.debugLogFunction || (() => {});
     this.debugLogFunction("AudioManager running constructor");
     this.duckVolumeLevel = options.duckVolumeLevel ?? 0;
-    this.normalVolumeLevel = options.normalVolumeLevel ?? 1;
     this.sttService = options.sttService ?? "charisma/deepgram";
 
     this.audioInputsService = new AudioInputsService(
@@ -149,7 +145,7 @@ class AudioManager {
     this.audioOutputsService.beginMutingForMicrophone();
 
     if (this.audioTrackManager.isPlaying) {
-      this.audioTrackManager.setVolume(this.duckVolumeLevel);
+      this.audioTrackManager.duckTo(this.duckVolumeLevel);
     }
   };
 
@@ -166,7 +162,7 @@ class AudioManager {
     this.audioOutputsService.endMutingForMicrophone();
 
     if (this.audioTrackManager.isPlaying) {
-      this.audioTrackManager.setVolume(this.normalVolumeLevel);
+      this.audioTrackManager.duckOff();
     }
   };
 
@@ -232,7 +228,7 @@ class AudioManager {
   }
 
   public set characterSpeechVolume(volume: number) {
-    this.audioOutputsService.setNormalVolume(volume);
+    this.audioOutputsService.normalVolume = volume;
   }
 
   public get characterSpeechIsMuted(): boolean {
@@ -252,14 +248,22 @@ class AudioManager {
     this.audioTrackManager.play(audioTracks);
   };
 
-  public mediaAudioSetVolume = (volume: number): void => {
-    this.audioTrackManager.setVolume(volume);
-  };
+  public get mediaAudioVolume(): number {
+    return this.audioTrackManager.normalVolume;
+  }
 
-  public mediaAudioToggleMute = (): void => {
-    this.debugLogFunction("AudioManager mediaAudioToggleMute");
-    this.audioTrackManager.toggleMute();
-  };
+  public set mediaAudioVolume(volume: number) {
+    this.audioTrackManager.normalVolume = volume;
+  }
+
+  public get mediaAudioIsMuted(): boolean {
+    return this.audioTrackManager.isMutedByClient;
+  }
+
+  public set mediaAudioIsMuted(value: boolean) {
+    this.debugLogFunction(`AudioManager characterSpeechIsMuted set ${value}`);
+    this.audioTrackManager.isMutedByClient = value;
+  }
 
   public mediaAudioStopAll = (): void => {
     this.debugLogFunction("AudioManager mediaAudioStopAll");

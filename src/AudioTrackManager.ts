@@ -16,9 +16,13 @@ class AudioTrackManager {
 
   private muteForClientGainNode: GainNode | null = null;
 
+  private duckForMicrophoneGainNode: GainNode | null = null;
+
   private clientVolumeGainNode: GainNode | null = null;
 
   public isPlaying: boolean;
+
+  private duckControlCurrentGainVolume = 1;
 
   private clientSetVolume = 1;
 
@@ -92,10 +96,15 @@ class AudioTrackManager {
 
     this.audioContext = new AudioContextClass();
     this.clientVolumeGainNode = this.audioContext.createGain();
+    this.duckForMicrophoneGainNode = this.audioContext.createGain();
     this.muteForClientGainNode = this.audioContext.createGain();
 
     this.muteForClientGainNode.gain.setValueAtTime(
       this.clientSetMuted ? 0 : 1,
+      this.audioContext.currentTime,
+    );
+    this.muteForClientGainNode.gain.setValueAtTime(
+      this.duckControlCurrentGainVolume,
       this.audioContext.currentTime,
     );
     this.clientVolumeGainNode.gain.setValueAtTime(
@@ -103,8 +112,9 @@ class AudioTrackManager {
       this.audioContext.currentTime,
     );
 
-    this.clientVolumeGainNode.connect(this.muteForClientGainNode);
-    this.muteForClientGainNode.connect(this.audioContext.destination);
+    this.muteForClientGainNode.connect(this.duckForMicrophoneGainNode);
+    this.duckForMicrophoneGainNode.connect(this.clientVolumeGainNode);
+    this.clientVolumeGainNode.connect(this.audioContext.destination);
 
     return this.audioContext;
   };
@@ -169,19 +179,11 @@ class AudioTrackManager {
     this.isPlaying = false;
   }
 
-  public toggleMute(): void {
-    this.clientSetMuted = !this.clientSetMuted;
-
-    if (!this.audioContext || !this.muteForClientGainNode) {
-      return;
-    }
-    this.muteForClientGainNode.gain.setValueAtTime(
-      this.clientSetMuted ? 0 : 1,
-      this.audioContext.currentTime,
-    );
+  public get isMutedByClient(): boolean {
+    return this.clientSetMuted;
   }
 
-  public setMuted(muted: boolean): void {
+  public set isMutedByClient(muted: boolean) {
     this.clientSetMuted = muted;
     if (!this.audioContext || !this.muteForClientGainNode) {
       return;
@@ -192,7 +194,11 @@ class AudioTrackManager {
     );
   }
 
-  public setVolume(volume: number): void {
+  public get normalVolume(): number {
+    return this.clientSetVolume;
+  }
+
+  public set normalVolume(volume: number) {
     const clampedVolume = Math.max(0, Math.min(1, volume));
 
     this.clientSetVolume = clampedVolume;
@@ -201,6 +207,28 @@ class AudioTrackManager {
     }
     this.clientVolumeGainNode.gain.setValueAtTime(
       this.clientSetVolume,
+      this.audioContext.currentTime,
+    );
+  }
+
+  public duckTo(volume: number): void {
+    this.duckControlCurrentGainVolume = volume;
+    if (!this.audioContext || !this.duckForMicrophoneGainNode) {
+      return;
+    }
+    this.duckForMicrophoneGainNode.gain.setValueAtTime(
+      this.duckControlCurrentGainVolume,
+      this.audioContext.currentTime,
+    );
+  }
+
+  public duckOff(): void {
+    this.duckControlCurrentGainVolume = 1;
+    if (!this.audioContext || !this.duckForMicrophoneGainNode) {
+      return;
+    }
+    this.duckForMicrophoneGainNode.gain.setValueAtTime(
+      this.duckControlCurrentGainVolume,
       this.audioContext.currentTime,
     );
   }

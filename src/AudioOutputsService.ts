@@ -41,7 +41,7 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
 
   private volumeGainNode: GainNode | null = null;
 
-  public normalVolume = 1;
+  private clientSetVolume = 1;
 
   public isMutedByClient: boolean;
 
@@ -154,11 +154,14 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
     });
   };
 
-  public setNormalVolume = (volume: number): void => {
+  public get normalVolume(): number {
+    return this.clientSetVolume;
+  }
+
+  public set normalVolume(volume: number) {
     const clampedVolume = Math.max(0, Math.min(1, volume));
 
-    // record volume on a variable in case volume is requested before ramp has finished
-    this.normalVolume = clampedVolume;
+    this.clientSetVolume = clampedVolume;
 
     if (!this.volumeGainNode || !this.audioContext) {
       return;
@@ -173,7 +176,7 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
       clampedVolume,
       this.audioContext.currentTime + 0.1,
     );
-  };
+  }
 
   public setIsMutedByClient = (value: boolean): void => {
     this.debugLogFunction(`AudioOutputsService setIsMutedByClient ${value}`);

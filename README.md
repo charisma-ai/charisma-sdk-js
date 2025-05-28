@@ -269,20 +269,19 @@ const audio = new AudioManager({
 
 #### AudioManager Options
 
-| Option              | Type                               | Default                     | Description                                                                                                                             |
-| ------------------- | ---------------------------------- | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `duckVolumeLevel`   | `number`                           | 0                           | Volume level when ducking (0 to 1)                                                                                                      |
-| `normalVolumeLevel` | `number`                           | 1                           | Regular volume level (0 to 1)                                                                                                           |
-| `sttService`        | `"charisma/deepgram" \| "browser"` | `"charisma/deepgram"`       | Speech-to-text service to use (see below).                                                                                              |
-| `sttUrl`            | `string`                           | `"https://stt.charisma.ai"` | Speech-to-text service URL.                                                                                                             |
-| `streamTimeslice`   | `number`                           | 100                         | The number of milliseconds to record into each Blob. See https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder/start#timeslice |
-| `handleTranscript`  | `(transcript: string) => void`     |                             | Callback to handle transcripts.                                                                                                         |
-| `handleStartSTT`    | `() => void`                       |                             | Callback to handle when speech-to-text starts. Can be used to update the UI.                                                            |
-| `handleStopSTT`     | `() => void`                       |                             | Callback to handle when speech-to-text stops.                                                                                           |
-| `handleError`       | `(error: string) => void`          | `console.error(error)`      | Callback to handle errors.                                                                                                              |
-| `handleDisconnect`  | `(message: string) => void`        | `console.error(message)`    | Callback to handle when the transcription service disconnects.                                                                          |
-| `handleConnect`     | `(message: string) => void`        | `console.log(message)`      | Callback to handle when the transcription service connects.                                                                             |
-| `debugLogFunction`  | `(message: string) => void`        | `() => {}`                  | Callback to handle log messages for debugging.                                                                                          |
+| Option             | Type                               | Default                     | Description                                                                                                                             |
+| ------------------ | ---------------------------------- | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | --- |
+| `debugLogFunction` | `(message: string) => void`        | `() => {}`                  | Callback to handle log messages for debugging.                                                                                          |
+| `duckVolumeLevel`  | `number`                           | 0                           | Background audio volume level to use when ducking for microphone input (0 to 1).                                                        |     |
+| `handleConnect`    | `(message: string) => void`        | `console.log(message)`      | Callback to handle when the transcription service connects.                                                                             |
+| `handleError`      | `(error: string) => void`          | `console.error(error)`      | Callback to handle errors.                                                                                                              |
+| `handleDisconnect` | `(message: string) => void`        | `console.error(message)`    | Callback to handle when the transcription service disconnects.                                                                          |
+| `handleStartSTT`   | `() => void`                       |                             | Callback to handle when speech-to-text starts. Can be used to update the UI.                                                            |
+| `handleStopSTT`    | `() => void`                       |                             | Callback to handle when speech-to-text stops.                                                                                           |
+| `handleTranscript` | `(transcript: string) => void`     |                             | Callback to handle transcripts.                                                                                                         |
+| `streamTimeslice`  | `number`                           | 100                         | The number of milliseconds to record into each Blob. See https://developer.mozilla.org/en-US/docs/Web/API/MediaRecorder/start#timeslice |
+| `sttService`       | `"charisma/deepgram" \| "browser"` | `"charisma/deepgram"`       | Speech-to-text service to use (see below).                                                                                              |
+| `sttUrl`           | `string`                           | `"https://stt.charisma.ai"` | Speech-to-text service URL.                                                                                                             |
 
 There are currently two speech-to-text services available:
 
@@ -291,43 +290,45 @@ There are currently two speech-to-text services available:
 
 ### Speech-to-text
 
-#### audio.startListening(timeout?: number)
+#### audioManager.startListening(timeout?: number)
 
 Starts listening for speech. This will call handleStartSTT() when the speech-to-text service starts.
 Takes a `timeout` argument in milliseconds, which will automatically stop the speech-to-text service after the timeout. Defaults to 10000 (ten seconds) if not provided.
 
-#### audio.stopListening()
+#### audioManager.stopListening()
 
 Stops listening for speech. This will call handleStopSTT() when the speech-to-text service stops.
 
-#### audio.connect(token: string, playerSessionId: string)
+#### audioManager.connect(token: string, playerSessionId: string)
 
 Connects the to the speech-to-text service using the playthrough token and player session id to validate. This is only needed when using the `charisma/deepgram` speech-to-text service.
 
 The `playerSessionId` is returned from `playthrough.connect()`. See the `deepgram-stt` demo for an example.
 
-#### audio.disconnect()
+#### audioManager.disconnect()
 
 Disconnects from the speech-to-text service.
 
-#### audio.resetTimeout(timeout: number)
+#### audioManager.resetTimeout(timeout: number)
 
 Resets the timeout for the speech-to-text service to `timeout` in milliseconds. If this is not run, the speech-to-text service will default to a timeout of 10 seconds.
 After the timeout, the speech-to-text service will automatically stop listening.
 
-#### audio.browserIsSupported(): boolean
+#### audioManager.browserIsSupported(): boolean
 
 Returns `true` if the browser supports the `browser` speech recognition service.
 
-### Audio Outputs Service
+### General Output
 
-#### audio.initialise()
+#### audioManager.initialise()
 
 Initialises the audio for characters and media. This method _must_ be called before attempting to play audio from media nodes or character speech.
 
-This method _must_ also be called from a user interaction event, such as a click or a keypress. This is due to a security restriction in some browsers. We recommend adding it to the "start" button the sets up your playthrough. See the demos for an example.
+This method _must_ also be called from a user interaction event, such as a click or a keypress. This is due to a security restriction in some browsers (especially mobile). We recommend adding it to the "start" button the sets up your playthrough. See the demos for an example.
 
-#### audio.playCharacterSpeech(audio: ArrayBuffer, options: AudioOutputsServicePlayOptions): Promise<void>
+### Character Audio
+
+#### audioManager.playCharacterSpeech(audio: ArrayBuffer, options: AudioOutputsServicePlayOptions): Promise<void>
 
 This plays the generated speech in the message event. Typically, you would want to use this in combination with a `message` conversation handler.
 
@@ -348,9 +349,13 @@ type SpeakerPlayOptions = {
 };
 ```
 
-#### audio.characterSpeechVolume
+#### audioManager.characterSpeechVolume
 
 Get or set the volume of the character speech. Must be a number between 0 and 1.
+
+#### audioManager.characterSpeechIsMuted
+
+Get or set whether character speech is muted. Must be a boolean.
 
 ### Media Track Audio
 
@@ -358,15 +363,13 @@ Get or set the volume of the character speech. Must be a number between 0 and 1.
 
 Will play the audio tracks in a message event. An empty array can also be passed here so it can be called on every message event.
 
-#### audio.mediaAudioSetVolume(volume: number): void
+#### audio.mediaAudioVolume
 
-Sets the volume of all media audio tracks. Must be a number between 0 and 1.
+Get or set the volume of all non-character audio. Must be a number between 0 and 1.
 
-The volume set here will be multiplied by the volume set in the graph editor for each track. For example, if you set the graph editor volume to 0.5 and the SDK volume to 1, the final volume will be 0.5. If you set the graph editor volume to 0.5 and the SDK volume to 0.5, the final volume will be 0.25.
+#### audioManager.characterSpeechIsMuted
 
-#### audio.mediaAudioToggleMute()
-
-Will mute and unmute all media audio tracks.
+Get or set whether all non-character audio is muted. Must be a boolean.
 
 #### audio.mediaAudioStopAll()
 

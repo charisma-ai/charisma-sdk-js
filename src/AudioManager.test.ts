@@ -24,21 +24,18 @@ describe("AudioManager", () => {
     const audioManager = new AudioManager(defaultOptions);
 
     expect(audioManager["duckVolumeLevel"]).toBe(0);
-    expect(audioManager["normalVolumeLevel"]).toBe(1);
     expect(audioManager["sttService"]).toBe("charisma/deepgram");
   });
 
   test("should initialise with provided options", () => {
     const mockOptions: AudioManagerOptions = {
       duckVolumeLevel: 0.2,
-      normalVolumeLevel: 2,
       sttService: "browser",
     };
 
     const audioManager = new AudioManager(mockOptions);
 
     expect(audioManager["duckVolumeLevel"]).toBe(0.2);
-    expect(audioManager["normalVolumeLevel"]).toBe(2);
     expect(audioManager["sttService"]).toBe("browser");
   });
 
