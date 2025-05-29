@@ -359,11 +359,11 @@ Get or set whether character speech is muted. Must be a boolean.
 
 ### Media Track Audio
 
-#### audio.mediaAudioPlay(audioTracks: AudioTrack[]): void
+#### audioManager.mediaAudioPlay(audioTracks: AudioTrack[]): void
 
 Will play the audio tracks in a message event. An empty array can also be passed here so it can be called on every message event.
 
-#### audio.mediaAudioVolume
+#### audioManager.mediaAudioVolume
 
 Get or set the volume of all non-character audio. Must be a number between 0 and 1.
 
@@ -371,7 +371,7 @@ Get or set the volume of all non-character audio. Must be a number between 0 and
 
 Get or set whether all non-character audio is muted. Must be a boolean.
 
-#### audio.mediaAudioStopAll()
+#### audioManager.mediaAudioStopAll()
 
 Will stop all media audio tracks.
 

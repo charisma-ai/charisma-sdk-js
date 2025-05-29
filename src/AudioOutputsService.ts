@@ -43,7 +43,7 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
 
   private clientSetVolume = 1;
 
-  public isMutedByClient: boolean;
+  private clientSetMuted: boolean;
 
   private currentSources: AudioOutputsServiceSource[] = [];
 
@@ -55,7 +55,7 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
   ) {
     super();
     this.debugLogFunction = debugLogFunction;
-    this.isMutedByClient = muteCharacterAudio;
+    this.clientSetMuted = muteCharacterAudio;
   }
 
   public getAudioContext = (): AudioContext => {
@@ -82,7 +82,7 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
       this.audioContext.currentTime,
     );
     this.muteForClientGainNode.gain.setValueAtTime(
-      this.isMutedByClient ? 0 : 1,
+      this.clientSetMuted ? 0 : 1,
       this.audioContext.currentTime,
     );
     this.volumeGainNode.gain.setValueAtTime(
@@ -178,10 +178,14 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
     );
   }
 
-  public setIsMutedByClient = (value: boolean): void => {
+  public get isMutedByClient(): boolean {
+    return this.clientSetMuted;
+  }
+
+  public set isMutedByClient(value: boolean) {
     this.debugLogFunction(`AudioOutputsService setIsMutedByClient ${value}`);
 
-    this.isMutedByClient = value;
+    this.clientSetMuted = value;
 
     if (!this.muteForClientGainNode || !this.audioContext) {
       return;
@@ -196,7 +200,7 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
       value ? 0 : 1,
       this.audioContext.currentTime + 0.1,
     );
-  };
+  }
 
   public beginMutingForMicrophone = (): void => {
     this.debugLogFunction(`AudioOutputsService beginMuting`);

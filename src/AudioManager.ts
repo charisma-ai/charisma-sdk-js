@@ -237,7 +237,7 @@ class AudioManager {
 
   public set characterSpeechIsMuted(value: boolean) {
     this.debugLogFunction(`AudioManager characterSpeechIsMuted set ${value}`);
-    this.audioOutputsService.setIsMutedByClient(value);
+    this.audioOutputsService.isMutedByClient = value;
   }
 
   // **
