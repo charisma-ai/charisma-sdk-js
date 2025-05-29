@@ -230,7 +230,6 @@ window.toggleMicrophone = () => {
 };
 
 window.setBackgroundAudio = (audioOn: boolean) => {
-  console.log(audioOn);
   audioManager.mediaAudioIsMuted = !audioOn;
 };
 

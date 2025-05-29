@@ -62,7 +62,7 @@ class AudioTrackManager {
     source.buffer = audioBuffer;
     source.loop = audioTrack.loop;
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    source.connect(sourceGainNode).connect(this.clientVolumeGainNode!);
+    source.connect(sourceGainNode).connect(this.muteForClientGainNode!);
     source.start(0);
 
     source.onended = () => {
