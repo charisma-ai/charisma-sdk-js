@@ -14,16 +14,26 @@ declare const window: WindowWithAudioContext;
 class AudioTrackManager {
   private audioContext: AudioContext | undefined;
 
+  private muteForClientGainNode: GainNode | null = null;
+
+  private duckForMicrophoneGainNode: GainNode | null = null;
+
+  private clientVolumeGainNode: GainNode | null = null;
+
   public isPlaying: boolean;
+
+  private duckControlCurrentGainVolume = 1;
+
+  private clientSetVolume = 1;
+
+  private clientSetMuted = false;
 
   private currentAudio: {
     source: AudioBufferSourceNode;
-    gainNode: GainNode;
+    originalGainNode: GainNode;
     url: string;
     originalVolume: number;
   }[];
-
-  private muted = false;
 
   constructor() {
     this.isPlaying = false;
@@ -44,25 +54,30 @@ class AudioTrackManager {
     const audioBuffer = await this.loadAudioBuffer(audioTrack.url);
     if (this.audioContext === undefined) return;
 
-    const gainNode = this.audioContext.createGain();
-    gainNode.gain.value = audioTrack.volume;
+    const sourceGainNode = this.audioContext.createGain();
+    sourceGainNode.gain.value = audioTrack.volume;
 
     const source = this.audioContext.createBufferSource();
     if (audioBuffer === undefined) return;
     source.buffer = audioBuffer;
     source.loop = audioTrack.loop;
-    source.connect(gainNode).connect(this.audioContext.destination);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    source.connect(sourceGainNode).connect(this.muteForClientGainNode!);
     source.start(0);
 
     source.onended = () => {
       this.currentAudio = this.currentAudio.filter(
         (currentAudio) => currentAudio.source !== source,
       );
+
+      if (this.currentAudio.length === 0) {
+        this.isPlaying = false;
+      }
     };
 
     this.currentAudio.push({
       source,
-      gainNode,
+      originalGainNode: sourceGainNode,
       url: audioTrack.url,
       originalVolume: audioTrack.volume,
     });
@@ -80,12 +95,34 @@ class AudioTrackManager {
     }
 
     this.audioContext = new AudioContextClass();
+    this.clientVolumeGainNode = this.audioContext.createGain();
+    this.duckForMicrophoneGainNode = this.audioContext.createGain();
+    this.muteForClientGainNode = this.audioContext.createGain();
+
+    this.muteForClientGainNode.gain.setValueAtTime(
+      this.clientSetMuted ? 0 : 1,
+      this.audioContext.currentTime,
+    );
+    this.duckForMicrophoneGainNode.gain.setValueAtTime(
+      this.duckControlCurrentGainVolume,
+      this.audioContext.currentTime,
+    );
+    this.clientVolumeGainNode.gain.setValueAtTime(
+      this.clientSetVolume,
+      this.audioContext.currentTime,
+    );
+
+    this.muteForClientGainNode.connect(this.duckForMicrophoneGainNode);
+    this.duckForMicrophoneGainNode.connect(this.clientVolumeGainNode);
+    this.clientVolumeGainNode.connect(this.audioContext.destination);
 
     return this.audioContext;
   };
 
   public async play(audioTracks: AudioTrack[]): Promise<void> {
-    if (audioTracks.length === 0) return;
+    if (audioTracks.length === 0) {
+      return;
+    }
     if (this.audioContext === undefined) {
       this.getAudioContext();
     }
@@ -121,6 +158,10 @@ class AudioTrackManager {
         }
       }),
     );
+
+    if (this.currentAudio.length === 0) {
+      this.isPlaying = false;
+    }
   }
 
   public pause(): void {
@@ -138,20 +179,58 @@ class AudioTrackManager {
     this.isPlaying = false;
   }
 
-  public toggleMute(): void {
-    this.muted = !this.muted;
-
-    this.currentAudio.forEach(({ gainNode }) => {
-      // eslint-disable-next-line no-param-reassign
-      gainNode.gain.value = this.muted ? 0 : 1;
-    });
+  public get isMutedByClient(): boolean {
+    return this.clientSetMuted;
   }
 
-  public setVolume(volume: number): void {
-    this.currentAudio.forEach(({ gainNode, originalVolume }) => {
-      // eslint-disable-next-line no-param-reassign
-      gainNode.gain.value = originalVolume * volume;
-    });
+  public set isMutedByClient(muted: boolean) {
+    this.clientSetMuted = muted;
+    if (!this.audioContext || !this.muteForClientGainNode) {
+      return;
+    }
+    this.muteForClientGainNode.gain.setValueAtTime(
+      this.clientSetMuted ? 0 : 1,
+      this.audioContext.currentTime + 0.1,
+    );
+  }
+
+  public get normalVolume(): number {
+    return this.clientSetVolume;
+  }
+
+  public set normalVolume(volume: number) {
+    const clampedVolume = Math.max(0, Math.min(1, volume));
+
+    this.clientSetVolume = clampedVolume;
+    if (!this.audioContext || !this.clientVolumeGainNode) {
+      return;
+    }
+    this.clientVolumeGainNode.gain.setValueAtTime(
+      this.clientSetVolume,
+      this.audioContext.currentTime + 0.1,
+    );
+  }
+
+  public duckTo(volume: number): void {
+    this.duckControlCurrentGainVolume = volume;
+    if (!this.audioContext || !this.duckForMicrophoneGainNode) {
+      return;
+    }
+    this.duckForMicrophoneGainNode.gain.setValueAtTime(
+      this.duckControlCurrentGainVolume,
+      this.audioContext.currentTime + 0.05,
+    );
+  }
+
+  public duckOff(): void {
+    this.duckControlCurrentGainVolume = 1;
+    if (!this.audioContext || !this.duckForMicrophoneGainNode) {
+      return;
+    }
+    this.duckForMicrophoneGainNode.gain.setValueAtTime(
+      this.duckControlCurrentGainVolume,
+      this.audioContext.currentTime + 0.01,
+    );
   }
 }
 

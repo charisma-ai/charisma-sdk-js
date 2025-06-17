@@ -11,7 +11,6 @@
         Story ID
         <input type="text" id="story-id" placeholder="12345" />
         Story API Key
-        <input type="text" id="story-api-key" placeholder="Story API Key" />
         <span class="comment">
           only needed for draft or unpublished versions
         </span>
@@ -34,15 +33,7 @@
           id="reply-input"
         />
       </div>
-      <button id="record-button" onclick="toggleMicrophone(event)">
-        Record
-      </button>
       <button onclick="reply()">Send</button>
-      <div >
-        <button onclick="toggleMuteBackgroundAudio()">
-          Mute Background Audio
-        </button>
-      </div>
-    <script type="module" src="/src/main.ts"></script>
+    <script type="module" src="/src/main.js"></script>
   </body>
 </html>

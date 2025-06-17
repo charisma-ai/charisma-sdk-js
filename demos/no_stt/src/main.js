@@ -16,12 +16,7 @@ const appendMessage = (message, className, name) => {
 };
 
 // Setup the audio manager.
-const audioManager = new AudioManager({
-  duckVolumeLevel: 0.1,
-  normalVolumeLevel: 1,
-  sttService: "browser",
-  streamTimeslice: 100,
-});
+const audioManager = new AudioManager({});
 
 let playthrough;
 let conversation;
@@ -136,6 +131,3 @@ window.onKeyPress = function onKeyPress(event) {
 
 window.reply = reply;
 
-window.toggleMuteBackgroundAudio = () => {
-  audioManager.mediaAudioToggleMute();
-};

@@ -64,11 +64,6 @@ button:hover {
   padding-left: 0.5em;
 }
 
-.error-message {
-  color: red;
-  padding-left: 0.5em;
-}
-
 .story-parameters-container {
   display: flex;
   flex-direction: column;
@@ -85,4 +80,14 @@ button:hover {
 .comment {
   font-size: 0.6em;
   color: #999;
+}
+
+#volume-control {
+  display: flex;
+  justify-content: space-between;
+  border: 1px solid #ccc;
+}
+
+.volume-item {
+  margin: 0.8em;
 }

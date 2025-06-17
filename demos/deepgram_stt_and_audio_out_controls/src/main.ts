@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-
 import "./style.css";
 import {
   Playthrough,
@@ -16,8 +14,11 @@ declare global {
     start: () => Promise<void>;
     reply: () => void;
     onKeyPress: (event: KeyboardEvent) => void;
-    toggleMuteBackgroundAudio: () => void;
+    setBackgroundAudio: (audioOn: boolean) => void;
+    setCharacterAudio: (audioOn: boolean) => void;
     toggleMicrophone: (event: Event) => void;
+    setBackgroundAudioVolume: (volume: number) => void;
+    setCharacterAudioVolume: (volume: number) => void;
   }
 }
 
@@ -33,10 +34,17 @@ const appendMessage = (message: string, className: string, name?: string) => {
 
 // Keep track of the recording statuses of the microphone so we can update the UI accordingly.
 let recordingStatus: "recording" | "off" | "starting" = "off";
+let confirmedText = "";
+let volatileText = "";
 
 const handleStartSTT = () => {
   recordingStatus = "recording";
   if (recordButton) recordButton.innerHTML = "Stop";
+  const replyInput = <HTMLInputElement>document.getElementById("reply-input");
+
+  if (replyInput) {
+    replyInput.value = "";
+  }
 };
 
 const handleStopSTT = () => {
@@ -45,29 +53,40 @@ const handleStopSTT = () => {
 };
 
 const handleTranscript = (transcript: string) => {
+  confirmedText = `${confirmedText} ${transcript}`;
+  volatileText = "";
   const replyInput = <HTMLInputElement>document.getElementById("reply-input");
   if (replyInput) {
-    replyInput.value = transcript;
+    replyInput.value = confirmedText;
+  }
+};
+
+const handleInterimTranscript = (interimTranscript: string) => {
+  volatileText = interimTranscript;
+  const replyInput = <HTMLInputElement>document.getElementById("reply-input");
+  if (replyInput) {
+    replyInput.value = `${confirmedText} ${volatileText}`;
   }
 };
 
 // Setup the audio manager.
 const audioManager = new AudioManager({
   duckVolumeLevel: 0.1,
-  normalVolumeLevel: 1,
-  sttService: "browser",
+  sttService: "charisma/deepgram",
   streamTimeslice: 100,
   handleTranscript,
+  handleInterimTranscript,
   handleStartSTT,
   handleStopSTT,
+  handleDisconnect: (message: string) =>
+    appendMessage(message, "disconnected-message"),
+  handleConnect: (message: string) =>
+    appendMessage(message, "connected-message"),
+  debugLogFunction: (message: string) =>
+    console.log(
+      `${new Date().toISOString().split("T")[1].slice(0, 12)} ${message}`,
+    ),
 });
-
-if (!audioManager.browserIsSupported()) {
-  appendMessage(
-    "Your browser does not support the browser STT service.",
-    "error-message",
-  );
-}
 
 let playthrough: Playthrough;
 let conversation: Conversation;
@@ -77,15 +96,19 @@ window.start = async function start() {
   // This is due to a security restriction in some browsers.
   audioManager.initialise();
 
-  const storyIdInput = document.getElementById("story-id");
+  const storyIdInput = document.getElementById("story-id") as HTMLInputElement;
   const storyId = Number(storyIdInput.value);
-  const storyApiKeyInput = document.getElementById("story-api-key");
+  const storyApiKeyInput = document.getElementById(
+    "story-api-key",
+  ) as HTMLInputElement;
   const storyApiKey = storyApiKeyInput.value;
-  const storyVersionInput = document.getElementById("version");
+  const storyVersionInput = document.getElementById(
+    "version",
+  ) as HTMLInputElement;
   const storyVersion = Number(storyVersionInput.value) || undefined;
   const StartGraphReferenceIdInput = document.getElementById(
     "startGraphReferenceId",
-  );
+  ) as HTMLInputElement;
   const startGraphReferenceId = StartGraphReferenceIdInput.value;
 
   const { token } = await createPlaythroughToken({
@@ -157,7 +180,8 @@ window.start = async function start() {
     }
   });
 
-  await playthrough.connect();
+  const { playerSessionId } = await playthrough.connect();
+  audioManager.connect(token, playerSessionId);
 };
 
 const reply = () => {
@@ -172,10 +196,10 @@ const reply = () => {
   if (text.trim() === "") return;
 
   conversation.reply({ text });
-  replyInput.value = "";
 
   // Put player message on the page.
   appendMessage(text, "player-message", "You");
+  replyInput.value = "";
 };
 
 // Handle the Enter key press.
@@ -194,6 +218,8 @@ window.toggleMicrophone = () => {
 
   if (recordingStatus === "off") {
     audioManager.startListening();
+    confirmedText = "";
+    volatileText = "";
     recordingStatus = "starting";
     recordButton.innerHTML = "...";
   } else if (recordingStatus === "recording") {
@@ -203,6 +229,18 @@ window.toggleMicrophone = () => {
   }
 };
 
-window.toggleMuteBackgroundAudio = () => {
-  audioManager.mediaAudioToggleMute();
+window.setBackgroundAudio = (audioOn: boolean) => {
+  audioManager.mediaAudioIsMuted = !audioOn;
+};
+
+window.setBackgroundAudioVolume = (volume: number) => {
+  audioManager.mediaAudioVolume = volume;
+};
+
+window.setCharacterAudio = (audioOn: boolean) => {
+  audioManager.characterSpeechIsMuted = !audioOn;
+};
+
+window.setCharacterAudioVolume = (volume: number) => {
+  audioManager.characterSpeechVolume = volume;
 };
