@@ -91,10 +91,11 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
       this.audioContext.currentTime,
     );
 
-    this.volumeGainNode.connect(this.muteForClientGainNode);
-    this.muteForClientGainNode.connect(this.muteForMicrophoneGainNode);
-    this.muteForMicrophoneGainNode.connect(this.audioContext.destination);
-    this.analyserNode.connect(this.audioContext.destination);
+    this.volumeGainNode
+      .connect(this.muteForClientGainNode)
+      .connect(this.muteForMicrophoneGainNode)
+      .connect(this.analyserNode) // Connect analyser *after* muteForMicrophoneGainNode
+      .connect(this.audioContext.destination);
 
     return this.audioContext;
   };
