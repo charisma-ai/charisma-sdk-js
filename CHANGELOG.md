@@ -1,5 +1,11 @@
 # Changelog
 
+### vNext
+
+### v7.0.0
+
+- Add improved volume and mute controls for character and background audio outputs
+
 ### v6.0.0
 
 - Add interim transcripts from the STT service

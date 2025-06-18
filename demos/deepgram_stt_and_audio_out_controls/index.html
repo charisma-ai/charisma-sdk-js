@@ -14,7 +14,7 @@
         <span class="comment">
           only needed for draft or unpublished versions
         </span>
-        <input type="text" id="story-api-key" />
+        <input type="text" id="story-api-key" placeholder="Story API Key" />
         Version
         <span class="comment">
           use -1 for draft, or undefined for most recent published
@@ -33,12 +33,22 @@
           id="reply-input"
         />
       </div>
+      <button id="record-button" onclick="toggleMicrophone(event)">
+        Record
+      </button>
       <button onclick="reply()">Send</button>
-      <div >
-        <button onclick="toggleMuteBackgroundAudio()">
-          Mute Background Audio
-        </button>
+      <div id="volume-control">
+        <div class="volume-item">
+          <label for="backgroundMute">Background Audio</label>
+          <input type="checkbox" id="backgroundMute" checked onchange="setBackgroundAudio(this.checked)">
+          <input type="range" min="0" max="1" step="0.01" value="1" oninput="setBackgroundAudioVolume(this.value)">
+        </div>
+        <div class="volume-item">
+          <label for="characterMute">Character Audio</label>
+          <input type="checkbox" id="characterMute" checked onchange="setCharacterAudio(this.checked)">
+          <input type="range" min="0" max="1" step="0.01" value="1" oninput="setCharacterAudioVolume(this.value)">
+        </div>
       </div>
-    <script type="module" src="/src/main.js"></script>
+    <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

@@ -29,26 +29,33 @@ type AudioOutputsServiceSource = {
 class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
   private audioContext: AudioContext | undefined;
 
-  private muteGainNode: GainNode | null = null;
+  private muteForMicrophoneGainNode: GainNode | null = null;
+
+  private muteForClientGainNode: GainNode | null = null;
 
   private volumeGainNode: GainNode | null = null;
 
   private analyserNode: AnalyserNode | null = null;
 
-  public normalVolume = 1;
+  private clientSetVolume = 1;
+
+  private clientSetMuted: boolean;
+
+  private startTime: number | null = null;
+
+  private isPlaying = false;
 
   private currentSources: AudioOutputsServiceSource[] = [];
 
   private debugLogFunction: (message: string) => void;
 
-  // NEW: Track start time and playing status
-  private startTime: number | null = null;
-
-  private isPlaying = false;
-
-  constructor(debugLogFunction: (message: string) => void) {
+  constructor(
+    debugLogFunction: (message: string) => void,
+    muteCharacterAudio: boolean,
+  ) {
     super();
     this.debugLogFunction = debugLogFunction;
+    this.clientSetMuted = muteCharacterAudio;
   }
 
   public getAudioContext = (): AudioContext => {
@@ -65,18 +72,28 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
 
     this.audioContext = new AudioContextClass();
 
-    this.muteGainNode = this.audioContext.createGain();
+    // Create and store the gain nodes.
+    this.muteForMicrophoneGainNode = this.audioContext.createGain();
+    this.muteForClientGainNode = this.audioContext.createGain();
     this.volumeGainNode = this.audioContext.createGain();
     this.analyserNode = this.audioContext.createAnalyser();
 
-    this.muteGainNode.gain.setValueAtTime(1, this.audioContext.currentTime);
+    this.muteForMicrophoneGainNode.gain.setValueAtTime(
+      1,
+      this.audioContext.currentTime,
+    );
+    this.muteForClientGainNode.gain.setValueAtTime(
+      this.clientSetMuted ? 0 : 1,
+      this.audioContext.currentTime,
+    );
     this.volumeGainNode.gain.setValueAtTime(
       this.normalVolume,
       this.audioContext.currentTime,
     );
 
-    this.volumeGainNode.connect(this.muteGainNode);
-    this.muteGainNode.connect(this.analyserNode);
+    this.volumeGainNode.connect(this.muteForClientGainNode);
+    this.muteForClientGainNode.connect(this.muteForMicrophoneGainNode);
+    this.muteForMicrophoneGainNode.connect(this.audioContext.destination);
     this.analyserNode.connect(this.audioContext.destination);
 
     return this.audioContext;
@@ -161,12 +178,17 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
     });
   };
 
-  public setNormalVolume = (volume: number): void => {
-    this.debugLogFunction(`AudioOutputsService setNormalVolume ${volume}`);
-    if (!this.volumeGainNode || !this.audioContext) return;
+  public get normalVolume(): number {
+    return this.clientSetVolume;
+  }
 
+  public set normalVolume(volume: number) {
     const clampedVolume = Math.max(0, Math.min(1, volume));
-    this.normalVolume = clampedVolume;
+    this.clientSetVolume = clampedVolume;
+
+    if (!this.volumeGainNode || !this.audioContext) {
+      return;
+    }
 
     this.volumeGainNode.gain.setValueAtTime(
       this.volumeGainNode.gain.value,
@@ -176,31 +198,55 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
       clampedVolume,
       this.audioContext.currentTime + 0.1,
     );
-  };
+  }
 
-  public beginMuting = (): void => {
-    this.debugLogFunction(`AudioOutputsService beginMuting`);
-    if (!this.muteGainNode || !this.audioContext) return;
+  public get isMutedByClient(): boolean {
+    return this.clientSetMuted;
+  }
 
-    this.muteGainNode.gain.setValueAtTime(
-      this.muteGainNode.gain.value,
+  public set isMutedByClient(value: boolean) {
+    this.debugLogFunction(`AudioOutputsService setIsMutedByClient ${value}`);
+
+    this.clientSetMuted = value;
+
+    if (!this.muteForClientGainNode || !this.audioContext) {
+      return;
+    }
+
+    // smooth ramp to new value
+    this.muteForClientGainNode.gain.setValueAtTime(
+      this.muteForClientGainNode.gain.value,
       this.audioContext.currentTime,
     );
-    this.muteGainNode.gain.linearRampToValueAtTime(
+    this.muteForClientGainNode.gain.linearRampToValueAtTime(
+      value ? 0 : 1,
+      this.audioContext.currentTime + 0.1,
+    );
+  }
+
+  public beginMutingForMicrophone = (): void => {
+    this.debugLogFunction(`AudioOutputsService beginMuting`);
+    if (!this.muteForMicrophoneGainNode || !this.audioContext) return;
+
+    this.muteForMicrophoneGainNode.gain.setValueAtTime(
+      this.muteForMicrophoneGainNode.gain.value,
+      this.audioContext.currentTime,
+    );
+    this.muteForMicrophoneGainNode.gain.linearRampToValueAtTime(
       0,
       this.audioContext.currentTime + 0.05,
     );
   };
 
-  public endMuting = (): void => {
+  public endMutingForMicrophone = (): void => {
     this.debugLogFunction(`AudioOutputsService endMuting`);
-    if (!this.muteGainNode || !this.audioContext) return;
+    if (!this.muteForMicrophoneGainNode || !this.audioContext) return;
 
-    this.muteGainNode.gain.setValueAtTime(
-      this.muteGainNode.gain.value,
+    this.muteForMicrophoneGainNode.gain.setValueAtTime(
+      this.muteForMicrophoneGainNode.gain.value,
       this.audioContext.currentTime,
     );
-    this.muteGainNode.gain.linearRampToValueAtTime(
+    this.muteForMicrophoneGainNode.gain.linearRampToValueAtTime(
       1,
       this.audioContext.currentTime + 0.01,
     );

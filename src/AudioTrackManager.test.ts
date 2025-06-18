@@ -4,7 +4,7 @@ import { AudioTrackBehaviour } from "./types";
 
 globalThis.AudioContext = jest.fn().mockImplementation(() => {
   const gainNodeMock = {
-    gain: { value: 1 },
+    gain: { value: 1, setValueAtTime: jest.fn() },
     connect: jest.fn().mockReturnThis(), // return `this` to allow chaining
   };
 
@@ -125,54 +125,6 @@ describe("AudioTrackManager", () => {
 
     expect(audioTrackManager.isPlaying).toBe(false);
     expect(audioTrackManager["currentAudio"]).toEqual([]);
-  });
-
-  test("should toggle mute on all currently playing audio tracks", async () => {
-    const audioTrackManager = new AudioTrackManager();
-    const audioTracks = [
-      {
-        url: "track1.mp3",
-        loop: false,
-        volume: 0.5,
-        behaviour: AudioTrackBehaviour.Restart,
-        stopPlaying: false,
-      },
-    ];
-
-    await audioTrackManager.play(audioTracks);
-
-    audioTrackManager.toggleMute();
-    expect(audioTrackManager["currentAudio"][0].gainNode.gain.value).toBe(0);
-
-    audioTrackManager.toggleMute();
-    expect(audioTrackManager["currentAudio"][0].gainNode.gain.value).toBe(1);
-  });
-
-  test("should set the volume for all currently playing audio tracks", async () => {
-    const audioTrackManager = new AudioTrackManager();
-    const audioTracks = [
-      {
-        url: "track2.mp3",
-        loop: true,
-        volume: 0.8,
-        behaviour: AudioTrackBehaviour.Continue,
-        stopPlaying: false,
-      },
-    ];
-
-    await audioTrackManager.play(audioTracks);
-
-    audioTrackManager.setVolume(0.5);
-
-    expect(audioTrackManager["currentAudio"][0].gainNode.gain.value).toBe(0.4);
-
-    audioTrackManager.setVolume(0.25);
-
-    expect(audioTrackManager["currentAudio"][0].gainNode.gain.value).toBe(0.2);
-
-    audioTrackManager.setVolume(1);
-
-    expect(audioTrackManager["currentAudio"][0].gainNode.gain.value).toBe(0.8);
   });
 
   test("should restart an audio track when behaviour is set to 'restart'", async () => {

@@ -8,11 +8,11 @@ import { AudioTrack } from "./types.js";
 
 export interface AudioManagerOptions {
   duckVolumeLevel?: number;
-  normalVolumeLevel?: number;
   sttService?: "browser" | "charisma/deepgram";
   streamTimeslice?: number;
   reconnectAttemptsTimeout?: number;
   sttUrl?: string;
+  muteCharacterAudio?: boolean;
   handleStartSTT?: () => void;
   handleStopSTT?: () => void;
   handleTranscript?: (transcript: string) => void;
@@ -34,8 +34,6 @@ class AudioManager {
 
   private duckVolumeLevel: number;
 
-  private normalVolumeLevel: number;
-
   private sttService: "browser" | "charisma/deepgram";
 
   private microphoneIsOn = false;
@@ -49,7 +47,6 @@ class AudioManager {
     this.debugLogFunction = options.debugLogFunction || (() => {});
     this.debugLogFunction("AudioManager running constructor");
     this.duckVolumeLevel = options.duckVolumeLevel ?? 0;
-    this.normalVolumeLevel = options.normalVolumeLevel ?? 1;
     this.sttService = options.sttService ?? "charisma/deepgram";
 
     this.audioInputsService = new AudioInputsService(
@@ -59,7 +56,11 @@ class AudioManager {
       this.debugLogFunction,
     );
     this.audioInputsBrowser = new AudioInputsBrowser();
-    this.audioOutputsService = new AudioOutputsService(this.debugLogFunction);
+    const muteCharacterAudio = !!options.muteCharacterAudio;
+    this.audioOutputsService = new AudioOutputsService(
+      this.debugLogFunction,
+      muteCharacterAudio,
+    );
     this.audioTrackManager = new AudioTrackManager();
 
     this.audioInputsService.on(
@@ -113,16 +114,16 @@ class AudioManager {
 
     this.audioOutputsService.on("start", () => {
       if (this.microphoneIsOn) {
-        this.audioOutputsService.beginMuting();
+        this.audioOutputsService.beginMutingForMicrophone();
       } else {
-        this.audioOutputsService.endMuting();
+        this.audioOutputsService.endMutingForMicrophone();
       }
     });
     this.audioOutputsService.on("stop", () => {
       if (this.microphoneIsOn) {
-        this.audioOutputsService.beginMuting();
+        this.audioOutputsService.beginMutingForMicrophone();
       } else {
-        this.audioOutputsService.endMuting();
+        this.audioOutputsService.endMutingForMicrophone();
       }
 
       this.onSpeechEndCallbacks.forEach((callback) => callback());
@@ -140,10 +141,10 @@ class AudioManager {
     }
 
     this.microphoneIsOn = true;
-    this.audioOutputsService.beginMuting();
+    this.audioOutputsService.beginMutingForMicrophone();
 
     if (this.audioTrackManager.isPlaying) {
-      this.audioTrackManager.setVolume(this.duckVolumeLevel);
+      this.audioTrackManager.duckTo(this.duckVolumeLevel);
     }
   };
 
@@ -157,10 +158,10 @@ class AudioManager {
 
     this.microphoneIsOn = false;
 
-    this.audioOutputsService.endMuting();
+    this.audioOutputsService.endMutingForMicrophone();
 
     if (this.audioTrackManager.isPlaying) {
-      this.audioTrackManager.setVolume(this.normalVolumeLevel);
+      this.audioTrackManager.duckOff();
     }
   };
 
@@ -222,8 +223,16 @@ class AudioManager {
   }
 
   public set characterSpeechVolume(volume: number) {
-    this.debugLogFunction("AudioManager outputServiceSetVolume");
-    this.audioOutputsService.setNormalVolume(volume);
+    this.audioOutputsService.normalVolume = volume;
+  }
+
+  public get characterSpeechIsMuted(): boolean {
+    return this.audioOutputsService.isMutedByClient;
+  }
+
+  public set characterSpeechIsMuted(value: boolean) {
+    this.debugLogFunction(`AudioManager characterSpeechIsMuted set ${value}`);
+    this.audioOutputsService.isMutedByClient = value;
   }
 
   // NEW: Playback tracking
@@ -243,15 +252,22 @@ class AudioManager {
     this.audioTrackManager.play(audioTracks);
   };
 
-  public mediaAudioSetVolume = (volume: number): void => {
-    this.debugLogFunction("AudioManager mediaAudioSetVolume");
-    this.audioTrackManager.setVolume(volume);
-  };
+  public get mediaAudioVolume(): number {
+    return this.audioTrackManager.normalVolume;
+  }
 
-  public mediaAudioToggleMute = (): void => {
-    this.debugLogFunction("AudioManager mediaAudioToggleMute");
-    this.audioTrackManager.toggleMute();
-  };
+  public set mediaAudioVolume(volume: number) {
+    this.audioTrackManager.normalVolume = volume;
+  }
+
+  public get mediaAudioIsMuted(): boolean {
+    return this.audioTrackManager.isMutedByClient;
+  }
+
+  public set mediaAudioIsMuted(value: boolean) {
+    this.debugLogFunction(`AudioManager mediaAudioIsMuted set ${value}`);
+    this.audioTrackManager.isMutedByClient = value;
+  }
 
   public mediaAudioStopAll = (): void => {
     this.debugLogFunction("AudioManager mediaAudioStopAll");
