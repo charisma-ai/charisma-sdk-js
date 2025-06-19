@@ -269,6 +269,11 @@ class AudioManager {
     this.debugLogFunction("AudioManager mediaAudioStopAll");
     this.audioTrackManager.stopAll();
   };
+
+  public getAnalyserNode = (): AnalyserNode | null => {
+    this.debugLogFunction("AudioManager getAnalyserNode");
+    return this.audioOutputsService.getAnalyserNode();
+  };
 }
 
 export default AudioManager;
