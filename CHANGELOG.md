@@ -2,6 +2,10 @@
 
 ### vNext
 
+### v7.0.1
+
+- Expose Character Speech Analyser node.
+
 ### v7.0.0
 
 - Add improved volume and mute controls for character and background audio outputs
