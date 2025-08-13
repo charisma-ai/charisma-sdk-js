@@ -240,6 +240,11 @@ class AudioManager {
     this.audioOutputsService.isMutedByClient = value;
   }
 
+  public getCharacterSpeechAnalyserNode = (): AnalyserNode | null => {
+    this.debugLogFunction("AudioManager getCharacterSpeechAnalyserNode");
+    return this.audioOutputsService.getAnalyserNode();
+  };
+
   // **
   // ** Audio Track Manager ** //
   // **

@@ -41,6 +41,8 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
 
   private volumeGainNode: GainNode | null = null;
 
+  private analyserNode: AnalyserNode | null = null;
+
   private clientSetVolume = 1;
 
   private clientSetMuted: boolean;
@@ -76,6 +78,7 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
     this.muteForMicrophoneGainNode = this.audioContext.createGain();
     this.muteForClientGainNode = this.audioContext.createGain();
     this.volumeGainNode = this.audioContext.createGain();
+    this.analyserNode = this.audioContext.createAnalyser();
 
     this.muteForMicrophoneGainNode.gain.setValueAtTime(
       1,
@@ -90,9 +93,11 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
       this.audioContext.currentTime,
     );
 
-    this.volumeGainNode.connect(this.muteForClientGainNode);
-    this.muteForClientGainNode.connect(this.muteForMicrophoneGainNode);
-    this.muteForMicrophoneGainNode.connect(this.audioContext.destination);
+    this.volumeGainNode
+      .connect(this.muteForClientGainNode)
+      .connect(this.muteForMicrophoneGainNode)
+      .connect(this.analyserNode)
+      .connect(this.audioContext.destination);
 
     return this.audioContext;
   };
@@ -230,6 +235,11 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
       1,
       this.audioContext.currentTime + 0.01,
     );
+  };
+
+  public getAnalyserNode = (): AnalyserNode | null => {
+    this.debugLogFunction("AudioOutputsService getAnalyserNode");
+    return this.analyserNode || null;
   };
 }
 
