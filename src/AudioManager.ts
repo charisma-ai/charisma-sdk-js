@@ -240,6 +240,11 @@ class AudioManager {
     this.audioOutputsService.isMutedByClient = value;
   }
 
+  public getCharacterSpeechAnalyserNode = (): AnalyserNode | null => {
+    this.debugLogFunction("AudioManager getCharacterSpeechAnalyserNode");
+    return this.audioOutputsService.getAnalyserNode();
+  };
+
   // **
   // ** Audio Track Manager ** //
   // **
@@ -268,11 +273,6 @@ class AudioManager {
   public mediaAudioStopAll = (): void => {
     this.debugLogFunction("AudioManager mediaAudioStopAll");
     this.audioTrackManager.stopAll();
-  };
-
-  public getAnalyserNode = (): AnalyserNode | null => {
-    this.debugLogFunction("AudioManager getAnalyserNode");
-    return this.audioOutputsService.getAnalyserNode();
   };
 }
 
