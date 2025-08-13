@@ -47,6 +47,8 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
 
   private clientSetMuted: boolean;
 
+  private latestStartTime = 0;
+
   private currentSources: AudioOutputsServiceSource[] = [];
 
   private debugLogFunction: (message: string) => void;
@@ -154,9 +156,29 @@ class AudioOutputsService extends EventEmitter<AudioOutputsServiceEvents> {
       if (this.currentSources.length === 0) {
         this.emit("start");
       }
+      this.latestStartTime = audioContext.currentTime;
       this.currentSources.push({ sourceNode: source, trackId });
       source.start();
     });
+  };
+
+  // @experimental
+  public experimentalStop = (): { latestElapsedTime: number } => {
+    this.debugLogFunction("AudioOutputsService stop");
+    let latestElapsedTime = 0;
+    if (!this.audioContext) {
+      return { latestElapsedTime };
+    }
+    if (this.currentSources.length) {
+      latestElapsedTime = this.audioContext.currentTime - this.latestStartTime;
+    }
+    this.currentSources.forEach((currentSource) => {
+      currentSource.sourceNode.stop();
+    });
+
+    this.currentSources = [];
+    this.emit("stop");
+    return { latestElapsedTime };
   };
 
   public get normalVolume(): number {

@@ -245,6 +245,14 @@ class AudioManager {
     return this.audioOutputsService.getAnalyserNode();
   };
 
+  // @experimental
+  public experimentalStopCharacterSpeech = (): {
+    latestElapsedTime: number;
+  } => {
+    this.debugLogFunction("AudioManager experimentalStopCharacterSpeech");
+    return this.audioOutputsService.experimentalStop();
+  };
+
   // **
   // ** Audio Track Manager ** //
   // **
